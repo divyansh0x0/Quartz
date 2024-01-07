@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Main-Class: app.Frost
+Class-Path: annotations-23.0.0.jar jfa-1.1.9.jar ikonli-bootstrapicons-p
+ ack-12.3.1.jar ikonli-materialdesign-pack-12.3.1.jar filters-2.0.235-1.
+ jar javafx-controls-19-linux.jar timingframework-1.0.jar miglayout-swin
+ g-11.0.jar javafx-media-19-linux.jar javafx-base-19-linux.jar javafx-gr
+ aphics-19.jar javafx-graphics-19-linux.jar slf4j-simple-2.0.3.jar ikonl
+ i-core-12.3.1.jar slf4j-api-2.0.3.jar oshi-core-5.7.1.jar jna-platform-
+ 5.12.1.jar ikonli-material2-pack-12.3.1.jar jSystemThemeDetector-3.6.ja
+ r javafx-base-19.jar ikonli-swing-12.3.1.jar miglayout-core-11.0.jar ja
+ udiotagger-2.0.1.jar versioncompare-1.4.1.jar jna-5.12.1.jar
+

@@ -1,0 +1,8 @@
+/build/
+/.gradle/
+/.idea/
+/out/
+/gradle/
+/bin/
+output.txt
+file_cache.json
