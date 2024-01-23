@@ -2,7 +2,7 @@ package app.components.containers.views.artist;
 
 import app.TileManager;
 import app.audio.Artist;
-import app.audio.indexer.FrostIndexer;
+import app.audio.indexer.AudioDataIndexer;
 import app.components.AudioTilePanel;
 import app.components.audio.ArtistListHeader;
 import app.components.audio.ArtistTile;
@@ -96,15 +96,15 @@ public class ArtistsContainer extends ViewPanel {
         LoadTask = CompletableFuture.runAsync(() -> {
             artistTileContainer.removeAll();
             artistTileContainer.add(artistListHeader, "growX, h " + ComponentParameters.ARTIST_TILE_CONTAINER_HEIGHT + "!");
-            FrostIndexer indexer = FrostIndexer.getInstance();
-            FrostIndexer.getInstance().addIndexUpdatedListener(this::createAndAddArtistsTiles);
+            AudioDataIndexer indexer = AudioDataIndexer.getInstance();
+            AudioDataIndexer.getInstance().addIndexUpdatedListener(this::createAndAddArtistsTiles);
             if (indexer.isIndexed())
                 createAndAddArtistsTiles();
         });
     }
 
     private synchronized void createAndAddArtistsTiles() {
-        List<Artist> artists = FrostIndexer.getInstance().getAllArtists();
+        List<Artist> artists = AudioDataIndexer.getInstance().getAllArtists();
         artistListHeader.setArtists(artists);
         for (Artist artist : artists) {
             ArtistTile artistTile = TileManager.convertToArtistTile(artist);
@@ -137,7 +137,7 @@ public class ArtistsContainer extends ViewPanel {
         }
 
         LoadTask = CompletableFuture.runAsync(() -> {
-            for (AudioTile audioTile : TileManager.convertToAudioTiles(artist.getFrostAudios(), NavigationLink.ARTIST)) {
+            for (AudioTile audioTile : TileManager.convertToAudioTiles(artist.getAudioDataList(), NavigationLink.ARTIST)) {
                 audioTileContainer.add(audioTile, tileConstraint);
 //                Log.info(audioTile.getAudioFile().toString());
                 if (!IsAudioTilesContainerFilled)
@@ -189,7 +189,7 @@ public class ArtistsContainer extends ViewPanel {
         if (activeArtist != null) {
             audioListHeader.setHeading(activeArtist.getName());
             audioListHeader.setSubHeading("ARTIST");
-            audioListHeader.setFrostAudios(activeArtist.getFrostAudios());
+            audioListHeader.setAudioDatas(activeArtist.getAudioDataList());
         }
     }
 

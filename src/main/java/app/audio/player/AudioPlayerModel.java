@@ -1,12 +1,12 @@
 package app.audio.player;
 
-import app.audio.FrostAudio;
+import app.audio.AudioData;
 
 import java.io.FileNotFoundException;
 import java.time.Duration;
 
-public interface FrostPlayerModel {
-    void load(FrostAudio audio) throws FileNotFoundException;
+public interface AudioPlayerModel {
+    void load(AudioData audio) throws FileNotFoundException;
      void play();
     void pause();
     void stop();

@@ -1,9 +1,9 @@
 package app;
 
-import app.audio.indexer.FrostIndexer;
+import app.audio.indexer.AudioDataIndexer;
 import app.audio.search.SystemSearch;
-import app.loader.FrostLoader;
-import app.main.Frost;
+import app.loader.AphroditeLoader;
+import app.main.Aphrodite;
 import app.settings.StartupSettings;
 import material.animation.MaterialFixedTimer;
 import material.theme.ThemeManager;
@@ -33,7 +33,7 @@ public class MainClass {
     }
 
     private static void testStartApp() {
-        Frost.getInstance().show();
+        Aphrodite.getInstance().show();
 //        SystemSearch.getInstance().forceSearch();
     }
 
@@ -63,11 +63,11 @@ public class MainClass {
 
     public static synchronized void startApp() {
         try {
-            FrostLoader.getInstance().show();
+            AphroditeLoader.getInstance().show();
             Log.info("Preparing system search");
-            FrostIndexer.getInstance().addIndexUpdatedListener(MainClass::hideLoaderAndLoadApp);
+            AudioDataIndexer.getInstance().addIndexUpdatedListener(MainClass::hideLoaderAndLoadApp);
             SystemSearch.getInstance().forceSearch();
-            if (FrostIndexer.getInstance().isIndexed()) {
+            if (AudioDataIndexer.getInstance().isIndexed()) {
                 hideLoaderAndLoadApp();
             }
         } catch (Exception e) {
@@ -77,24 +77,24 @@ public class MainClass {
     }
 
     private static void hideLoaderAndLoadApp() {
-        Log.info("Hiding frost loader");
+        Log.info("Hiding loader");
         SwingUtilities.invokeLater(() -> {
-            Frost.getInstance().show();
-            Log.success("Frost player opened");
+            Aphrodite.getInstance().show();
+            Log.success("Aphrodite player opened");
         });
-        FrostLoader.getInstance().hide();
+        AphroditeLoader.getInstance().hide();
     }
 
     public static void noLoaderSearch() {
         SystemSearch.getInstance().onSearchComplete(() -> {
-            Log.info("Hiding frost loader");
+            Log.info("Hiding loader");
 
             SwingUtilities.invokeLater(() -> {
-//                Frost.getInstance().show();
+//                Aphrodite.getInstance().show();
 
-                Log.success("Frost player opened");
+                Log.success("Aphrodite player opened");
             });
-            FrostLoader.getInstance().hide();
+            AphroditeLoader.getInstance().hide();
         });
         SystemSearch.getInstance().forceSearch();
     }

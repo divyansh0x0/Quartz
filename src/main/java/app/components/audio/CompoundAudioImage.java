@@ -1,6 +1,6 @@
 package app.components.audio;
 
-import app.audio.FrostAudio;
+import app.audio.AudioData;
 import material.component.MaterialComponent;
 import material.theme.ThemeColors;
 import material.utils.GraphicsUtils;
@@ -22,8 +22,8 @@ public class CompoundAudioImage extends MaterialComponent {
     private final Object lock = new Object();
 
 
-    public CompoundAudioImage(FrostAudio... frostAudios) {
-        setAudioFiles(frostAudios);
+    public CompoundAudioImage(AudioData... audioData) {
+        setAudioFiles(audioData);
     }
 
     @Override
@@ -92,20 +92,20 @@ public class CompoundAudioImage extends MaterialComponent {
         }
     }
 
-    public void setAudioFiles(FrostAudio[] frostAudios) {
-        if (frostAudios.length > 0) {
-            Image[] images = frostAudios.length > 3 ? new BufferedImage[4] : new BufferedImage[1];
+    public void setAudioFiles(AudioData[] audioData) {
+        if (audioData.length > 0) {
+            Image[] images = audioData.length > 3 ? new BufferedImage[4] : new BufferedImage[1];
             for (int i = 0; i < images.length; i++)
-                images[i] = frostAudios[i].getArtwork();
+                images[i] = audioData[i].getArtwork();
             rewriteImage(images);
         }
     }
 
-    public void setAudioFiles(ArrayList<FrostAudio> frostAudios) {
-        if (frostAudios.size() > 0) {
-            Image[] images = frostAudios.size() > 3 ? new Image[4] : new Image[1];
+    public void setAudioFiles(ArrayList<AudioData> audioData) {
+        if (audioData.size() > 0) {
+            Image[] images = audioData.size() > 3 ? new Image[4] : new Image[1];
             for (int i = 0; i < images.length; i++)
-                images[i] = frostAudios.get(i).getArtwork();
+                images[i] = audioData.get(i).getArtwork();
             rewriteImage(images);
         }
     }

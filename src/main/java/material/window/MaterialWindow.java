@@ -22,8 +22,8 @@ import java.awt.event.WindowEvent;
 import java.util.Enumeration;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-// `xprop -name 'Frost' -format _MOTIF_WM_HINTS 32c -set _MOTIF_WM_HINTS 2` command can be used to remove windows border in x11 linux distros
-// `xprop -name 'Frost' -format _MOTIF_WM_HINTS 32c -set _MOTIF_WM_HINTS '0x2, 0x2, 0x2, 0x2,0x2,0x2'` will remove windows border but won't remove mouse resize
+// `xprop -name 'Aphrodite' -format _MOTIF_WM_HINTS 32c -set _MOTIF_WM_HINTS 2` command can be used to remove windows border in x11 linux distros
+// `xprop -name 'Aphrodite' -format _MOTIF_WM_HINTS 32c -set _MOTIF_WM_HINTS '0x2, 0x2, 0x2, 0x2,0x2,0x2'` will remove windows border but won't remove mouse resize
 // ProcessBuilder processBuilder = new ProcessBuilder();
 //         processBuilder.command("xprop", "-name","" + getName() + "", "-format","_MOTIF_WM_HINTS", "32c", "-set", "_MOTIF_WM_HINTS", "0x2, 0x2, 0x2, 0x2,0x2,0x2"); [Took me 1 hour to figure this shit out]
 public class MaterialWindow extends JFrame {
@@ -44,7 +44,7 @@ public class MaterialWindow extends JFrame {
     private final AtomicBoolean isMouseOnDragArea = new AtomicBoolean(false);
     private MaterialPanel captionBar;
     String CAPTION_BUTTONS_CONSTRAINT = "east, growy, w " + (DecorationParameters.getTitleBarHeight()) + "!";
-    private int GRIP_SIZE = DecorationParameters.getTitleBarHeight();
+    private int GRIP_HEIGHT = DecorationParameters.getTitleBarHeight();
 
 
     public MaterialWindow(String name, Size minimumSize, boolean addCaptionBar, boolean addWindowProcedure) {
@@ -74,10 +74,7 @@ public class MaterialWindow extends JFrame {
         //CaptionBar
         if (addCaptionBar) {
             captionBar = new MaterialPanel(new MigLayout("fill, insets 0 0 0 0"));
-            captionBar.add(new CloseButton(), CAPTION_BUTTONS_CONSTRAINT);
-            captionBar.add(new MaxRestoreButton(), CAPTION_BUTTONS_CONSTRAINT);
-            captionBar.add(new MinimizeButton(), CAPTION_BUTTONS_CONSTRAINT);
-            _root.add(captionBar, "top, align right,h " + DecorationParameters.getTitleBarHeight() + "!");
+            _root.add(captionBar, "top, align right");
         }
         ThemeManager.getInstance().addThemeListener(this::updateTheme);
 
@@ -110,7 +107,7 @@ public class MaterialWindow extends JFrame {
     private void updateDragArea() {
         if (isCaptionBarEnabled && captionBar != null) {
             Rectangle rect = MouseDragArea == null ? new Rectangle(DecorationParameters.getResizeBorderThickness(), DecorationParameters.getResizeBorderThickness(), 0, 0) : MouseDragArea;
-            rect.setSize(getWidth() - captionBar.getWidth(), GRIP_SIZE);
+            rect.setSize(getWidth() - captionBar.getWidth(), GRIP_HEIGHT);
         }
     }
 
@@ -248,8 +245,8 @@ public class MaterialWindow extends JFrame {
         }
     }
 
-    public void setGripSize(int size) {
-        GRIP_SIZE = size;
+    public void setGripHeight(int size) {
+        GRIP_HEIGHT = size;
         if (captionBar != null)
             MouseDragArea.setSize(getWidth() - captionBar.getWidth(), size);
     }
@@ -259,13 +256,13 @@ public class MaterialWindow extends JFrame {
         super.setResizable(resizable);
         if (windowProc != null)
             windowProc.setResizable(resizable);
-        if (captionBar != null) {
-            if (!resizable)
-                captionBar.remove(1);
-            else if (captionBar.getComponents().length < 3)
-                captionBar.add(new MaxRestoreButton(), CAPTION_BUTTONS_CONSTRAINT, 1);
-            captionBar.revalidate();
-        }
+//        if (captionBar != null) {
+//            if (!resizable)
+//                captionBar.remove(1);
+//            else if (captionBar.getComponents().length < 3)
+//                captionBar.add(new MaxRestoreButton(), CAPTION_BUTTONS_CONSTRAINT, 1);
+//            captionBar.revalidate();
+//        }
     }
 
     private void setProperties() {
@@ -349,5 +346,24 @@ public class MaterialWindow extends JFrame {
 
     public void setMouseDragArea(Rectangle rect) {
         this.MouseDragArea = rect;
+    }
+
+    protected void addButtonsToCaptionBar() {
+        if (captionBar != null) {
+            captionBar.add(new CloseButton(), CAPTION_BUTTONS_CONSTRAINT);
+            captionBar.add(new MaxRestoreButton(), CAPTION_BUTTONS_CONSTRAINT);
+            captionBar.add(new MinimizeButton(), CAPTION_BUTTONS_CONSTRAINT);
+        }
+        else{
+            Log.error("Caption bar is null, cannot add buttons to it");
+        }
+    }
+
+    public MaterialPanel getCaptionBar() {
+        return captionBar;
+    }
+
+    public void setCaptionBar(MaterialPanel captionBar) {
+        this.captionBar = captionBar;
     }
 }

@@ -1,7 +1,7 @@
 package app.audio.search;
 
-import app.audio.FrostAudio;
-import app.audio.indexer.FrostIndexer;
+import app.audio.AudioData;
+import app.audio.indexer.AudioDataIndexer;
 import material.utils.Log;
 import material.utils.OsUtils;
 import material.utils.enums.OsType;
@@ -50,7 +50,7 @@ public class AudioFileVisitor implements FileVisitor<Path> {
     @Override
     public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
         try {
-            if (FrostAudio.isValidAudio(path)) {
+            if (AudioData.isValidAudio(path)) {
                 addAudio(path);
             }
         } catch (Exception e) {
@@ -76,7 +76,7 @@ public class AudioFileVisitor implements FileVisitor<Path> {
     private void addAudio(Path path) {
         if (path != null) {
             File file = path.toFile();
-            if (!FrostIndexer.getInstance().isFileLoaded(file)) {
+            if (!AudioDataIndexer.getInstance().isFileLoaded(file)) {
                 AUDIO_FILE_PATHS.add(file);
             }
         }

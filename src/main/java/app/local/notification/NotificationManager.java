@@ -1,6 +1,6 @@
 package app.local.notification;
 
-import app.audio.FrostAudio;
+import app.audio.AudioData;
 import app.local.cache.NotifCacheManager;
 import material.utils.OsUtils;
 
@@ -20,14 +20,14 @@ public class NotificationManager {
         return instance;
     }
 
-    public void notifyNewPlayback(FrostAudio frostAudio) {
+    public void notifyNewPlayback(AudioData audioData) {
         if(AsyncTask != null){
             AsyncTask.cancel(true);
             AsyncTask = null;
         }
         AsyncTask = CompletableFuture.runAsync(() -> {
             if(OsUtils.isUnix())
-                GnomeNotify.getInstance().sendNotification(frostAudio.getName(),frostAudio.getArtistsConcatenated(), NotifCacheManager.getInstance().writeNotifImageFile(frostAudio).getAbsolutePath());
+                GnomeNotify.getInstance().sendNotification(audioData.getName(), audioData.getArtistsConcatenated(), NotifCacheManager.getInstance().writeNotifImageFile(audioData).getAbsolutePath());
         });
     }
 }

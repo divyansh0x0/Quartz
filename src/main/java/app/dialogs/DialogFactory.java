@@ -3,7 +3,7 @@ package app.dialogs;
 import material.utils.ComponentMover;
 
 public class DialogFactory {
-    private static FrostDialog dialogInstance;
+    private static AphroditeDialog dialogInstance;
     private static ComponentMover _componentMover = new ComponentMover();
 
     public static void showErrorDialog(String error) {

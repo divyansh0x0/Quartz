@@ -1,6 +1,6 @@
 package app.components.audio;
 
-import app.audio.FrostAudio;
+import app.audio.AudioData;
 import material.MaterialParameters;
 import material.component.MaterialComponent;
 import material.theme.ThemeColors;
@@ -19,7 +19,7 @@ import java.util.concurrent.CompletableFuture;
 public class AudioInfoViewer extends MaterialComponent {
     private Image artwork = null;
     private static BufferedImage defaultArtworkImage;
-    private FrostAudio frostAudio;
+    private AudioData audioData;
     private CompletableFuture<Void> imageWriterTask;
     private static final int padding = 5;
     private static Color audioNameColor = ThemeColors.getTextPrimary();
@@ -57,7 +57,7 @@ public class AudioInfoViewer extends MaterialComponent {
                 final int iSize = Math.abs(getHeight() - padding * 2);
                 try {
                     // resize image
-                    this.artwork = frostAudio.getArtwork();
+                    this.artwork = audioData.getArtwork();
                     SwingUtilities.invokeLater(this::repaint);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -91,7 +91,7 @@ public class AudioInfoViewer extends MaterialComponent {
         g2d.setColor(Color.WHITE);
 
         g2d.setClip(artworkBounds);
-        if (frostAudio != null && artwork != null) {
+        if (audioData != null && artwork != null) {
             g2d.setComposite(AlphaComposite.SrcAtop);
 
             g2d.drawImage(artwork, iX, iY, iSize,iSize,null);
@@ -102,8 +102,8 @@ public class AudioInfoViewer extends MaterialComponent {
             g2d.draw(artworkBounds);
 
             //Drawing font
-            String artistName = frostAudio.getArtistsConcatenated();
-            String audioName = frostAudio.getName();
+            String artistName = audioData.getArtistsConcatenated();
+            String audioName = audioData.getName();
 
             FontMetrics fontMetrics = g2d.getFontMetrics(this.getFont());
 //            int artistStringWidth = fontMetrics.stringWidth(artistName);
@@ -146,19 +146,19 @@ public class AudioInfoViewer extends MaterialComponent {
     }
 
 
-    public AudioInfoViewer setAudio(FrostAudio frostAudio) {
-        this.frostAudio = frostAudio;
+    public AudioInfoViewer setAudio(AudioData audioData) {
+        this.audioData = audioData;
         setPreferredSize(getRequiredDimensions());
         rewriteImage();
         return this;
     }
 
     private Dimension getRequiredDimensions() {
-        if (frostAudio != null && getGraphics() != null) {
+        if (audioData != null && getGraphics() != null) {
             var fontMetrics = getGraphics().getFontMetrics();
 
-            int artistWidth = fontMetrics.stringWidth(frostAudio.getArtistsConcatenated());
-            int nameWidth = fontMetrics.stringWidth(frostAudio.getName());
+            int artistWidth = fontMetrics.stringWidth(audioData.getArtistsConcatenated());
+            int nameWidth = fontMetrics.stringWidth(audioData.getName());
             int maxTextWidth = Math.max(artistWidth, nameWidth);
 
             int imageWidth = getHeight() + padding * 2;

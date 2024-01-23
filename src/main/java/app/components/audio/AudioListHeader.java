@@ -1,6 +1,6 @@
 package app.components.audio;
 
-import app.audio.FrostAudio;
+import app.audio.AudioData;
 import app.components.Icons;
 import app.components.enums.SortingPolicy;
 import material.component.MaterialComboBox;
@@ -11,9 +11,7 @@ import material.component.enums.LabelStyle;
 import material.containers.MaterialPanel;
 import net.miginfocom.swing.MigLayout;
 
-import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Locale;
 
 public class AudioListHeader extends MaterialPanel {
@@ -66,7 +64,7 @@ public class AudioListHeader extends MaterialPanel {
         SubHeading.setText(text);
     }
 
-    public void setFrostAudios(ArrayList<FrostAudio> audios){
+    public void setAudioDatas(ArrayList<AudioData> audios){
         HeaderImage.setAudioFiles(audios);
         HeaderImage.revalidate();
         repaint();

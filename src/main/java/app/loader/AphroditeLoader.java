@@ -1,15 +1,13 @@
 package app.loader;
 
-import app.main.Frost;
 import material.utils.Log;
 
-public class FrostLoader {
+public class AphroditeLoader {
 
-    private static FrostLoader instance;
-    Frost FROST = Frost.getInstance();
-    LoaderWindow loaderWindow;
+    private static AphroditeLoader instance;
+    private LoaderWindow loaderWindow;
 
-    public FrostLoader() {
+    public AphroditeLoader() {
 
     }
 
@@ -27,9 +25,9 @@ public class FrostLoader {
              loaderWindow.close();
     }
 
-    public static FrostLoader getInstance() {
+    public static AphroditeLoader getInstance() {
         if (instance == null)
-            instance = new FrostLoader();
+            instance = new AphroditeLoader();
         return instance;
     }
 }

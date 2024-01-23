@@ -1,6 +1,6 @@
 package app.dialogs;
 
-import app.main.Frost;
+import app.main.Aphrodite;
 import app.settings.constraints.ComponentParameters;
 import material.component.MaterialTextPane;
 import material.constants.Size;
@@ -12,12 +12,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-class ErrorDialog extends FrostDialog {
+class ErrorDialog extends AphroditeDialog {
     private static final String NAME = "Error";
     private static Size minSize = Size.getGoldenSize(120);
     private Size SIZE = Size.getGoldenSize(120);
     private final MaterialTextPane _label = new MaterialTextPane();
-    private static final MaterialWindow window = Frost.getInstance().getWindow();
+    private static final MaterialWindow window = Aphrodite.getInstance().getWindow();
 
     ErrorDialog(String err) {
         super(NAME,minSize);

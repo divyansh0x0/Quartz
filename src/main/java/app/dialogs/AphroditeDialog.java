@@ -1,6 +1,6 @@
 package app.dialogs;
 
-import app.main.Frost;
+import app.main.Aphrodite;
 import app.settings.constraints.ComponentParameters;
 import material.component.MaterialLabel;
 import material.component.enums.LabelStyle;
@@ -24,15 +24,15 @@ import java.util.Enumeration;
 
 import static material.MaterialParameters.CORNER_RADIUS;
 
-public abstract class FrostDialog extends JDialog {
+public abstract class AphroditeDialog extends JDialog {
     public static final Size MAX_SIZE = new Size(640, 640 / 12 * 9);
     //    private static CustomWindow instance;
 //    private final MaterialPanel container = new MaterialPanel().setElevationDP(null);
-    private static final MaterialWindow window = Frost.getInstance().getWindow();
+    private static final MaterialWindow window = Aphrodite.getInstance().getWindow();
     private final DialogRootPanel _root = new DialogRootPanel();
     private PopupWindowProc windowProc;
 
-    public FrostDialog(String title, Size minimumSize) {
+    public AphroditeDialog(String title, Size minimumSize) {
         super(window.getJFrame());
 
 

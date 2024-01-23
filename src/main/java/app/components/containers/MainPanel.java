@@ -1,9 +1,9 @@
 package app.components.containers;
 
-import app.audio.player.FrostPlayerController;
+import app.audio.player.AphroditeAudioController;
 import app.components.enums.ViewType;
 import app.components.spectrum.SpectrumViewer;
-import app.main.Frost;
+import app.main.Aphrodite;
 import app.settings.StartupSettings;
 import material.containers.MaterialPanel;
 import material.utils.OsUtils;
@@ -49,13 +49,13 @@ public class MainPanel extends MaterialPanel {
             }
         });
 
-        MaterialWindow window = Frost.getInstance().getWindow();
+        MaterialWindow window = Aphrodite.getInstance().getWindow();
         window.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
                 Rectangle rect = MouseDragArea == null ? new Rectangle(0, 0, 0, 0) : MouseDragArea;
                 rect.setSize(window.getWidth() - DecorationParameters.getControlBoxWidth(), DecorationParameters.getTitleBarHeight());
-                Frost.getInstance().getWindow().setMouseDragArea(rect);
+                Aphrodite.getInstance().getWindow().setMouseDragArea(rect);
             }
         });
     }
@@ -72,7 +72,7 @@ public class MainPanel extends MaterialPanel {
 
     public synchronized void switchView(@NotNull ViewType mainPanelView) {
         currentView = mainPanelView;
-        FrostPlayerController.getInstance().enableVisualizerSampling(mainPanelView == ViewType.SpectrumView);
+        AphroditeAudioController.getInstance().enableVisualizerSampling(mainPanelView == ViewType.SpectrumView);
 
         switch (mainPanelView) {
             case DefaultView -> switchToDefaultView();

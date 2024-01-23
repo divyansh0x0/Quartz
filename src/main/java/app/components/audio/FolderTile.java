@@ -122,7 +122,7 @@ public class FolderTile extends MaterialComponent {
         g2d.drawString(pilLText, pX, pY);
 
         //Songs pill
-        pilLText = FOLDER.getFrostAudios().size() + " songs";
+        pilLText = FOLDER.getAudioDatas().size() + " songs";
         tX += pWidth + GAP;
         pX = tX + pPad.getLeft();
         pWidth = pPad.getHorizontal() + pFm.stringWidth(pilLText);

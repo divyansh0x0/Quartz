@@ -1,22 +1,23 @@
 package app.audio.indexer;
 
-import app.audio.FrostAudio;
+import app.audio.AudioData;
+
 import java.util.Comparator;
 
 public enum IndexerSortingPolicy {
     ASCENDING{
         @Override
-        Comparator<FrostAudio> getComparator(){
+        Comparator<AudioData> getComparator(){
             return AudioFileComparators.getAscendingComparator();
         }
     },
     DESCENDING{
         @Override
-        Comparator<FrostAudio> getComparator(){
+        Comparator<AudioData> getComparator(){
             return AudioFileComparators.getDescendingComparator();
         }
     };
 
-    abstract Comparator<FrostAudio> getComparator();
+    abstract Comparator<AudioData> getComparator();
 
 }

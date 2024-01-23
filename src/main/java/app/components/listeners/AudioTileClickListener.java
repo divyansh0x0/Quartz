@@ -1,8 +1,9 @@
 package app.components.listeners;
 
-import app.audio.FrostAudio;
+import app.audio.AudioData;
+
 import java.io.Serializable;
 
 public interface AudioTileClickListener extends Serializable {
-    void clicked(FrostAudio frostAudio);
+    void clicked(AudioData audioData);
 }

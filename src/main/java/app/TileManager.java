@@ -1,8 +1,8 @@
 package app;
 
 import app.audio.Artist;
+import app.audio.AudioData;
 import app.audio.Folder;
-import app.audio.FrostAudio;
 import app.audio.Playlist;
 import app.components.audio.ArtistTile;
 import app.components.audio.AudioTile;
@@ -18,31 +18,31 @@ import java.util.concurrent.CompletableFuture;
 
 public class TileManager {
     private static final List<AudioTile> EMPTY_ARRAY = new ArrayList<>(0);
-    private static FrostAudio lastActiveAudioFile;
-    private static final TreeMap<FrostAudio, List<AudioTile>> TilesMap = new TreeMap<>();
+    private static AudioData lastActiveAudioFile;
+    private static final TreeMap<AudioData, List<AudioTile>> TilesMap = new TreeMap<>();
     private static final TreeMap<Playlist, List<AudioTile>> playlistMap = new TreeMap<>();
     private static final TreeMap<String, ArtistTile> artistMap = new TreeMap<>();
     private static final TreeMap<String, FolderTile> folderMap = new TreeMap<>();
 
 
-    public static @NotNull AudioTile convertToTile(@NotNull FrostAudio frostAudio, NavigationLink link) {
-        for (AudioTile tile : getMappedTiles(frostAudio)) {
+    public static @NotNull AudioTile convertToTile(@NotNull AudioData audioData, NavigationLink link) {
+        for (AudioTile tile : getMappedTiles(audioData)) {
             if (tile.getLink().equals(link)) {
                 return tile;
             }
         }
-        AudioTile audioTile = new AudioTile(frostAudio, link);
-        if(frostAudio.equals(lastActiveAudioFile))
+        AudioTile audioTile = new AudioTile(audioData, link);
+        if(audioData.equals(lastActiveAudioFile))
             audioTile.setActive(true);
         mapTile(audioTile);
         return audioTile;
     }
 
-    public static AudioTile convertToPlaylistTile(@NotNull FrostAudio audio, @NotNull Playlist playlist) {
+    public static AudioTile convertToPlaylistTile(@NotNull AudioData audio, @NotNull Playlist playlist) {
         for (Playlist playlistOfAudio : audio.getPlaylists()) {
             if (playlistMap.containsKey(playlistOfAudio)) {
                 for (AudioTile mappedTile : playlistMap.get(playlistOfAudio)) {
-                    if (mappedTile.getFrostAudio().equals(audio))
+                    if (mappedTile.getAudioData().equals(audio))
                         return mappedTile;
                 }
             }
@@ -68,12 +68,12 @@ public class TileManager {
         }
     }
 
-    public static @NotNull ArrayList<AudioTile> convertToAudioTiles(@NotNull List<FrostAudio> frostAudios, @NotNull NavigationLink link) {
-        ArrayList<AudioTile> arr = new ArrayList<>(frostAudios.size());
-        for (FrostAudio frostAudio : frostAudios) {
+    public static @NotNull ArrayList<AudioTile> convertToAudioTiles(@NotNull List<AudioData> audioDataList, @NotNull NavigationLink link) {
+        ArrayList<AudioTile> arr = new ArrayList<>(audioDataList.size());
+        for (AudioData audioData : audioDataList) {
             boolean isTileAlreadyCreated = false;
-            if (TilesMap.containsKey(frostAudio)) {
-                for (AudioTile audioTile : getMappedTiles(frostAudio)) {
+            if (TilesMap.containsKey(audioData)) {
+                for (AudioTile audioTile : getMappedTiles(audioData)) {
                     if (audioTile.getLink().equals(link)) {
                         isTileAlreadyCreated = true;
                         arr.add(audioTile);
@@ -82,8 +82,8 @@ public class TileManager {
                 }
             }
             if (!isTileAlreadyCreated) {
-                AudioTile audioTile = new AudioTile(frostAudio, link);
-                if(frostAudio.equals(lastActiveAudioFile))
+                AudioTile audioTile = new AudioTile(audioData, link);
+                if(audioData.equals(lastActiveAudioFile))
                     audioTile.setActive(true);
                 mapTile(audioTile);
                 arr.add(audioTile);
@@ -92,62 +92,59 @@ public class TileManager {
         return arr;
     }
 
-    public static @NotNull List<AudioTile> getMappedTiles(FrostAudio frostAudio) {
-        if (TilesMap.containsKey(frostAudio))
-            return TilesMap.get(frostAudio);
-        else
-            return EMPTY_ARRAY;
+    public static @NotNull List<AudioTile> getMappedTiles(AudioData audioData) {
+        return TilesMap.getOrDefault(audioData, EMPTY_ARRAY);
     }
 
-    public static @NotNull List<AudioTile> getPlaylistAudioTiles(FrostAudio frostAudio) {
+    public static @NotNull List<AudioTile> getPlaylistAudioTiles(AudioData audioData) {
         return new ArrayList<>(0);
     }
 
     private static void mapTile(@NotNull AudioTile tile) {
-        FrostAudio frostAudio = tile.getFrostAudio();
-        if (TilesMap.containsKey(frostAudio)) {
-            List<AudioTile> list = TilesMap.get(frostAudio);
+        AudioData audioData = tile.getAudioData();
+        if (TilesMap.containsKey(audioData)) {
+            List<AudioTile> list = TilesMap.get(audioData);
             if (!list.contains(tile))
                 list.add(tile);
         } else {
-            TilesMap.put(frostAudio, Collections.synchronizedList(new ArrayList<>()));
+            TilesMap.put(audioData, Collections.synchronizedList(new ArrayList<>()));
             mapTile(tile);
         }
 
     }
 
-    public static void removeAudioFile(FrostAudio frostAudio) {
-        TilesMap.remove(frostAudio);
+    public static void removeAudioFile(AudioData audioData) {
+        TilesMap.remove(audioData);
     }
 
-    public static void removeAudioTileAsync(FrostAudio currentFrostAudio, boolean b) {
+    public static void removeAudioTileAsync(AudioData currentAudioData, boolean b) {
         CompletableFuture.runAsync(() -> {
-            for (AudioTile audioTile : getMappedTiles(currentFrostAudio)) {
+            for (AudioTile audioTile : getMappedTiles(currentAudioData)) {
                 Container container = audioTile.getParent();
                 if (container != null)
                     container.remove(audioTile);
             }
-            removeAudioFile(currentFrostAudio);
+            removeAudioFile(currentAudioData);
         });
     }
 
     public static @NotNull String getMapDetails() {
         StringBuilder sb = new StringBuilder();
-        for (Map.Entry<FrostAudio, List<AudioTile>> entry : TilesMap.entrySet()) {
-            FrostAudio frostAudio = entry.getKey();
+        for (Map.Entry<AudioData, List<AudioTile>> entry : TilesMap.entrySet()) {
+            AudioData audioData = entry.getKey();
             List<AudioTile> audioTiles = entry.getValue();
-//            String str = frostAudio.name().substring(0, 10) + StringUtils.ELLIPSIS;
-            sb.append(frostAudio.getName()).append(":\n\t\t\t").append(audioTiles.size()).append('\n');
+//            String str = audioData.name().substring(0, 10) + StringUtils.ELLIPSIS;
+            sb.append(audioData.getName()).append(":\n\t\t\t").append(audioTiles.size()).append('\n');
         }
         return sb.toString();
     }
 
-    public static void setActiveAudioTiles(@Nullable FrostAudio frostAudio) {
-        if(lastActiveAudioFile == null || !lastActiveAudioFile.equals(frostAudio)) {
+    public static void setActiveAudioTiles(@Nullable AudioData audioData) {
+        if(lastActiveAudioFile == null || !lastActiveAudioFile.equals(audioData)) {
             List<AudioTile> audioTiles = null;
-            if (frostAudio == null) {
+            if (audioData == null) {
                 if (lastActiveAudioFile != null) {
-                    audioTiles = findAudioTilesByFrostAudio(lastActiveAudioFile);
+                    audioTiles = findAudioTilesByAudioData(lastActiveAudioFile);
                     for (AudioTile audioTile : audioTiles) {
                         audioTile.setActive(false);
                     }
@@ -155,26 +152,26 @@ public class TileManager {
 
             } else {
                 if (lastActiveAudioFile != null) {
-                    audioTiles = findAudioTilesByFrostAudio(lastActiveAudioFile);
+                    audioTiles = findAudioTilesByAudioData(lastActiveAudioFile);
                     for (AudioTile audioTile : audioTiles) {
                         audioTile.setActive(false);
                     }
                     lastActiveAudioFile = null;
                 }
 
-                audioTiles = findAudioTilesByFrostAudio(frostAudio);
+                audioTiles = findAudioTilesByAudioData(audioData);
                 for (AudioTile audioTile : audioTiles) {
                     audioTile.setActive(true);
                 }
             }
-            lastActiveAudioFile = frostAudio;
+            lastActiveAudioFile = audioData;
         }
     }
 
-    public static List<AudioTile> findAudioTilesByFrostAudio(@NotNull FrostAudio frostAudio) {
+    public static List<AudioTile> findAudioTilesByAudioData(@NotNull AudioData audioData) {
 //        Log.info(TilesMap.keySet().toString());
-        var arr1 = getMappedTiles(frostAudio);
-        var arr2 = getPlaylistAudioTiles(frostAudio);
+        var arr1 = getMappedTiles(audioData);
+        var arr2 = getPlaylistAudioTiles(audioData);
         ArrayList<AudioTile> arr = new ArrayList<>(arr1.size() + arr2.size());
         arr.addAll(arr1);
         arr.addAll(arr2);

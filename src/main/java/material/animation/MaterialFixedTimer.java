@@ -15,9 +15,6 @@ public abstract class MaterialFixedTimer {
     private final Thread timerLoop;
     private boolean isDisposed = false;
 
-    static {
-        Runtime.getRuntime().addShutdownHook(new Thread(MaterialFixedTimer::disposeAll));
-    }
 
     public static void disposeAll() {
         Log.warn("Disposing " + allTimers.size() + " timers");

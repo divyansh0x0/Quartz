@@ -2,7 +2,7 @@ package app.components.containers.views.folders;
 
 import app.TileManager;
 import app.audio.Folder;
-import app.audio.indexer.FrostIndexer;
+import app.audio.indexer.AudioDataIndexer;
 import app.audio.search.SystemSearch;
 import app.components.containers.SelectablePanel;
 import app.components.containers.views.ViewPanel;
@@ -55,14 +55,14 @@ public class FoldersContainer extends ViewPanel {
         LoadTask = CompletableFuture.runAsync(() -> {
             folderTilesContainer.removeAll();
 //            folderTilesContainer.add(artistListHeader, "growX, h " + ComponentConstraints.ARTIST_TILE_CONTAINER_HEIGHT + "!");
-            FrostIndexer indexer = FrostIndexer.getInstance();
-            FrostIndexer.getInstance().addIndexUpdatedListener(this::createAndAddArtistsTiles);
+            AudioDataIndexer indexer = AudioDataIndexer.getInstance();
+            AudioDataIndexer.getInstance().addIndexUpdatedListener(this::createAndAddArtistsTiles);
             if (indexer.isIndexed())
                 createAndAddArtistsTiles();
         });
     }
     private synchronized void createAndAddArtistsTiles() {
-        List<Folder> folders = FrostIndexer.getInstance().getAllFolders();
+        List<Folder> folders = AudioDataIndexer.getInstance().getAllFolders();
         for (Folder folder : folders) {
 
             Log.info("Adding folder tile: " + folder);

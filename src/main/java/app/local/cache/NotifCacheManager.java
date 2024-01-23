@@ -1,6 +1,6 @@
 package app.local.cache;
 
-import app.audio.FrostAudio;
+import app.audio.AudioData;
 import material.utils.Log;
 
 import javax.imageio.ImageIO;
@@ -26,14 +26,14 @@ public class NotifCacheManager {
         }
     }
 
-    public File writeNotifImageFile(FrostAudio frostAudio) {
+    public File writeNotifImageFile(AudioData audioData) {
         try {
             if (NOTIF_IMAGE_FILe != null && NOTIF_IMAGE_FILe.exists())
                 NOTIF_IMAGE_FILe.delete();
-            NAME = "notif - " + frostAudio.getName();
+            NAME = "notif - " + audioData.getName();
             NOTIF_IMAGE_FILe = File.createTempFile(NAME, ".jpg");
             NOTIF_IMAGE_FILe.deleteOnExit();
-            RenderedImage img = frostAudio.getArtwork();
+            RenderedImage img = audioData.getArtwork();
             ImageIO.write(img, "jpg", NOTIF_IMAGE_FILe);
         } catch (Exception e) {
             Log.error("Exception while writing notification image" + e);

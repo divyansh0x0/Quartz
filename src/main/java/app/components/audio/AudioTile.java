@@ -1,11 +1,11 @@
 package app.components.audio;
 
 import app.audio.Artist;
-import app.audio.FrostAudio;
+import app.audio.AudioData;
 import app.audio.Playlist;
-import app.audio.indexer.FrostIndexer;
-import app.audio.player.FrostPlayerController;
-import app.audio.player.FrostQueue;
+import app.audio.indexer.AudioDataIndexer;
+import app.audio.player.AphroditeAudioController;
+import app.audio.player.AudioQueue;
 import app.components.Icons;
 import app.components.enums.NavigationLink;
 import app.components.listeners.AudioTileClickListener;
@@ -40,7 +40,7 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
     private Playlist playlist;
     private Elevation elevation = null;
     private BufferedImage artwork = null;
-    private final @NotNull FrostAudio frostAudio;
+    private final @NotNull AudioData audioData;
     private int padding = 10;
     private Color audioNameColor = ThemeColors.getTextPrimary();
     private Color artistNameColor = ThemeColors.getTextSecondary();
@@ -53,9 +53,9 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
     private final AudioUtilityPopupMenu audioUtilityPopupMenu = new AudioUtilityPopupMenu(this);
     private static Color artworkBg = new Color(0x98000000, true);
 
-    public AudioTile(@NotNull FrostAudio frostAudio, NavigationLink link) {
+    public AudioTile(@NotNull AudioData audioData, NavigationLink link) {
         super();
-        this.frostAudio = frostAudio;
+        this.audioData = audioData;
         LINK = link;
 //        elevationDP = ComponentConstraints.VIEWER_ELEVATION_DP;
         setPreferredSize(new Dimension(ThumbSize, ThumbSize));
@@ -72,19 +72,19 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
     }
 
     public void play() {
-        FrostPlayerController.getInstance().load(frostAudio);
-        FrostPlayerController.getInstance().play();
+        AphroditeAudioController.getInstance().load(audioData);
+        AphroditeAudioController.getInstance().play();
 
         switch (LINK) {
             case ARTIST -> {
-                Artist artist = FrostIndexer.getInstance().getArtistByName(frostAudio.getArtistsConcatenated());
+                Artist artist = AudioDataIndexer.getInstance().getArtistByName(audioData.getArtistsConcatenated());
                 if (artist != null) {
-                    FrostQueue.getInstance().newQueue(frostAudio, artist.getFrostAudios());
-//                Log.success("QUEUE: " + artist.getFrostAudios());
+                    AudioQueue.getInstance().newQueue(audioData, artist.getAudioDataList());
+//                Log.success("QUEUE: " + artist.getAudioDatas());
                 }
             }
             case EXPLORE -> {
-                FrostQueue.getInstance().newQueue(frostAudio, FrostIndexer.getInstance().getAllAudioFiles());
+                AudioQueue.getInstance().newQueue(audioData, AudioDataIndexer.getInstance().getAllAudioFiles());
             }
         }
     }
@@ -146,7 +146,7 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
         int iX = padding;
         int iY = padding;
         int gap = 5;
-        Image artwork = frostAudio.getArtwork();
+        Image artwork = audioData.getArtwork();
 
         //Background
         RoundRectangle2D artworkBounds = new RoundRectangle2D.Float(iX, iY, iSize, iSize, cornerRadius, cornerRadius);
@@ -169,9 +169,9 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
         g2d.draw(artworkBounds);
 
         //Drawing text
-        Duration duration = Duration.ofMillis((long) frostAudio.getDurationInSeconds() * 1000);
-        String artistName = frostAudio.getArtistsConcatenated();
-        String audioName = frostAudio.getName();
+        Duration duration = Duration.ofMillis((long) audioData.getDurationInSeconds() * 1000);
+        String artistName = audioData.getArtistsConcatenated();
+        String audioName = audioData.getName();
         String audioDuration = StringUtils.formatTime(duration);
 
         g2d.setFont(getFont());
@@ -210,7 +210,7 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
             drawCompatibleString(artistName, tX, tY, g2d, artistFont);
         }
         //If audio is broken show an error visual for it
-        if (frostAudio.isBroken()) {
+        if (audioData.isBroken()) {
             if (BROKEN_AUDIO_ICON.getIconSize() != this.getFontSize())
                 BROKEN_AUDIO_ICON.setIconSize((int) this.getFontSize());
             ImageIcon icon = BROKEN_AUDIO_ICON.toImageIcon();
@@ -246,8 +246,8 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
         if (getGraphics() != null) {
             var fontMetrics = getGraphics().getFontMetrics();
 
-            int artistWidth = fontMetrics.stringWidth(frostAudio.getArtistsConcatenated());
-            int nameWidth = fontMetrics.stringWidth(frostAudio.getName());
+            int artistWidth = fontMetrics.stringWidth(audioData.getArtistsConcatenated());
+            int nameWidth = fontMetrics.stringWidth(audioData.getName());
             int maxTextWidth = Math.max(artistWidth, nameWidth);
 
             int imageWidth = getHeight() + padding * 2;
@@ -270,7 +270,7 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
     public void mouseReleased(MouseEvent e) {
         if (!e.isConsumed()) {
             if (SwingUtilities.isLeftMouseButton(e))
-                leftClicked(e, frostAudio);
+                leftClicked(e, audioData);
             else if (SwingUtilities.isRightMouseButton(e)) {
                 showPopup();
             }
@@ -314,10 +314,10 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
     }
 
 
-    private void leftClicked(MouseEvent e, FrostAudio frostAudio) {
+    private void leftClicked(MouseEvent e, AudioData audioData) {
         if (!e.isConsumed())
             for (AudioTileClickListener l : mouseClickListeners)
-                l.clicked(frostAudio);
+                l.clicked(audioData);
 
     }
 
@@ -346,7 +346,7 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
                     --------------
                     Audio File: %s
                     --------------
-                """.formatted(frostAudio);
+                """.formatted(audioData);
     }
 
     public Playlist getPlaylist() {
@@ -361,7 +361,7 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
         return artwork;
     }
 
-    public @NotNull FrostAudio getFrostAudio() {
-        return frostAudio;
+    public @NotNull AudioData getAudioData() {
+        return audioData;
     }
 }

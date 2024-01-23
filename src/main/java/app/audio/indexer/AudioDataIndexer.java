@@ -1,8 +1,8 @@
 package app.audio.indexer;
 
 import app.audio.Artist;
+import app.audio.AudioData;
 import app.audio.Folder;
-import app.audio.FrostAudio;
 import app.audio.Playlist;
 import app.audio.search.SystemSearch;
 import org.jetbrains.annotations.NotNull;
@@ -14,16 +14,16 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.concurrent.CompletableFuture;
 
-public class FrostIndexer {
+public class AudioDataIndexer {
     private static final ArrayList<Runnable> indexUpdatedListeners = new ArrayList<>(10);
     private static final int InitialCapacity = 500;
-    private static FrostIndexer instance;
+    private static AudioDataIndexer instance;
     private final HashSet<String> audioFilePath = new HashSet<>(InitialCapacity);
-    private final ArrayList<FrostAudio> allAudioFiles = new ArrayList<>(InitialCapacity);
+    private final ArrayList<AudioData> allAudioFiles = new ArrayList<>(InitialCapacity);
     private final ArrayList<Artist> audioFilesByArtist = new ArrayList<>(InitialCapacity);
     private final ArrayList<Folder> audioFilesByFolder = new ArrayList<>(InitialCapacity);
-    private final Hashtable<Playlist, ArrayList<FrostAudio>> audioFilesByPlaylist = new Hashtable<>(InitialCapacity);
-    private final ArrayList<FrostAudio> favoriteFrostAudios = new ArrayList<>(InitialCapacity);
+    private final Hashtable<Playlist, ArrayList<AudioData>> audioFilesByPlaylist = new Hashtable<>(InitialCapacity);
+    private final ArrayList<AudioData> favoriteAudioData = new ArrayList<>(InitialCapacity);
     private static IndexerSortingPolicy indexerSortingPolicy = IndexerSortingPolicy.ASCENDING;
     private boolean isSorted = false;
 
@@ -39,32 +39,32 @@ public class FrostIndexer {
         isSorted = true;
     }
 
-    public final ArrayList<FrostAudio> getAllAudioFiles() {
+    public final ArrayList<AudioData> getAllAudioFiles() {
         return new ArrayList<>(allAudioFiles);
     }
     public final int getTotalAudioFiles(){
         return allAudioFiles.size();
     }
 
-    public void createAndAddAudioFileAsync(@NotNull FrostAudio frostAudio) {
-        CompletableFuture.runAsync(() -> addAudioFile(frostAudio));
+    public void createAndAddAudioFileAsync(@NotNull AudioData audioData) {
+        CompletableFuture.runAsync(() -> addAudioFile(audioData));
     }
 
-    public synchronized void addAudioFile(@NotNull FrostAudio frostAudio) {
-        if(!allAudioFiles.contains(frostAudio)) {
-            allAudioFiles.add(frostAudio);
-            var playlists = frostAudio.getPlaylists();
+    public synchronized void addAudioFile(@NotNull AudioData audioData) {
+        if(!allAudioFiles.contains(audioData)) {
+            allAudioFiles.add(audioData);
+            var playlists = audioData.getPlaylists();
             if (playlists != null) {
                 for (Playlist playlist : playlists) {
                     if (!audioFilesByPlaylist.contains(playlist)) {
                         addPlaylist(playlist);
-                        addAudioFileToPlaylist(playlist, frostAudio);
+                        addAudioFileToPlaylist(playlist, audioData);
                     }
                 }
             }
-            if (frostAudio.isFavorite())
-                addAudioFileToFavorites(frostAudio);
-            audioFilePath.add(frostAudio.getFile().getAbsolutePath());
+            if (audioData.isFavorite())
+                addAudioFileToFavorites(audioData);
+            audioFilePath.add(audioData.getFile().getAbsolutePath());
         }
     }
     /**********************************************
@@ -76,11 +76,11 @@ public class FrostIndexer {
     }
 
     public synchronized void indexAudioTilesByArtists() {
-        for (FrostAudio frostAudio : getAllAudioFiles()) {
-            String[] artistNames = frostAudio.getArtists();
+        for (AudioData audioData : getAllAudioFiles()) {
+            String[] artistNames = audioData.getArtists();
             for(String artistName : artistNames) {
                 Artist artist = createOrGetArtist(artistName);
-                artist.addFrostAudio(frostAudio);
+                artist.addAudioData(audioData);
             }
         }
     }
@@ -113,31 +113,31 @@ public class FrostIndexer {
     /**********************************************
                      FAVORITES
      *********************************************/
-    public synchronized void addAudioFileToFavorites(@NotNull FrostAudio audio) {
-        if (!favoriteFrostAudios.contains(audio))
-            favoriteFrostAudios.add(audio);
+    public synchronized void addAudioFileToFavorites(@NotNull AudioData audio) {
+        if (!favoriteAudioData.contains(audio))
+            favoriteAudioData.add(audio);
     }
 
-    public synchronized void removeAudioFileFromFavorites(@NotNull FrostAudio audio) {
-        favoriteFrostAudios.remove(audio);
+    public synchronized void removeAudioFileFromFavorites(@NotNull AudioData audio) {
+        favoriteAudioData.remove(audio);
     }
-    public ArrayList<FrostAudio> getAudioFilesByFavorites() {
-        return favoriteFrostAudios;
+    public ArrayList<AudioData> getAudioFilesByFavorites() {
+        return favoriteAudioData;
     }
     /**********************************************
                         PLAYLISTS
      *********************************************/
-    public synchronized void removeAudioFileFromPlaylists(FrostAudio frostAudio) {
+    public synchronized void removeAudioFileFromPlaylists(AudioData audioData) {
         audioFilesByPlaylist.forEach((playlist, arr) -> {
-            arr.removeIf(el -> el.equals(frostAudio));
+            arr.removeIf(el -> el.equals(audioData));
         });
     }
 
-    public synchronized void addAudioFileToPlaylist(Playlist playlist, FrostAudio frostAudio) {
-        ArrayList<FrostAudio> arr = audioFilesByPlaylist.get(playlist);
+    public synchronized void addAudioFileToPlaylist(Playlist playlist, AudioData audioData) {
+        ArrayList<AudioData> arr = audioFilesByPlaylist.get(playlist);
         if (arr == null)
             arr = new ArrayList<>();
-        arr.add(frostAudio);
+        arr.add(audioData);
         audioFilesByPlaylist.put(playlist, arr);
     }
 
@@ -154,10 +154,10 @@ public class FrostIndexer {
     }
 
     public synchronized void indexAudioTilesByFolders() {
-        for (FrostAudio frostAudio : getAllAudioFiles()) {
-            String folderPath = frostAudio.getFolderPath();
+        for (AudioData audioData : getAllAudioFiles()) {
+            String folderPath = audioData.getFolderPath();
             Folder folder = createOrGetFolder(folderPath);
-            folder.addFrostAudio(frostAudio);
+            folder.addAudioData(audioData);
         }
     }
 
@@ -182,14 +182,14 @@ public class FrostIndexer {
     /**********************************************
                         UTILITY FUNCTIONS
      *********************************************/
-    public static FrostIndexer getInstance() {
+    public static AudioDataIndexer getInstance() {
         if (instance == null)
-            instance = new FrostIndexer();
+            instance = new AudioDataIndexer();
         return instance;
     }
 
 
-    private FrostIndexer() {
+    private AudioDataIndexer() {
     }
 
 
@@ -215,7 +215,7 @@ public class FrostIndexer {
 //    public void createNewQueue(AudioTile audioTile, NavigationLink link) {
 //        switch (link) {
 //            case EXPLORE -> {
-//                FrostQueue.getInstance().newQueue(audioTile.getAudioFile(), getAllAudioFiles());
+//                AudioQueue.getInstance().newQueue(audioTile.getAudioFile(), getAllAudioFiles());
 //            }
 //        }
 //    }

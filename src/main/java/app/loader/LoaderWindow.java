@@ -11,20 +11,21 @@ import javax.swing.*;
 
 public class LoaderWindow extends MaterialWindow {
     private static final ComponentMover componentMover = new ComponentMover();
-    private static final String NAME = "LOADING FROST";
+    private static final String NAME = "LOADING Aphrodite";
     private static final Size MIN_SIZE = Size.getGoldenSize(300).swapValues();
 
-    private static final MaterialLabel LABEL = new MaterialLabel("Loading Frost", LabelStyle.PRIMARY, MaterialLabel.HorizontalAlignment.CENTER, MaterialLabel.VerticalAlignment.CENTER);
+    private static final MaterialLabel LABEL = new MaterialLabel("Loading Aphrodite", LabelStyle.PRIMARY, MaterialLabel.HorizontalAlignment.CENTER, MaterialLabel.VerticalAlignment.CENTER);
 
     public LoaderWindow() {
-        super(NAME, MIN_SIZE,false,true);
+        super(NAME, MIN_SIZE,true,true);
 
         this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
         this.setResizable(false);
         if (!OsUtils.isCustomWindowSupported()) {
             makeWindowUndecorated();
         } else
-            setGripSize(MIN_SIZE.getHeightInt());
+            setGripHeight(MIN_SIZE.getHeightInt());
+
 
         LABEL.setFontSize(20);
         getRootPanel().add(LABEL, "grow");

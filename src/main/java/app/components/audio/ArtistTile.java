@@ -134,7 +134,7 @@ public class ArtistTile extends MaterialComponent {
         g2d.drawString(pilLText, pX, pY);
 
         //Songs pill
-        pilLText = ARTIST.getFrostAudios().size() + " songs";
+        pilLText = ARTIST.getAudioDataList().size() + " songs";
         tX += pWidth + GAP;
         pX = tX + pPad.getLeft();
         pWidth = pPad.getHorizontal() + pFm.stringWidth(pilLText);

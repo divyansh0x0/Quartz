@@ -1,9 +1,9 @@
 package app.components.containers.views.home;
 
 import app.TileManager;
-import app.audio.FrostAudio;
-import app.audio.indexer.FrostIndexer;
-import app.audio.search.FrostSearch;
+import app.audio.AudioData;
+import app.audio.indexer.AudioDataIndexer;
+import app.audio.search.IndexSearch;
 import app.components.audio.AudioTile;
 import app.components.containers.SelectablePanel;
 import app.components.containers.ViewManagerPanel;
@@ -84,7 +84,7 @@ public class ExploreContainer extends ViewPanel {
         }
         loadTask = CompletableFuture.runAsync(() -> {
             if (!isTilesLoaded) {
-                FrostIndexer indexer = FrostIndexer.getInstance();
+                AudioDataIndexer indexer = AudioDataIndexer.getInstance();
                 indexer.addIndexUpdatedListener(this::createAndAddAllTiles);
                 if (indexer.isIndexed())
                     createAndAddAllTiles();
@@ -94,14 +94,14 @@ public class ExploreContainer extends ViewPanel {
 
     private void createAndAddAllTiles() {
         defaultTileContainer.removeAll();
-        ArrayList<FrostAudio> audios = FrostIndexer.getInstance().getAllAudioFiles();
+        ArrayList<AudioData> audios = AudioDataIndexer.getInstance().getAllAudioFiles();
         if (audios.isEmpty()) {
             SwingUtilities.invokeLater(() -> {
                 showStatus(ViewerStatusLabel.NO_MUSIC_FOUND, false);
             });
         } else {
             showStatus(ViewerStatusLabel.HIDDEN, true);
-            for (FrostAudio audio : audios) {
+            for (AudioData audio : audios) {
                 AudioTile audioTile = TileManager.convertToTile(audio, NavigationLink.EXPLORE);
                 SwingUtilities.invokeLater(() -> {
                     defaultTileContainer.add(audioTile, ComponentParameters.TILE_CONSTRAINT);
@@ -138,7 +138,7 @@ public class ExploreContainer extends ViewPanel {
 
                     if (text.length() > 0) {
                         // Perform the search and load the results
-                        loadSearchResults(TileManager.convertToAudioTiles(FrostSearch.getInstance().searchString(query), NavigationLink.EXPLORE));
+                        loadSearchResults(TileManager.convertToAudioTiles(IndexSearch.getInstance().searchString(query), NavigationLink.EXPLORE));
                     } else {
                         loadSearchResults(null);
                     }
@@ -194,7 +194,7 @@ public class ExploreContainer extends ViewPanel {
             isSilentSearch = true;
             ViewManagerPanel.getInstance().getSearchHeader().getSearchBar().setText(query);
             if (query != null && !query.equals("")) {
-                loadSearchResults(TileManager.convertToAudioTiles(FrostSearch.getInstance().searchString(query), NavigationLink.EXPLORE));
+                loadSearchResults(TileManager.convertToAudioTiles(IndexSearch.getInstance().searchString(query), NavigationLink.EXPLORE));
             } else {
                 loadSearchResults(null);
             }
@@ -208,7 +208,7 @@ public class ExploreContainer extends ViewPanel {
             isSilentSearch = true;
             ViewManagerPanel.getInstance().getSearchHeader().getSearchBar().setText(query);
             if (query != null && !query.equals("")) {
-                loadSearchResults(TileManager.convertToAudioTiles(FrostSearch.getInstance().searchString(query), NavigationLink.EXPLORE));
+                loadSearchResults(TileManager.convertToAudioTiles(IndexSearch.getInstance().searchString(query), NavigationLink.EXPLORE));
             } else {
                 loadSearchResults(null);
             }
@@ -263,8 +263,8 @@ public class ExploreContainer extends ViewPanel {
             searchResultContainer.removeAllSelection();
             explorerContainer.remove(searchResultContainer);
 
-            if (defaultTileContainer.getComponents().length < FrostIndexer.getInstance().getTotalAudioFiles()) {
-                ArrayList<AudioTile> arr = TileManager.convertToAudioTiles(FrostIndexer.getInstance().getAllAudioFiles(), NavigationLink.EXPLORE);
+            if (defaultTileContainer.getComponents().length < AudioDataIndexer.getInstance().getTotalAudioFiles()) {
+                ArrayList<AudioTile> arr = TileManager.convertToAudioTiles(AudioDataIndexer.getInstance().getAllAudioFiles(), NavigationLink.EXPLORE);
                 for (AudioTile audioTile : arr) {
                     SwingUtilities.invokeLater(() -> {
                         try {

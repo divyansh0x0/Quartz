@@ -20,7 +20,7 @@ compileJava.options.encoding = 'UTF-8'
 compileJava.sourceCompatibility = '16'
 compileJava.targetCompatibility = '16'
 //java  myApplication
-group 'com.frost'
+group 'com.aphrodite'
 version '1.0.0'
 
 //javafx {

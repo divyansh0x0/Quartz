@@ -1,7 +1,7 @@
 package app.components.containers.views;
 
 import app.TileManager;
-import app.audio.indexer.FrostIndexer;
+import app.audio.indexer.AudioDataIndexer;
 import app.audio.search.SystemSearch;
 import app.components.audio.AudioTile;
 import app.components.enums.NavigationLink;
@@ -47,12 +47,12 @@ private static FavoritesContainer instance;
     }
 
     private void loadTiles(){
-        FrostIndexer frostIndexer = FrostIndexer.getInstance();
-        if(frostIndexer.getAudioFilesByFavorites().size() == 0){
+        AudioDataIndexer audioDataIndexer = AudioDataIndexer.getInstance();
+        if(audioDataIndexer.getAudioFilesByFavorites().size() == 0){
             viewerStatusLabel.setLabelType(ViewerStatusLabel.NO_FAVORITES_FOUND);
         }
         else{
-            frostIndexer.getAudioFilesByFavorites().forEach(audioFile->{
+            audioDataIndexer.getAudioFilesByFavorites().forEach(audioFile->{
                 AudioTile audioTile = TileManager.convertToTile(audioFile, NavigationLink.FAVORITES);
                 this.add(audioTile, AUDIO_TILE_CONSTRAINTS);
             });

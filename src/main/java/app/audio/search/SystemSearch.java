@@ -1,7 +1,7 @@
 package app.audio.search;
 
-import app.audio.FrostAudio;
-import app.audio.indexer.FrostIndexer;
+import app.audio.AudioData;
+import app.audio.indexer.AudioDataIndexer;
 import app.components.listeners.SearchCompletedListener;
 import app.local.cache.FileCacheManager;
 import app.settings.StartupSettings;
@@ -82,9 +82,9 @@ public class SystemSearch {
         ArrayList<Callable<Void>> tasks = new ArrayList<>();
         for (File file : files) {
             Callable<Void> callable= () -> {
-                if (file.exists() && FrostAudio.isValidAudio(file.toPath())) {
-                    FrostAudio frostAudio = new FrostAudio(file);
-                    FrostIndexer.getInstance().addAudioFile(frostAudio);
+                if (file.exists() && AudioData.isValidAudio(file.toPath())) {
+                    AudioData audioData = new AudioData(file);
+                    AudioDataIndexer.getInstance().addAudioFile(audioData);
                 } else {
                     FileCacheManager.getInstance().deleteCacheFile(file);
                 }
@@ -139,7 +139,7 @@ public class SystemSearch {
 
     private synchronized void saveData(List<File> files) {
         for (File file : files) {
-            FrostIndexer.getInstance().addAudioFile(new FrostAudio(file));
+            AudioDataIndexer.getInstance().addAudioFile(new AudioData(file));
             FileCacheManager.getInstance().cacheFile(file);
         }
         FileCacheManager.getInstance().saveCacheToStorage();
@@ -164,9 +164,9 @@ public class SystemSearch {
         ArrayList<Callable<Void>> tasks = new ArrayList<>();
         for (File file : files) {
             Callable<Void> callable= () -> {
-                if (file.exists() && FrostAudio.isValidAudio(file.toPath())) {
-                    FrostAudio frostAudio = new FrostAudio(file);
-                    FrostIndexer.getInstance().addAudioFile(frostAudio);
+                if (file.exists() && AudioData.isValidAudio(file.toPath())) {
+                    AudioData audioData = new AudioData(file);
+                    AudioDataIndexer.getInstance().addAudioFile(audioData);
                 } else {
                     FileCacheManager.getInstance().deleteCacheFile(file);
                 }
@@ -201,7 +201,7 @@ public class SystemSearch {
 
     private synchronized void searchCompleted() {
         Log.success("SEARCH COMPLETED!");
-        FrostIndexer.getInstance().indexAndSortAudioFiles();
+        AudioDataIndexer.getInstance().indexAndSortAudioFiles();
 
         isSearchOnceComplete = true;
         isSearching = false;
@@ -209,7 +209,7 @@ public class SystemSearch {
         for (SearchCompletedListener l : searchCompletedListeners) {
             l.searchComplete();
         }
-        FrostIndexer.getInstance().callIndexUpdated();
+        AudioDataIndexer.getInstance().callIndexUpdated();
     }
 
     public boolean isSearchOnceComplete() {

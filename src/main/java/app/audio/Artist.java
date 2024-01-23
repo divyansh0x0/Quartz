@@ -11,7 +11,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 public class Artist {
-    private final ArrayList<FrostAudio> frostAudios = new ArrayList<>();
+    private final ArrayList<AudioData> audioData = new ArrayList<>();
     private final String name;
     private BufferedImage defaultArtistImage;
     private BufferedImage lastBufferedImage;
@@ -22,27 +22,27 @@ public class Artist {
         this.name = StringUtils.toHeading(name);
     }
 
-    public ArrayList<FrostAudio> getFrostAudios() {
-//        Log.info(name +":\n" + frostAudios);
-        return new ArrayList<>(frostAudios);
+    public ArrayList<AudioData> getAudioDataList() {
+//        Log.info(name +":\n" + audioData);
+        return new ArrayList<>(audioData);
     }
 
-    public void setFrostAudios(ArrayList<FrostAudio> frostAudios) {
-        this.frostAudios.clear();
-        this.frostAudios.addAll(frostAudios);
+    public void addAudioDataList(ArrayList<AudioData> audioData) {
+        this.audioData.clear();
+        this.audioData.addAll(audioData);
     }
 
-    public void addFrostAudio(FrostAudio frostAudio) {
-        if(!frostAudios.contains(frostAudio))
-            frostAudios.add(frostAudio);
+    public void addAudioData(AudioData audioData) {
+        if(!this.audioData.contains(audioData))
+            this.audioData.add(audioData);
     }
 
-    public void removeFrostAudio(FrostAudio frostAudio) {
-        frostAudios.remove(frostAudio);
+    public void removeAudioData(AudioData audioData) {
+        this.audioData.remove(audioData);
     }
 
-    public void removeAllFrostAudios() {
-        frostAudios.clear();
+    public void removeAllAudioDatas() {
+        audioData.clear();
     }
 
     public String getName() {
@@ -53,10 +53,10 @@ public class Artist {
         try {
             if (defaultArtistImage == null) {
                 if (lastBufferedImage == null) {
-                    int numOfImages = frostAudios.size() >= 4 ? 4 : 1;
+                    int numOfImages = audioData.size() >= 4 ? 4 : 1;
                     Image[] images = new Image[numOfImages];
                     for (int i = 0; i < images.length; i++) {
-                        images[i] = frostAudios.get(i).getArtwork();
+                        images[i] = audioData.get(i).getArtwork();
                     }
 
                     lastBufferedImage = GraphicsUtils.imageMerger(ArtworkManager.getInstance().getArtworkSize().getWidthInt(),images);
@@ -79,7 +79,7 @@ public class Artist {
 
     @Override
     public int hashCode() {
-        int result = getFrostAudios().hashCode();
+        int result = getAudioDataList().hashCode();
         result = 31 * result + getName().hashCode();
         return result;
     }

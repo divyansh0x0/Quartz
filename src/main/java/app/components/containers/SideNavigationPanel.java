@@ -1,7 +1,7 @@
 package app.components.containers;
 
 import app.components.enums.NavigationLink;
-import app.main.Frost;
+import app.main.Aphrodite;
 import app.settings.StartupSettings;
 import app.settings.constraints.ComponentParameters;
 import material.Padding;
@@ -41,7 +41,7 @@ public class SideNavigationPanel extends MaterialPanel {
     private static final Padding NAV_BTN_PADDING = new Padding(10, 20);
     private static final Cursor resizeCursor = new Cursor(Cursor.E_RESIZE_CURSOR);
     private static final TreeMap<String, MaterialNavButton> LinkMap = new TreeMap<>();
-    private static final MaterialLabel titleLabel = new MaterialLabel(Frost.getTitle(), LabelStyle.PRIMARY, MaterialLabel.HorizontalAlignment.CENTER, MaterialLabel.VerticalAlignment.CENTER);
+    private static final MaterialLabel titleLabel = new MaterialLabel(Aphrodite.getTitle(), LabelStyle.PRIMARY, MaterialLabel.HorizontalAlignment.CENTER, MaterialLabel.VerticalAlignment.CENTER);
     private static final MaterialLabel menuLabel_1 = new MaterialLabel("MENU", LabelStyle.SECONDARY);
 
     private static final Ikon[] ikons = {MaterialDesignC.COMPASS, FluentUiFilledMZ.MIC_ON_28, FluentUiFilledMZ.MUSIC_NOTES_24, FluentUiFilledAL.HEART_24, FluentUiFilledAL.FOLDER_48};

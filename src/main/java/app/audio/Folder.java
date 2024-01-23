@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 public class Folder {
-    private final ArrayList<FrostAudio> frostAudios = new ArrayList<>();
+    private final ArrayList<AudioData> audioData = new ArrayList<>();
     private final String name;
     private final String path;
     private BufferedImage defaultArtistImage;
@@ -21,27 +21,27 @@ public class Folder {
         Log.info("Folder path:"+path + "|name: " + name);
     }
 
-    public ArrayList<FrostAudio> getFrostAudios() {
-//        Log.info(name +":\n" + frostAudios);
-        return new ArrayList<>(frostAudios);
+    public ArrayList<AudioData> getAudioDatas() {
+//        Log.info(name +":\n" + audioData);
+        return new ArrayList<>(audioData);
     }
 
-    public void setFrostAudios(ArrayList<FrostAudio> frostAudios) {
-        this.frostAudios.clear();
-        this.frostAudios.addAll(frostAudios.stream().filter((audio)->name.equals(audio.getFile().getParent())).toList());
+    public void setAudioDatas(ArrayList<AudioData> audioData) {
+        this.audioData.clear();
+        this.audioData.addAll(audioData.stream().filter((audio)->name.equals(audio.getFile().getParent())).toList());
     }
 
-    public void addFrostAudio(FrostAudio frostAudio) {
-        if(!frostAudios.contains(frostAudio) && path.equals(frostAudio.getFolderPath()))
-            frostAudios.add(frostAudio);
+    public void addAudioData(AudioData audioData) {
+        if(!this.audioData.contains(audioData) && path.equals(audioData.getFolderPath()))
+            this.audioData.add(audioData);
     }
 
-    public void removeFrostAudio(FrostAudio frostAudio) {
-        frostAudios.remove(frostAudio);
+    public void removeAudioData(AudioData audioData) {
+        this.audioData.remove(audioData);
     }
 
-    public void removeAllFrostAudios() {
-        frostAudios.clear();
+    public void removeAllAudioDatas() {
+        audioData.clear();
     }
 
     public String getName() {
@@ -55,10 +55,10 @@ public class Folder {
 //        try {
 //            if (defaultArtistImage == null) {
 //                if (lastBufferedImage == null) {
-//                    int numOfImages = frostAudios.size() >= 4 ? 4 : 1;
+//                    int numOfImages = audioData.size() >= 4 ? 4 : 1;
 //                    Image[] images = new Image[numOfImages];
 //                    for (int i = 0; i < images.length; i++) {
-//                        images[i] = frostAudios.get(i).getArtwork();
+//                        images[i] = audioData.get(i).getArtwork();
 //                    }
 //
 //                    lastBufferedImage = GraphicsUtils.imageMerger(ArtworkManager.getInstance().getArtworkSize().getWidth(),images);
@@ -81,7 +81,7 @@ public class Folder {
 
     @Override
     public int hashCode() {
-        int result = getFrostAudios().hashCode();
+        int result = getAudioDatas().hashCode();
         result = 31 * result + getName().hashCode();
         return result;
     }

@@ -1,6 +1,6 @@
 package app.audio.player;
 
-import app.audio.FrostAudio;
+import app.audio.AudioData;
 import org.freedesktop.gstreamer.*;
 import org.freedesktop.gstreamer.elements.PlayBin;
 import material.utils.OsUtils;
@@ -19,14 +19,14 @@ import java.util.concurrent.TimeUnit;
         else // not?Then merge the array
             pSample1 = visualizerModel.stereoMerge(visualizerDrawer.pLeftChannel, visualizerDrawer.pRightChannel);
  */
-class FrostPlayer implements FrostPlayerModel {
+class AudioPlayer implements AudioPlayerModel {
     private static final float DEFAULT_MASTER_GAIN_VALUE = 0.0f;
-    private FrostAudio CURRENT_AUDIO;
+    private AudioData CURRENT_AUDIO;
     private final Object lock = new Object();
     private final PlayBin PLAY_BIN;
     private final ArrayList<Runnable> MediaEndedListeners = new ArrayList<>();
-    private final ArrayList<FrostPlayerExceptionListener> frostPlayerExceptionListeners = new ArrayList<FrostPlayerExceptionListener>();
-    private final ArrayList<FrostPlayerVisualizerListener> visualizerListeners = new ArrayList<FrostPlayerVisualizerListener>();
+    private final ArrayList<AudioPlayerExceptionListener> audioPlayerExceptionListeners = new ArrayList<AudioPlayerExceptionListener>();
+    private final ArrayList<AudioVisualizerListener> visualizerListeners = new ArrayList<AudioVisualizerListener>();
     private static final String SPECTRUM_ELEMENT_NAME = "spectrum";
     private int THRESHOLD;
     private int SPECTRUM_BANDS;
@@ -44,7 +44,7 @@ class FrostPlayer implements FrostPlayerModel {
 
     private boolean isDisposed;
 
-    public FrostPlayer() {
+    public AudioPlayer() {
         /*
          * Set up paths to native GStreamer libraries - see adjacent file.
          */
@@ -58,9 +58,9 @@ class FrostPlayer implements FrostPlayerModel {
          * is a higher version.
          */
 
-        Gst.init(Version.BASELINE, "Frost");
+        Gst.init(Version.BASELINE, "Aphrodite");
         this.SPECTRUM = ElementFactory.make(SPECTRUM_ELEMENT_NAME, SPECTRUM_ELEMENT_NAME);
-        PLAY_BIN = new PlayBin("Frost-Playbin");
+        PLAY_BIN = new PlayBin("Aphrodite-Playbin");
         PLAY_BIN.set("audio-filter", SPECTRUM);
 //        PLAY_BIN.getBus().connect((Bus.ASYNC_DONE) source -> setVolume(VOLUME));
         PLAY_BIN.getBus().connect((Bus.ERROR) (source, code, message) -> handleError(code, message));
@@ -123,7 +123,7 @@ class FrostPlayer implements FrostPlayerModel {
         FROST PLAYER MODEL
     */
     @Override
-    public void load(FrostAudio audio) throws FileNotFoundException {
+    public void load(AudioData audio) throws FileNotFoundException {
         if (audio != null) {
             CURRENT_AUDIO = audio;
             PLAY_BIN.stop();
@@ -202,26 +202,26 @@ class FrostPlayer implements FrostPlayerModel {
 
     private void handleVisualizerDataUpdate(float[] newSamples) {
         synchronized (lock) {
-            for (FrostPlayerVisualizerListener listener : visualizerListeners) {
+            for (AudioVisualizerListener listener : visualizerListeners) {
                 listener.visualizerDataUpdated(newSamples, THRESHOLD);
             }
         }
     }
 
     private void handleError(int code, String message) {
-        for (FrostPlayerExceptionListener l : frostPlayerExceptionListeners)
-            l.handleException(new FrostPlayerException(code, message));
+        for (AudioPlayerExceptionListener l : audioPlayerExceptionListeners)
+            l.handleException(new AudioControllerException(code, message));
     }
 
     /*
      ADD LISTENERS
      */
-    public synchronized void addFrostPlayerExceptionListener(FrostPlayerExceptionListener listener) {
-        if (!frostPlayerExceptionListeners.contains(listener))
-            frostPlayerExceptionListeners.add(listener);
+    public synchronized void addExceptionListener(AudioPlayerExceptionListener listener) {
+        if (!audioPlayerExceptionListeners.contains(listener))
+            audioPlayerExceptionListeners.add(listener);
     }
 
-    public synchronized void addFrostPlayerVisualizerListener(FrostPlayerVisualizerListener listener) {
+    public synchronized void addVisualizerDataListener(AudioVisualizerListener listener) {
         if (!visualizerListeners.contains(listener))
             visualizerListeners.add(listener);
     }
@@ -229,8 +229,8 @@ class FrostPlayer implements FrostPlayerModel {
     /*
     REMOVE LISTENERS
      */
-    private synchronized void removeFrostPlayerExceptionListener(FrostPlayerExceptionListener exceptionListener) {
-        frostPlayerExceptionListeners.remove(exceptionListener);
+    private synchronized void removeExceptionListener(AudioPlayerExceptionListener exceptionListener) {
+        audioPlayerExceptionListeners.remove(exceptionListener);
     }
 
     public void addMediaEndedListener(Runnable mediaEnded) {

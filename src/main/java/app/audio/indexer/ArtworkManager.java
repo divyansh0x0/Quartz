@@ -1,6 +1,6 @@
 package app.audio.indexer;
 
-import app.audio.FrostAudio;
+import app.audio.AudioData;
 import app.comparators.ImageComparator;
 import material.constants.Size;
 import material.utils.GraphicsUtils;
@@ -20,7 +20,7 @@ public class ArtworkManager {
     private static BufferedImage DEFAULT_ARTWORK;
     private static final Size ARTWORK_SIZE = new Size(200);
     private static final HashMap<Integer, BufferedImage> ARTWORKS = new HashMap<>();
-    private static final TreeMap<FrostAudio, Integer> ARTWORKS_POINTER = new TreeMap<>();
+    private static final TreeMap<AudioData, Integer> ARTWORKS_POINTER = new TreeMap<>();
     private static ArtworkManager instance;
 
     public static int DEFAULT_ARTWORK_POINTER;
@@ -28,7 +28,7 @@ public class ArtworkManager {
     static {
         if (DEFAULT_ARTWORK == null) {
             try {
-                BufferedImage artworkAltImage = ImageIO.read(Objects.requireNonNull(FrostAudio.class.getClassLoader().getResource("images/artwork.jpg"), "Artwork.jpg not found"));
+                BufferedImage artworkAltImage = ImageIO.read(Objects.requireNonNull(AudioData.class.getClassLoader().getResource("images/artwork.jpg"), "Artwork.jpg not found"));
                 DEFAULT_ARTWORK = GraphicsUtils.resize(artworkAltImage, ARTWORK_SIZE.getWidthInt(), ARTWORK_SIZE.getHeightInt());
             } catch (Exception e) {
                 Log.error(e.toString());
@@ -42,7 +42,7 @@ public class ArtworkManager {
     }
 
 
-    public void registerThumbnail(@NotNull FrostAudio audio, byte @Nullable [] artworkData) {
+    public void registerThumbnail(@NotNull AudioData audio, byte @Nullable [] artworkData) {
 
             try {
                 if (artworkData != null) {
@@ -70,13 +70,13 @@ public class ArtworkManager {
                 throw new RuntimeException(e);
             }
     }
-    public void registerThumbnailAsync(@NotNull FrostAudio audio, byte @Nullable [] artworkData){
+    public void registerThumbnailAsync(@NotNull AudioData audio, byte @Nullable [] artworkData){
         CompletableFuture.runAsync(() -> {
             registerThumbnail(audio,artworkData);
         });
     }
 
-    public @NotNull BufferedImage getArtwork(FrostAudio audio) {
+    public @NotNull BufferedImage getArtwork(AudioData audio) {
         return ARTWORKS.get(ARTWORKS_POINTER.get(audio));
     }
 

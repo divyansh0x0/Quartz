@@ -2,15 +2,15 @@ package app.audio.player;
 
 import app.components.spectrum.SharedSpectrumManager;
 
-public class SpectrumListener implements FrostPlayerVisualizerListener {
-    private static SpectrumListener instance;
-    private SpectrumListener() {
+public class Spectrum implements AudioVisualizerListener {
+    private static Spectrum instance;
+    private Spectrum() {
 
     }
 
-    public static SpectrumListener getInstance() {
+    public static Spectrum getInstance() {
         if(instance == null)
-            instance = new SpectrumListener();
+            instance = new Spectrum();
         return instance;
     }
 

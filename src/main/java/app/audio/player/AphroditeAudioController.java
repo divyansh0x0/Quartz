@@ -1,9 +1,9 @@
 package app.audio.player;
 
 import app.TileManager;
-import app.audio.FrostAudio;
+import app.audio.AudioData;
 import app.audio.PlayerComponents;
-import app.audio.indexer.FrostIndexer;
+import app.audio.indexer.AudioDataIndexer;
 import app.colors.dynamic.DynamicColors;
 import app.components.PlaybackBar;
 import app.components.audio.AudioInfoViewer;
@@ -15,7 +15,7 @@ import app.components.buttons.playback.VolumeButton;
 import app.components.containers.FullscreenPanel;
 import app.dialogs.DialogFactory;
 import app.local.notification.NotificationManager;
-import app.main.Frost;
+import app.main.Aphrodite;
 import app.settings.Shortcuts;
 import app.settings.StartupSettings;
 import material.animation.MaterialFixedTimer;
@@ -35,13 +35,13 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
-public class FrostPlayerController {
-    private static FrostPlayerController instance;
+public class AphroditeAudioController {
+    private static AphroditeAudioController instance;
     //    private MediaPlayer m_player;
     private static final short SEEK_SECONDS = 5;
     private static final double VOLUME_CHANGE = 0.05d;
-    private FrostPlayer FROST_PLAYER;
-    private FrostAudio currentFrostAudio;
+    private AudioPlayer _AudioPlayer;
+    private AudioData currentAudioData;
     private PlayerComponents playerComponents;
     private boolean isLoaded = false;
     private boolean isPaused = true;
@@ -54,7 +54,7 @@ public class FrostPlayerController {
     private boolean wasPausedBeforeSeeking = false;
     private boolean isVisualizerSamplingEnabled;
 
-    private FrostPlayerController() {
+    private AphroditeAudioController() {
         super();
     }
 
@@ -66,13 +66,13 @@ public class FrostPlayerController {
             switch (e.getID()) {
                 case KeyEvent.KEY_RELEASED -> {
                     switch (e.getKeyCode()) {
-                        case KeyEvent.VK_PAUSE, Shortcuts.FrostPlayerController.PLAY_PAUSE_TOGGLE -> {
+                        case KeyEvent.VK_PAUSE, Shortcuts.AudioPlayerController.PLAY_PAUSE_TOGGLE -> {
                             if (isPaused())
                                 play();
                             else
                                 pause();
                         }
-                        case Shortcuts.FrostPlayerController.SEEK_BACKWARDS, Shortcuts.FrostPlayerController.SEEK_FORWARDS -> {
+                        case Shortcuts.AudioPlayerController.SEEK_BACKWARDS, Shortcuts.AudioPlayerController.SEEK_FORWARDS -> {
                             if (currentTime != null) {
                                 if (playerComponents != null) {
                                     PlaybackBar playbackBar = playerComponents.getPlaybackBar();
@@ -88,7 +88,7 @@ public class FrostPlayerController {
                 }
                 case KeyEvent.KEY_PRESSED -> {
                     switch (e.getKeyCode()) {
-                        case Shortcuts.FrostPlayerController.SEEK_BACKWARDS -> {
+                        case Shortcuts.AudioPlayerController.SEEK_BACKWARDS -> {
                             if (currentTime != null) {
                                 if (!isPaused())
                                     pause();
@@ -97,7 +97,7 @@ public class FrostPlayerController {
                                 isSeeking = true;
                             }
                         }
-                        case Shortcuts.FrostPlayerController.SEEK_FORWARDS -> {
+                        case Shortcuts.AudioPlayerController.SEEK_FORWARDS -> {
                             if (currentTime != null) {
                                 if (!isPaused())
                                     pause();
@@ -106,8 +106,8 @@ public class FrostPlayerController {
                                 isSeeking = true;
                             }
                         }
-                        case Shortcuts.FrostPlayerController.VOLUME_UP -> setVolume(VOLUME + VOLUME_CHANGE);
-                        case Shortcuts.FrostPlayerController.VOLUME_DOWN -> setVolume(VOLUME - VOLUME_CHANGE);
+                        case Shortcuts.AudioPlayerController.VOLUME_UP -> setVolume(VOLUME + VOLUME_CHANGE);
+                        case Shortcuts.AudioPlayerController.VOLUME_DOWN -> setVolume(VOLUME - VOLUME_CHANGE);
                     }
                 }
             }
@@ -119,50 +119,50 @@ public class FrostPlayerController {
     public void init() {
         try {
 
-            if (FROST_PLAYER != null) {
-                FROST_PLAYER.dispose();
-                FROST_PLAYER = null;
+            if (_AudioPlayer != null) {
+                _AudioPlayer.dispose();
+                _AudioPlayer = null;
             }
-            FROST_PLAYER = new FrostPlayer();
-            FROST_PLAYER.addFrostPlayerVisualizerListener(SpectrumListener.getInstance());
-            FROST_PLAYER.addMediaEndedListener(this::mediaEnded);
-            FROST_PLAYER.setThreshold(StartupSettings.SPECTRUM_THRESHOLD);
-            FROST_PLAYER.setSpectrumBands(StartupSettings.SPECTRUM_BANDS_NUM);
-            FROST_PLAYER.addFrostPlayerExceptionListener(this::handleError);
-            FROST_PLAYER.enableVisualizerSampling(isVisualizerSamplingEnabled);
-            VOLUME = FROST_PLAYER.getVolume();
+            _AudioPlayer = new AudioPlayer();
+            _AudioPlayer.addVisualizerDataListener(Spectrum.getInstance());
+            _AudioPlayer.addMediaEndedListener(this::mediaEnded);
+            _AudioPlayer.setThreshold(StartupSettings.SPECTRUM_THRESHOLD);
+            _AudioPlayer.setSpectrumBands(StartupSettings.SPECTRUM_BANDS_NUM);
+            _AudioPlayer.addExceptionListener(this::handleError);
+            _AudioPlayer.enableVisualizerSampling(isVisualizerSamplingEnabled);
+            VOLUME = _AudioPlayer.getVolume();
         } catch (Exception e) {
             handleError(e);
         }
     }
 
 
-    public static FrostPlayerController getInstance() {
+    public static AphroditeAudioController getInstance() {
         if (instance == null)
-            instance = new FrostPlayerController();
+            instance = new AphroditeAudioController();
         return instance;
     }
 
-    public synchronized void load(@Nullable FrostAudio frostAudio) {
+    public synchronized void load(@Nullable AudioData audioData) {
         try {
-            if (FROST_PLAYER == null) {
+            if (_AudioPlayer == null) {
                 Log.error("call init() before loading an audio");
             }
 
-            if (frostAudio != null) {
+            if (audioData != null) {
                 PlayerFixedTimer.getInstance().start();
-                currentFrostAudio = frostAudio;
-                Log.success("Loading audio: " + currentFrostAudio.getFile().getPath());
-                FROST_PLAYER.load(frostAudio);
+                currentAudioData = audioData;
+                Log.success("Loading audio: " + currentAudioData.getFile().getPath());
+                _AudioPlayer.load(audioData);
                 isLoaded = true;
                 currentTime = Duration.ZERO;
-                TileManager.setActiveAudioTiles(currentFrostAudio);
-                FrostQueue.getInstance().setActiveAudio(frostAudio);
-                if (!Frost.getInstance().getWindow().isFocused())
-                    NotificationManager.getInstance().notifyNewPlayback(currentFrostAudio);
+                TileManager.setActiveAudioTiles(currentAudioData);
+                AudioQueue.getInstance().setActiveAudio(audioData);
+                if (!Aphrodite.getInstance().getWindow().isFocused())
+                    NotificationManager.getInstance().notifyNewPlayback(currentAudioData);
             } else {
                 PlayerFixedTimer.getInstance().stop();
-                currentFrostAudio = null;
+                currentAudioData = null;
                 TileManager.setActiveAudioTiles(null);
             }
             updatePlayerComponents();
@@ -177,8 +177,8 @@ public class FrostPlayerController {
 
 
     private void handleError(Exception e) {
-        if (e instanceof FrostPlayerException)
-            DialogFactory.showErrorDialog(((FrostPlayerException) e).getCode() + ":" + e.getMessage());
+        if (e instanceof AudioControllerException)
+            DialogFactory.showErrorDialog(((AudioControllerException) e).getCode() + ":" + e.getMessage());
         else
             DialogFactory.showErrorDialog(e.toString());
         Log.error(e + " \n " + Arrays.toString(e.getStackTrace()));
@@ -187,8 +187,8 @@ public class FrostPlayerController {
     public void enableVisualizerSampling(boolean b) {
         try {
             isVisualizerSamplingEnabled = b;
-            if (FROST_PLAYER != null)
-                FROST_PLAYER.enableVisualizerSampling(b);
+            if (_AudioPlayer != null)
+                _AudioPlayer.enableVisualizerSampling(b);
         } catch (Exception e) {
             handleError(e);
         }
@@ -196,9 +196,9 @@ public class FrostPlayerController {
 
     public synchronized void play() {
         try {
-            if (currentFrostAudio != null) {
-                Log.info("playing: " + currentFrostAudio.getName());
-                FROST_PLAYER.play();
+            if (currentAudioData != null) {
+                Log.info("playing: " + currentAudioData.getName());
+                _AudioPlayer.play();
                 isPaused = false;
                 playerComponents.getPlayButton().setActive(isPaused);
             }
@@ -211,7 +211,7 @@ public class FrostPlayerController {
         Log.warn("Pausing music!");
         if (isLoaded && !isPaused) {
             try {
-                FROST_PLAYER.pause();
+                _AudioPlayer.pause();
                 isPaused = true;
 //              TileManager.setActiveAudioTile(null);
                 updatePlayerButtons();
@@ -243,7 +243,7 @@ public class FrostPlayerController {
 
     public synchronized void restart() {
         try {
-            FROST_PLAYER.seek(Duration.ZERO);
+            _AudioPlayer.seek(Duration.ZERO);
         } catch (Exception e) {
             handleError(e);
         }
@@ -252,9 +252,9 @@ public class FrostPlayerController {
 
     private synchronized void next() {
         try {
-            FrostAudio frostAudio = FrostQueue.getInstance().getNextAudio();
-            load(frostAudio);
-            if (frostAudio != null) {
+            AudioData audioData = AudioQueue.getInstance().getNextAudio();
+            load(audioData);
+            if (audioData != null) {
                 if (!isPaused)
                     play();
             } else {
@@ -268,9 +268,9 @@ public class FrostPlayerController {
     private synchronized void previous() {
         try {
 
-            FrostAudio frostAudio = FrostQueue.getInstance().getPrevAudio();
-            load(frostAudio);
-            if (frostAudio != null) {
+            AudioData audioData = AudioQueue.getInstance().getPrevAudio();
+            load(audioData);
+            if (audioData != null) {
                 if (!isPaused)
                     play();
             } else
@@ -286,7 +286,7 @@ public class FrostPlayerController {
         try {
             if (VOLUME != newVolume) {
                 VOLUME = Math.max(0, Math.min(1, newVolume));
-                FROST_PLAYER.setVolume(newVolume);
+                _AudioPlayer.setVolume(newVolume);
                 playerComponents.getVolumeButton().setVolume(newVolume);
             }
         } catch (Exception e) {
@@ -295,7 +295,7 @@ public class FrostPlayerController {
     }
 
     private void updateFullScreenMode() {
-        FullscreenPanel.getInstance().setAudio(getCurrentFrostAudio());
+        FullscreenPanel.getInstance().setAudio(getCurrentAudioData());
     }
 
     private void updateUI() {
@@ -308,10 +308,10 @@ public class FrostPlayerController {
 
                 UiUpdateTask = CompletableFuture.runAsync(() -> {
                     try {
-                        if (currentFrostAudio != null) {
+                        if (currentAudioData != null) {
                             Image tempImg;
-                            currentFrostAudio.getArtwork();
-                            tempImg = currentFrostAudio.getArtwork();
+                            currentAudioData.getArtwork();
+                            tempImg = currentAudioData.getArtwork();
                             BufferedImage bufferedImage = MaterialGraphics.getBufferedImageFast(tempImg);
                             if (bufferedImage != null) {
                                 Color color = DynamicColors.getClosestColor(ColorUtils.getAverageColor(bufferedImage), ThemeManager.getInstance().getThemeType());
@@ -357,7 +357,7 @@ public class FrostPlayerController {
 
     private synchronized void shuffle() {
         try {
-            FrostQueue.getInstance().shuffle();
+            AudioQueue.getInstance().shuffle();
 
         } catch (Exception e) {
             handleError(e);
@@ -366,7 +366,7 @@ public class FrostPlayerController {
 
     private synchronized void unShuffle() {
         try {
-            FrostQueue.getInstance().unShuffle();
+            AudioQueue.getInstance().unShuffle();
         } catch (Exception e) {
             handleError(e);
         }
@@ -377,8 +377,8 @@ public class FrostPlayerController {
 //        switch (mediaException.getType()) {
 //            case MEDIA_UNAVAILABLE:
 //            case PLAYBACK_ERROR:
-//                if (currentFrostAudio != null) {
-//                    TileManager.removeAudioTileAsync(currentFrostAudio, true);
+//                if (currentAudioData != null) {
+//                    TileManager.removeAudioTileAsync(currentAudioData, true);
 //                    DialogFactory.showErrorDialog(mediaException.getLocalizedMessage());
 //                }
 //                load(null);
@@ -390,14 +390,14 @@ public class FrostPlayerController {
 //    }
 
     /**
-     * Sets player components that are updated dynamically by the FrostPlayer
+     * Sets player components that are updated dynamically by the AudioPlayer
      */
     public void installPlayerComponents(@NotNull PlayerComponents playerComponents) {
         try {
 
             //Seekbar
             playerComponents.getPlaybackBar().onSeek(newCurrentTime -> {
-                FROST_PLAYER.seek(newCurrentTime);
+                _AudioPlayer.seek(newCurrentTime);
                 currentTime = newCurrentTime;
 
             });
@@ -453,11 +453,11 @@ public class FrostPlayerController {
     private synchronized void setFavorite(boolean b) {
         try {
 
-            FrostIndexer frostIndexer = FrostIndexer.getInstance();
+            AudioDataIndexer audioDataIndexer = AudioDataIndexer.getInstance();
             if (b)
-                frostIndexer.addAudioFileToFavorites(currentFrostAudio);
+                audioDataIndexer.addAudioFileToFavorites(currentAudioData);
             else
-                frostIndexer.removeAudioFileFromFavorites(currentFrostAudio);
+                audioDataIndexer.removeAudioFileFromFavorites(currentAudioData);
         } catch (Exception e) {
             handleError(e);
         }
@@ -470,8 +470,8 @@ public class FrostPlayerController {
                 if (playerComponents != null) {
                     AudioInfoViewer viewer = playerComponents.getAudioInfoViewer();
                     VolumeButton volumeButton = playerComponents.getVolumeButton();
-                    viewer.setAudio(currentFrostAudio);
-                    Log.info("PLayer volume : " + FROST_PLAYER.getVolume());
+                    viewer.setAudio(currentAudioData);
+                    Log.info("PLayer volume : " + _AudioPlayer.getVolume());
                     volumeButton.setVolume(VOLUME);
 
                 }
@@ -493,9 +493,9 @@ public class FrostPlayerController {
                         playButton.setPaused(isPaused);
                     }
 
-                    if (currentFrostAudio != null) {
+                    if (currentAudioData != null) {
                         LikeButton likeButton = playerComponents.getLikeButton();
-                        likeButton.setActive(currentFrostAudio.isFavorite());
+                        likeButton.setActive(currentAudioData.isFavorite());
                     }
                 });
             }
@@ -512,7 +512,7 @@ public class FrostPlayerController {
 //        PlayerFixedTimer.getInstance().stop();
         try {
             PlayerFixedTimer.getInstance().dispose();
-            FROST_PLAYER.dispose();
+            _AudioPlayer.dispose();
         } catch (Exception e) {
             Log.error("Error occurred while disposing: " + e);
         }
@@ -522,21 +522,21 @@ public class FrostPlayerController {
         try {
 
             if (!isSeeking) {
-                if (playerComponents != null && !FROST_PLAYER.isDisposed()) {
+                if (playerComponents != null && !_AudioPlayer.isDisposed()) {
                     PlaybackBar playbackBar = playerComponents.getPlaybackBar();
-                    long currentTimeTemp = FROST_PLAYER.getCurrentTimeNanos();
+                    long currentTimeTemp = _AudioPlayer.getCurrentTimeNanos();
                     SwingUtilities.invokeLater(() -> {
                         playbackBar.setCurrentTime(currentTimeTemp);
                         currentTime = Duration.ofNanos(currentTimeTemp);
                     });
-                    if (FROST_PLAYER.getTotalTimeNanos() != 0) {
-                        if (playbackBar.getTotalTimeNanos() != FROST_PLAYER.getTotalTimeNanos())
+                    if (_AudioPlayer.getTotalTimeNanos() != 0) {
+                        if (playbackBar.getTotalTimeNanos() != _AudioPlayer.getTotalTimeNanos())
                             SwingUtilities.invokeLater(() -> {
-                                playbackBar.setTotalTime(FROST_PLAYER.getTotalTimeNanos());
+                                playbackBar.setTotalTime(_AudioPlayer.getTotalTimeNanos());
                             });
-                        if (FROST_PLAYER.getTotalTimeNanos() > 0 && currentFrostAudio.getDurationInSeconds() != FROST_PLAYER.getTotalTimeNanos() / 1e9) {
-                            currentFrostAudio.setDurationInSeconds(FROST_PLAYER.getTotalTimeNanos() / 1e9);
-                            TileManager.getMappedTiles(currentFrostAudio).forEach(Component::repaint);
+                        if (_AudioPlayer.getTotalTimeNanos() > 0 && currentAudioData.getDurationInSeconds() != _AudioPlayer.getTotalTimeNanos() / 1e9) {
+                            currentAudioData.setDurationInSeconds(_AudioPlayer.getTotalTimeNanos() / 1e9);
+                            TileManager.getMappedTiles(currentAudioData).forEach(Component::repaint);
                         }
 
                     }
@@ -552,8 +552,8 @@ public class FrostPlayerController {
         return playerComponents;
     }
 
-    public FrostAudio getCurrentFrostAudio() {
-        return currentFrostAudio;
+    public AudioData getCurrentAudioData() {
+        return currentAudioData;
     }
 
     public boolean isPaused() {
@@ -580,7 +580,7 @@ public class FrostPlayerController {
 
         @Override
         public void tick(float e) {
-            FrostPlayerController.getInstance().tick();
+            AphroditeAudioController.getInstance().tick();
         }
     }
 

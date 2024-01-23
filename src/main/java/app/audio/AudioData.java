@@ -21,11 +21,11 @@ import java.util.Locale;
 import java.util.Objects;
 
 /**
- * FrostAudio class used for storing and getting necessary data used by app.main.Frost Project
+ * AudioData class used for storing and getting necessary data used by app.main.Aphrodite Project
  */
 
 
-public final class FrostAudio implements Serializable, Comparable<FrostAudio> {
+public final class AudioData implements Serializable, Comparable<AudioData> {
     private @NotNull File file;
     private @NotNull String name;
     private @NotNull String[] artists;
@@ -37,7 +37,7 @@ public final class FrostAudio implements Serializable, Comparable<FrostAudio> {
     private boolean isBroken = false;
     private ArrayList<Playlist> playlists;
 
-    public FrostAudio(@NotNull File file) {
+    public AudioData(@NotNull File file) {
         this.file = file;
         this.folderPath = file.getParentFile().getAbsolutePath();
 
@@ -95,7 +95,7 @@ public final class FrostAudio implements Serializable, Comparable<FrostAudio> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        FrostAudio that = (FrostAudio) o;
+        AudioData that = (AudioData) o;
         return file.getPath().equals(that.file.getPath()) || (Double.compare(that.durationInSeconds, durationInSeconds) == 0 && name.equals(that.name) && artists.equals(that.artists));
     }
 
@@ -210,7 +210,7 @@ public final class FrostAudio implements Serializable, Comparable<FrostAudio> {
 //    public static @NotNull BufferedImage getDefaultArtwork() {
 //        if (artworkAltImageData == null) {
 //            try {
-//                BufferedImage artworkAltImage = ImageIO.read(Objects.requireNonNull(FrostAudio.class.getClassLoader().getResource("images/artwork.jpg"), "Artwork.jpg not found"));
+//                BufferedImage artworkAltImage = ImageIO.read(Objects.requireNonNull(AudioData.class.getClassLoader().getResource("images/artwork.jpg"), "Artwork.jpg not found"));
 //                artworkAltImageData = GraphicsUtils.resize(artworkAltImage, artworkSize,artworkSize);
 //            } catch (Exception e) {
 //                Log.error(e.toString());
@@ -221,7 +221,7 @@ public final class FrostAudio implements Serializable, Comparable<FrostAudio> {
 //    }
 
     @Override
-    public int compareTo(@NotNull FrostAudio o) {
+    public int compareTo(@NotNull AudioData o) {
         return file.getPath().compareTo(o.getFile().getPath());
     }
 

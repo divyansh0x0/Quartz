@@ -1,6 +1,6 @@
 package app.components.containers;
 
-import app.audio.FrostAudio;
+import app.audio.AudioData;
 import app.components.spectrum.SharedSpectrumManager;
 import app.components.spectrum.Spectrum;
 import app.components.spectrum.SpectrumType;
@@ -16,7 +16,7 @@ public class FullscreenPanel extends MaterialPanel {
 //    private static BufferedImage BG_IMAGE = FullscreenMode.getRandomImage();
     private static final Spectrum SPECTRUM = SharedSpectrumManager.createSpectrum();
     private static final float AMBIENT_TRANSPARENCY = 0.6f;
-    private FrostAudio currentFrostAudio;
+    private AudioData currentAudioData;
     private FullscreenPanel() {
         super(LAYOUT);
         setBackground(ThemeColors.TransparentColor);
@@ -32,8 +32,8 @@ public class FullscreenPanel extends MaterialPanel {
         g.setColor(Color.BLACK);
         g.fillRect(0,0,getWidth(),getHeight());
     }
-    public void setAudio(FrostAudio currentFrostAudio) {
-        this.currentFrostAudio = currentFrostAudio;
+    public void setAudio(AudioData currentAudioData) {
+        this.currentAudioData = currentAudioData;
     }
     public static FullscreenPanel getInstance() {
         if (instance == null)

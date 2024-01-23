@@ -1,10 +1,11 @@
 package app.main;
 
-import app.audio.player.FrostPlayerController;
+import app.audio.player.AphroditeAudioController;
 import app.components.buttons.control.FullScreenButton;
 import app.components.containers.FullscreenPanel;
 import app.components.containers.MainPanel;
 import app.components.containers.PlaybackControlPanel;
+import material.animation.MaterialFixedTimer;
 import material.constants.Size;
 import material.containers.MaterialPanel;
 import material.theme.ThemeManager;
@@ -20,10 +21,10 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 // TODO Add meta tag editor
-public class Frost {
-    private static Frost instance;
+public class Aphrodite {
+    private static Aphrodite instance;
     private static final GraphicsDevice[] devices = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
-    private static final String NAME = "Frost";
+    private static final String NAME = "Aphrodite";
     public static final Size MIN_SIZE = new Size(640, 640 / 12 * 9);
     private static final int TITLE_BAR_HEIGHT = 27;
 
@@ -43,12 +44,12 @@ public class Frost {
         FULLSCREEN
     }
 
-    private Frost() {
+    private Aphrodite() {
         EventQueue.invokeLater(() -> {
             WINDOW.setGlassPane(GLASS_PANE);
             WINDOW.setFocusable(true);
             WINDOW.pack();
-            KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new FrostKeyEventDispatcher(WINDOW));
+            KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new AphroditeControllerKeyEventDispatcher(WINDOW));
             switchToDefaultMode();
             addListeners();
             if (!ThemeManager.getInstance().isThemingSupported()) {
@@ -107,9 +108,9 @@ public class Frost {
         });
     }
 
-    public static Frost getInstance() {
+    public static Aphrodite getInstance() {
         if (instance == null)
-            instance = new Frost();
+            instance = new Aphrodite();
         return instance;
     }
 
@@ -122,7 +123,7 @@ public class Frost {
         WINDOW.addWindowListener(new WindowAdapter() {
             @Override
             public void windowOpened(WindowEvent e) {
-                initializeFrostController();
+                initializeAphroditeAudioController();
             }
 
             @Override
@@ -139,14 +140,14 @@ public class Frost {
         });
     }
 
-    private void initializeFrostController() {
-        FrostPlayerController.getInstance().init();
-        FrostPlayerController.getInstance().installPlayerComponents(PLAYBACK_CONTROL_PANEL.getPlayerComponents());
+    private void initializeAphroditeAudioController() {
+        AphroditeAudioController.getInstance().init();
+        AphroditeAudioController.getInstance().installPlayerComponents(PLAYBACK_CONTROL_PANEL.getPlayerComponents());
     }
 
     private void disposeEverything() {
-        FrostPlayerController.getInstance().dispose();
-
+        AphroditeAudioController.getInstance().dispose();
+        MaterialFixedTimer.disposeAll();
     }
 
     public static MaterialPanel getGlassPane() {
@@ -164,7 +165,7 @@ public class Frost {
                     switchToDefaultMode();
 //                System.exit(-1);
             }
-            default -> FrostPlayerController.getInstance().handleKeyEvent(e);
+            default -> AphroditeAudioController.getInstance().handleKeyEvent(e);
         }
 
     }

@@ -1,31 +1,32 @@
 package app.audio.player;
 
-import app.audio.FrostAudio;
-import app.audio.indexer.FrostIndexer;
-import java.util.ArrayList;
-import java.util.Random;
+import app.audio.AudioData;
+import app.audio.indexer.AudioDataIndexer;
 import app.components.audio.AudioTile;
+import material.utils.Log;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import material.utils.Log;
 
-public class FrostQueue {
+import java.util.ArrayList;
+import java.util.Random;
+
+public class AudioQueue {
     private ArrayList<Runnable> queueUpdateListeners = new ArrayList<>();
-    private static FrostQueue instance;
-    private ArrayList<FrostAudio> queue = new ArrayList<>();
-    private ArrayList<FrostAudio> unShuffledQueue;
+    private static AudioQueue instance;
+    private ArrayList<AudioData> queue = new ArrayList<>();
+    private ArrayList<AudioData> unShuffledQueue;
     private boolean isShuffled = false;
     private int currentAudioIndex = 0;
-    private FrostAudio currentFrostAudio;
-    private FrostAudio lastRandomFrostAudio;
+    private AudioData currentAudioData;
+    private AudioData lastRandomAudioData;
 
-    private FrostQueue() {
+    private AudioQueue() {
 
     }
 
-    public static FrostQueue getInstance() {
+    public static AudioQueue getInstance() {
         if (instance == null)
-            instance = new FrostQueue();
+            instance = new AudioQueue();
         return instance;
     }
 
@@ -35,11 +36,11 @@ public class FrostQueue {
             if (!isShuffled) {
                 unShuffledQueue = new ArrayList<>(queue);
             }
-            ArrayList<FrostAudio> shuffledQueue = new ArrayList<>(queue.size());
+            ArrayList<AudioData> shuffledQueue = new ArrayList<>(queue.size());
             for (int i = queue.size(); i > 0; i--) {
                 int j = random.nextInt(0, queue.size());
-                FrostAudio frostAudio = queue.remove(j);
-                shuffledQueue.add(frostAudio);
+                AudioData audioData = queue.remove(j);
+                shuffledQueue.add(audioData);
             }
             queue = shuffledQueue;
             isShuffled = true;
@@ -56,14 +57,14 @@ public class FrostQueue {
         }
     }
 
-    public @Nullable FrostAudio getRandomAudio() {
+    public @Nullable AudioData getRandomAudio() {
         if (queue.size() > 1) {
             Random random = new Random();
             int randomInt = random.nextInt(0, queue.size());
-            FrostAudio randomFrostAudio = queue.get(randomInt);
-            if (lastRandomFrostAudio == null || randomFrostAudio != lastRandomFrostAudio) {
-                lastRandomFrostAudio = randomFrostAudio;
-                return randomFrostAudio;
+            AudioData randomAudioData = queue.get(randomInt);
+            if (lastRandomAudioData == null || randomAudioData != lastRandomAudioData) {
+                lastRandomAudioData = randomAudioData;
+                return randomAudioData;
             } else return getRandomAudio();
         } else {
             if (queue.isEmpty()) {
@@ -73,28 +74,28 @@ public class FrostQueue {
         }
     }
 
-    public void add(FrostAudio frostAudio) {
-        queue.add(frostAudio);
+    public void add(AudioData audioData) {
+        queue.add(audioData);
         if (unShuffledQueue == null)
             unShuffledQueue = new ArrayList<>(queue);
         else
-            unShuffledQueue.add(frostAudio);
+            unShuffledQueue.add(audioData);
         queueUpdated();
     }
 
     public void add(AudioTile audioTile) {
-        add(audioTile.getFrostAudio());
+        add(audioTile.getAudioData());
     }
 
-    private void remove(FrostAudio frostAudio) {
-        queue.remove(frostAudio);
+    private void remove(AudioData audioData) {
+        queue.remove(audioData);
         if (unShuffledQueue != null)
-            unShuffledQueue.remove(frostAudio);
+            unShuffledQueue.remove(audioData);
         queueUpdated();
     }
 
     public void remove(AudioTile audioTile) {
-        remove(audioTile.getFrostAudio());
+        remove(audioTile.getAudioData());
     }
 
     private void queueUpdated() {
@@ -112,12 +113,12 @@ public class FrostQueue {
         return queueUpdateListeners.remove(runnable);
     }
 
-    public @Nullable FrostAudio getNextAudio() {
+    public @Nullable AudioData getNextAudio() {
         if (queue.size() > 0) {
             currentAudioIndex = Math.max(Math.min(currentAudioIndex + 1, queue.size() - 1), 0);
-            FrostAudio temp = queue.get(currentAudioIndex);
-            if (!temp.equals(currentFrostAudio)) {
-                currentFrostAudio = temp;
+            AudioData temp = queue.get(currentAudioIndex);
+            if (!temp.equals(currentAudioData)) {
+                currentAudioData = temp;
                 return temp;
             } else if (currentAudioIndex < queue.size() - 1)
                 return getNextAudio();
@@ -127,17 +128,17 @@ public class FrostQueue {
             return null;
     }
 
-    public @Nullable FrostAudio getPrevAudio() {
+    public @Nullable AudioData getPrevAudio() {
         if (queue.size() > 0) {
             currentAudioIndex = Math.max(Math.min(currentAudioIndex - 1, queue.size()), 0);
-            FrostAudio temp = queue.get(currentAudioIndex);
-            if (!temp.equals(currentFrostAudio)) {
-                currentFrostAudio = temp;
+            AudioData temp = queue.get(currentAudioIndex);
+            if (!temp.equals(currentAudioData)) {
+                currentAudioData = temp;
                 return temp;
             } else if (currentAudioIndex > 1)
                 return getPrevAudio();
             else
-                return currentFrostAudio;
+                return currentAudioData;
         } else
             return null;
     }
@@ -149,8 +150,8 @@ public class FrostQueue {
      * @param master        First audio
      * @param list Array list of audio that gets added after master audio
      */
-    public void newQueue(FrostAudio master, ArrayList<FrostAudio> list) {
-        currentFrostAudio = master;
+    public void newQueue(AudioData master, ArrayList<AudioData> list) {
+        currentAudioData = master;
         queue.clear();
         if(!list.contains(master))
             queue.add(master);
@@ -158,18 +159,18 @@ public class FrostQueue {
         updateQueueIndex();
     }
 
-    public void newQueueFromAudioTiles(FrostAudio master, ArrayList<AudioTile> allAudioTiles) {
-        ArrayList<FrostAudio> allFrostAudios = new ArrayList<>(allAudioTiles.size());
+    public void newQueueFromAudioTiles(AudioData master, ArrayList<AudioTile> allAudioTiles) {
+        ArrayList<AudioData> allAudioData = new ArrayList<>(allAudioTiles.size());
         for (AudioTile audioTile : allAudioTiles) {
-            allFrostAudios.add(audioTile.getFrostAudio());
+            allAudioData.add(audioTile.getAudioData());
         }
-        newQueue(master, allFrostAudios);
+        newQueue(master, allAudioData);
     }
  transient String s;
-    public void setActiveAudio(@NotNull FrostAudio frostAudio) {
-        currentFrostAudio = frostAudio;
+    public void setActiveAudio(@NotNull AudioData audioData) {
+        currentAudioData = audioData;
         if(queue.size() == 0) {
-            var arr = FrostIndexer.getInstance().getAllAudioFiles();
+            var arr = AudioDataIndexer.getInstance().getAllAudioFiles();
             newQueue(arr.get(0), arr);
         }
         updateQueueIndex();
@@ -177,6 +178,6 @@ public class FrostQueue {
 
     private void updateQueueIndex() {
 
-        currentAudioIndex = currentFrostAudio != null && queue.contains(currentFrostAudio) ? queue.indexOf(currentFrostAudio) : 0;
+        currentAudioIndex = currentAudioData != null && queue.contains(currentAudioData) ? queue.indexOf(currentAudioData) : 0;
     }
 }

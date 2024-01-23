@@ -12,7 +12,7 @@ import java.io.File;
 
 public class MP3Tools {
 
-//    public static @Nullable FrostAudio getAudioData(String path) {
+//    public static @Nullable AudioData getAudioData(String path) {
 //        try {
 //            File file = new File(path);
 //            if (file.exists()) {

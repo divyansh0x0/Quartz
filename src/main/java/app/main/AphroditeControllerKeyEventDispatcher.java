@@ -1,6 +1,5 @@
 package app.main;
 
-import app.audio.player.FrostPlayerController;
 import material.component.MaterialComponent;
 import material.window.MaterialWindow;
 import org.jetbrains.annotations.NotNull;
@@ -9,9 +8,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 
-public class FrostKeyEventDispatcher implements KeyEventDispatcher {
+public class AphroditeControllerKeyEventDispatcher implements KeyEventDispatcher {
     private final MaterialWindow materialWindow;
-    public FrostKeyEventDispatcher(MaterialWindow materialWindow) {
+    public AphroditeControllerKeyEventDispatcher(MaterialWindow materialWindow) {
         this.materialWindow = materialWindow;
     }
     private void traverseKeyPressEvent(@NotNull JComponent c, @NotNull KeyEvent e) {
@@ -32,7 +31,7 @@ public class FrostKeyEventDispatcher implements KeyEventDispatcher {
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent e) {
-        Frost.getInstance().handleKeyEvent(e);
+        Aphrodite.getInstance().handleKeyEvent(e);
         traverseKeyPressEvent(materialWindow.getRootPanel(),e);
         return false;
     }
