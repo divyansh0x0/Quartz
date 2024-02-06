@@ -12,7 +12,9 @@ import app.components.listeners.AudioTileClickListener;
 import material.MaterialParameters;
 import material.component.MaterialComponent;
 import material.theme.ThemeColors;
+import material.theme.ThemeManager;
 import material.theme.enums.Elevation;
+import material.theme.enums.ThemeType;
 import material.tools.ColorUtils;
 import material.utils.GraphicsUtils;
 import material.utils.Log;
@@ -93,16 +95,16 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
     private static final Color mouseOverColorDarkMode = new Color(0x5FFFFFF, true);
     @Override
     protected void animateMouseEnter() {
-//        if(ThemeColors.TransparentColor.equals(actualBackgroundColor))
-//            animateBG(ThemeManager.getInstance().getThemeType().equals(ThemeType.Dark) ? mouseOverColorDarkMode : mouseOverColorLightMode);
-//        else
-//            animateBG(actualBackgroundColor.brighter());
+        if(ThemeColors.TransparentColor.equals(actualBackgroundColor))
+            animateBG(ThemeManager.getInstance().getThemeType().equals(ThemeType.Dark) ? mouseOverColorDarkMode : mouseOverColorLightMode);
+        else
+            animateBG(actualBackgroundColor.brighter());
     }
 
     @Override
     protected void animateMouseExit() {
-//        if(actualBackgroundColor != null)
-//            animateBG(actualBackgroundColor);
+        if(actualBackgroundColor != null)
+            animateBG(actualBackgroundColor);
     }
 
     //TODO fix bad transitions in active status

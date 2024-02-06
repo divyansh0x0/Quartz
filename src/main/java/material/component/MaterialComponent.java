@@ -2,7 +2,6 @@ package material.component;
 
 import material.MaterialParameters;
 import material.animation.AnimationLibrary;
-import material.animation.MaterialFixedTimer;
 import material.fonts.MaterialFonts;
 import material.listeners.SelectionListener;
 import material.theme.ThemeColors;
@@ -33,53 +32,31 @@ public abstract class MaterialComponent extends JComponent implements Serializab
     private boolean isSelected;
     private float fontSize = 14;
     boolean applyNewFont = false;
+    private static MaterialComponent animatingComp = null;
 
     static {
-        MaterialFixedTimer materialFixedTimer = new MaterialFixedTimer(1000f / 60) {
-            final HashSet<MaterialComponent> animatingComponents = new HashSet<>(10);
-
-            @Override
-            public void tick(float deltaMillis) {
-                Point curr = MouseInfo.getPointerInfo().getLocation();
-                if (curr.equals(LastMouseLocation))
-                    return;
-                for (int i = 0; i < allInstances.size(); i++) {
-                    MaterialComponent comp = allInstances.get(i);
-
-                    if (!comp.isShowing() || !comp.isMouseAnimationAllowed())
-                        continue;
+        Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
+            Object source = event.getSource();
+            if (source instanceof MaterialComponent comp) {
+                System.out.println(comp);
+                if (comp.isMouseAnimationAllowed()) {
                     synchronized (comp.getTreeLock()) {
-                        if (containsScreenPoint(curr, comp)) {
-                            if (!animatingComponents.contains(comp)) {
-                                animatingComponents.add(comp);
-                                comp.setIsAnimatingMouse(true);
-                                comp.animateMouseEnter();
+                        if (animatingComp != comp) {
+                            if (animatingComp != null) {
+                                animatingComp.animateMouseExit();
                             }
-                        } else {
-                            if (comp.isAnimatingMouse()) {
-                                comp.animateMouseExit();
-                                comp.setIsAnimatingMouse(false);
-                                animatingComponents.remove(comp);
-                            }
+                            animatingComp = comp;
+                            comp.animateMouseEnter();
                         }
                     }
-
                 }
-
-            }
-
-            private boolean containsScreenPoint(Point p, MaterialComponent comp) {
-                synchronized (comp.getTreeLock()) {
-                    if (comp.isShowing()) {
-                        Point loc = comp.getLocationOnScreen();
-                        return p.x >= loc.x && p.y >= loc.y && p.x <= loc.x + comp.getWidth() && p.y <= loc.y + comp.getHeight();
-                    }
-
+            } else {
+                if (animatingComp != null) {
+                    animatingComp.animateMouseExit();
+                    animatingComp = null;
                 }
-                return false;
             }
-        };
-        materialFixedTimer.start();
+        }, AWTEvent.MOUSE_MOTION_EVENT_MASK | AWTEvent.MOUSE_EVENT_MASK);
 
     }
 
