@@ -51,27 +51,39 @@ public class BackgroundAnimation implements ColorAnimationModel {
         this.component.setBackground(to);
     }
 
-    @Override
-    public void prepareForNewAnimation() {
-//        forceCompleteAnimation();
-        progress = 0f;
-        currTime = 0f;
-        from = null;
-        to = null;
-    }
+//    @Override
+//    public void prepareForNewAnimation() {
+////        forceCompleteAnimation();
+//        progress = 0f;
+//        currTime = 0f;
+//        from = null;
+//        to = null;
+//    }
 
     @Override
     public void incrementAnimationTime(float delta) {
-        if (to != null && to.equals(from))
-            forceCompleteAnimation();
-        else {
-            currTime += delta;
-            setProgress(currTime / duration);
+        if(!isCompleted()) {
+            if (to != null && to.equals(from))
+                forceCompleteAnimation();
+            else {
+                currTime += delta;
+                setProgress(currTime / duration);
+            }
         }
     }
 
     @Override
     public boolean isCompleted() {
         return progress >= 1.0f;
+    }
+
+    @Override
+    public String toString() {
+        return "BackgroundAnimation{" +
+                "component=" + component +
+                ", duration=" + duration +
+                ", from=" + from +
+                ", to=" + to +
+                '}';
     }
 }

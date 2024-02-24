@@ -8,11 +8,13 @@ import material.theme.ThemeColors;
 import material.theme.ThemeManager;
 import material.theme.enums.Elevation;
 import material.utils.GraphicsUtils;
+import material.utils.Log;
 import material.utils.structures.LanguageCompatibleString;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
 import java.io.Serializable;
 import java.util.*;
@@ -37,23 +39,35 @@ public abstract class MaterialComponent extends JComponent implements Serializab
     static {
         Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
             Object source = event.getSource();
-            if (source instanceof MaterialComponent comp) {
-                System.out.println(comp);
-                if (comp.isMouseAnimationAllowed()) {
-                    synchronized (comp.getTreeLock()) {
+            if (event.getID() == MouseEvent.MOUSE_EXITED) {
+                if (source instanceof MaterialComponent comp) {
+                    if (animatingComp != null && animatingComp == comp) {
+                        animatingComp.animateMouseExit();
+                        if(animatingComp instanceof MaterialNavButton)
+                            Log.error("Mouse exited from " + ((MaterialNavButton) animatingComp).getText());
+                        animatingComp = null;
+                    }
+                }
+            } else if (event.getID() != MouseEvent.MOUSE_MOVED) {
+                if (source instanceof MaterialComponent comp) {
+                    if (comp.isMouseAnimationAllowed()) {
                         if (animatingComp != comp) {
                             if (animatingComp != null) {
                                 animatingComp.animateMouseExit();
+                                if(animatingComp instanceof MaterialNavButton && comp instanceof MaterialNavButton)
+                                    Log.warn("exited animation from " + ((MaterialNavButton) animatingComp).getText() + " to " + ((MaterialNavButton) comp).getText());
                             }
                             animatingComp = comp;
-                            comp.animateMouseEnter();
+                            animatingComp.animateMouseEnter();
                         }
                     }
-                }
-            } else {
-                if (animatingComp != null) {
-                    animatingComp.animateMouseExit();
-                    animatingComp = null;
+                } else {
+                    if (animatingComp != null) {
+                        animatingComp.animateMouseExit();
+                        Log.warn("Unknown event: " + event.getID());
+                        animatingComp = null;
+                    }
+
                 }
             }
         }, AWTEvent.MOUSE_MOTION_EVENT_MASK | AWTEvent.MOUSE_EVENT_MASK);
@@ -107,6 +121,7 @@ public abstract class MaterialComponent extends JComponent implements Serializab
     }
 
     public void animateBG(Color to) {
+        Log.success("animating bg of: " + this);
         AnimationLibrary.animateBackground(this, to, MaterialParameters.COLOR_ANIMATION_DURATION.toMillis());
     }
 

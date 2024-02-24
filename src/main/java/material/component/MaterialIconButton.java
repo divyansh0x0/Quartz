@@ -60,7 +60,7 @@ public class MaterialIconButton extends MaterialComponent {
 
     protected void animateMouseExit() {
         if (!isTransparentBackground) {
-                this.animateBG(ThemeColors.getIconButtonColors().getBackgroundColor());
+            this.animateBG(ThemeColors.getIconButtonColors().getBackgroundColor());
         } else {
             this.animateBG(ThemeColors.TransparentColor);
         }
@@ -259,4 +259,8 @@ public class MaterialIconButton extends MaterialComponent {
         mouseClickListeners.forEach(listener -> listener.clicked(e));
     }
 
+    @Override
+    public String toString() {
+        return "IconButton{text=" + getText() + "}";
+    }
 }

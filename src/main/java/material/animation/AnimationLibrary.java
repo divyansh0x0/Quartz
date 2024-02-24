@@ -1,6 +1,7 @@
 package material.animation;
 
 import material.MaterialParameters;
+import material.utils.Log;
 
 import javax.swing.*;
 import java.awt.*;
@@ -36,7 +37,9 @@ public class AnimationLibrary {
                                     continue;
                                 animation.incrementAnimationTime(delta);
                                 if(animation.isCompleted()){
-                                    animation.prepareForNewAnimation();
+                                    Log.info("animation completed: " + animation);
+                                    animationsArr.remove(animation);
+
                                 }
                             }
                         }
@@ -47,6 +50,7 @@ public class AnimationLibrary {
         timer.start();
     }
 
+    //TODO FIX THIS. IT BREAKS WHEN SAME COMPONENT IS ANIMATED MULTIPLE TIMES
     public static void animateBackground(JComponent component, Color toColor, float durationMs) {
         if (component.isVisible() && toColor != null && component.getBackground() != null && !component.getBackground().equals(toColor)) {
             BackgroundAnimation animation = getAnimation(component, BackgroundAnimation.class);
@@ -60,12 +64,16 @@ public class AnimationLibrary {
                 } else
                     arr.add(animation);
             } else {
-                animation.prepareForNewAnimation();
+                animation.forceCompleteAnimation();
+                removeAnimation(component,BackgroundAnimation.class);
+                animateBackground(component,toColor,durationMs);
             }
             animation.toColor(toColor);
         } else
             component.setBackground(toColor);
     }
+
+
 
     public static void animateForeground(JComponent component, Color toColor, float durationMs) {
         if (component.isVisible() && toColor != null && component.getForeground() != null && !component.getForeground().equals(toColor)) {
@@ -100,7 +108,16 @@ public class AnimationLibrary {
         }
         return null;
     }
-
+    private static void removeAnimation(JComponent component, Class<?> animationClass) {
+        ArrayList<ColorAnimationModel> animations = componentAnimations.get(component);
+        if (animations == null)
+            return;
+        for (int i = animations.size() - 1; i >= 0; --i) {
+            ColorAnimationModel animationModel = animations.get(i);
+            if (animationModel.getClass().getSimpleName().equals(animationClass.getSimpleName()))
+                animations.remove(animationModel);
+        }
+    }
 
     private static Color interpolateColor(Color fromColor, Color toColor, float progress) {
         return Interpolator.lerpRBG(fromColor, toColor, progress);
