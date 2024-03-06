@@ -67,7 +67,7 @@ public class FileCacheManager {
     }
 
     public void deleteCacheFileAsync(File file) {
-        CompletableFuture.runAsync(() -> {
+        Thread.startVirtualThread(() -> {
             deleteCacheFile(file);
         });
     }

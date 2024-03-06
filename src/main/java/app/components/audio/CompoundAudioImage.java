@@ -11,10 +11,9 @@ import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.concurrent.CompletableFuture;
 
 public class CompoundAudioImage extends MaterialComponent {
-    private CompletableFuture<Void> imageWriterThread;
+    private Thread imageWriterThread;
     private int cornerRadius = 10;
     private Image backgroundImage;
     private Image[] images;
@@ -74,10 +73,10 @@ public class CompoundAudioImage extends MaterialComponent {
         synchronized (lock) {
             this.images = images;
             if (imageWriterThread != null) {
-                imageWriterThread.cancel(true);
+                imageWriterThread.interrupt();
                 imageWriterThread = null;
             }
-            imageWriterThread = CompletableFuture.runAsync(() -> {
+            imageWriterThread = Thread.startVirtualThread(() -> {
                 try {
                     if (images != null && images.length > 0 && hasRendered) {
                         int size = Math.max(Math.min(getWidth(), getHeight()), 1);

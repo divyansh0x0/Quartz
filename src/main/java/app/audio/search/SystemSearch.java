@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 // TODO Add reload on pressing CTRL+R
 // TODO Save last search i.e. undo and redo
@@ -36,22 +37,22 @@ public class SystemSearch {
 
     private SystemSearch() {
 //        forceSearch();
-        Runtime.getRuntime().addShutdownHook(new Thread(()->{
-            if(searchThread != null && searchThread.isAlive())
+        Runtime.getRuntime().addShutdownHook(Thread.ofVirtual().unstarted(() -> {
+            if (searchThread != null && searchThread.isAlive())
                 searchThread.interrupt();
         }));
     }
 
     public void forceSearch() {
-        if(isSearching){
+        if (isSearching) {
             searchThread.interrupt();
             searchThread = null;
             isSearching = false;
         }
         Log.warn("Starting system search");
-            searchThread = new Thread(this::search);
-            searchThread.setName("System Search Thread");
-            searchThread.start();
+        searchThread = new Thread(this::search);
+        searchThread.setName("Search thread");
+        searchThread.start();
     }
 
     private void search() {
@@ -78,30 +79,17 @@ public class SystemSearch {
 
         long t1 = System.nanoTime();
 
-        try (ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())) {
-            ArrayList<Callable<Void>> tasks = new ArrayList<>();
-            for (File file : files) {
-                Callable<Void> callable = () -> {
-                    if (file.exists() && AudioData.isValidAudio(file.toPath())) {
-                        AudioData audioData = new AudioData(file);
-                        AudioDataIndexer.getInstance().addAudioFile(audioData);
-                    } else {
-                        FileCacheManager.getInstance().deleteCacheFile(file);
-                    }
-                    return null;
-                };
-
-                validFiles++;
-                tasks.add(callable);
-            }
+        try (ExecutorService executorService = Executors.newCachedThreadPool()) {
             try {
-                executorService.invokeAll(tasks);
+                for(Future<Integer> task : executorService.invokeAll(getSavingTasks(files))){
+                    validFiles += task.get();
+                }
             } catch (Exception e) {
                 Log.error(e);
             }
         }
         long t2 = System.nanoTime();
-        Log.success("Time taken to register "+validFiles + "out of " + files.size() +" artworks: " + ((t2 - t1)/0.000_0001)+ "ms");
+        Log.success("Time taken to register " + validFiles + "out of " + files.size() + " artworks: " + ((t2 - t1) / 0.000_0001) + "ms");
         return !files.isEmpty() && validFiles == files.size();
     }
 
@@ -148,14 +136,13 @@ public class SystemSearch {
 
     private void saveDataAsync(List<File> files) {
         Log.success("Number of MP3 files found:" + files.size());
-        try (ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())) {
-            ArrayList<Callable<Void>> tasks = getSavingTasks(files);
+        try (ExecutorService executorService = Executors.newCachedThreadPool()) {
+            ArrayList<Callable<Integer>> tasks = getSavingTasks(files);
             try {
                 executorService.invokeAll(tasks);
             } catch (Exception e) {
                 Log.error(e);
             }
-            executorService.shutdown();
         }
         Log.success("Saved " + files.size() + " files to memory");
         FileCacheManager.getInstance().saveCacheToStorage();
@@ -163,17 +150,18 @@ public class SystemSearch {
     }
 
     @NotNull
-    private static ArrayList<Callable<Void>> getSavingTasks(List<File> files) {
-        ArrayList<Callable<Void>> tasks = new ArrayList<>();
+    private static ArrayList<Callable<Integer>> getSavingTasks(List<File> files) {
+        ArrayList<Callable<Integer>> tasks = new ArrayList<>();
         for (File file : files) {
-            Callable<Void> callable= () -> {
+            Callable<Integer> callable = () -> {
                 if (file.exists() && AudioData.isValidAudio(file.toPath())) {
                     AudioData audioData = new AudioData(file);
                     AudioDataIndexer.getInstance().addAudioFile(audioData);
+                    return 0;
                 } else {
                     FileCacheManager.getInstance().deleteCacheFile(file);
+                    return 1;
                 }
-                return null;
             };
             tasks.add(callable);
         }

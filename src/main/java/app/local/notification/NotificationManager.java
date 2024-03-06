@@ -1,8 +1,6 @@
 package app.local.notification;
 
 import app.audio.AudioData;
-import app.local.cache.NotifCacheManager;
-import material.utils.OsUtils;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -25,9 +23,9 @@ public class NotificationManager {
             AsyncTask.cancel(true);
             AsyncTask = null;
         }
-        AsyncTask = CompletableFuture.runAsync(() -> {
-            if(OsUtils.isUnix())
-                GnomeNotify.getInstance().sendNotification(audioData.getName(), audioData.getArtistsConcatenated(), NotifCacheManager.getInstance().writeNotifImageFile(audioData).getAbsolutePath());
-        });
+//        AsyncTask = Thread.startVirtualThread(() -> {
+//            if(OsUtils.isUnix())
+//                GnomeNotify.getInstance().sendNotification(audioData.getName(), audioData.getArtistsConcatenated(), NotifCacheManager.getInstance().writeNotifImageFile(audioData).getAbsolutePath());
+//        });
     }
 }

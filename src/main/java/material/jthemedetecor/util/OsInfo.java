@@ -83,7 +83,7 @@ public class OsInfo {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String actualReadLine;
                 while ((actualReadLine = reader.readLine()) != null) {
-                    if (stringBuilder.length() != 0)
+                    if (!stringBuilder.isEmpty())
                         stringBuilder.append('\n');
                     stringBuilder.append(actualReadLine);
                 }

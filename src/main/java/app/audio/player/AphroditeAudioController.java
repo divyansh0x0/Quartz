@@ -33,7 +33,6 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.concurrent.CompletableFuture;
 
 public class AphroditeAudioController {
     private static AphroditeAudioController instance;
@@ -47,7 +46,7 @@ public class AphroditeAudioController {
     private boolean isPaused = true;
     private final RepeatMode repeatMode = RepeatMode.REPEAT_ALL;
     private double VOLUME = -1;
-    private CompletableFuture<Void> UiUpdateTask;
+    private Thread UiUpdateTask;
     private Duration currentTime;
     private Duration durationToSeek = Duration.ofSeconds(0);
     private boolean isSeeking = false;
@@ -302,11 +301,11 @@ public class AphroditeAudioController {
         try {
             if (StartupSettings.DYNAMIC_THEMING_ENABLED) {
                 if (UiUpdateTask != null) {
-                    UiUpdateTask.cancel(true);
+                    UiUpdateTask.join();
                     UiUpdateTask = null;
                 }
 
-                UiUpdateTask = CompletableFuture.runAsync(() -> {
+                UiUpdateTask = Thread.startVirtualThread(() -> {
                     try {
                         if (currentAudioData != null) {
                             Image tempImg;

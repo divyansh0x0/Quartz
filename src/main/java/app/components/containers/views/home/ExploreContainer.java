@@ -41,9 +41,9 @@ public class ExploreContainer extends ViewPanel {
     private static final MaterialScrollPane ROOT_SCROLLPANE = new MaterialScrollPane(explorerContainer);
     private Color AVG_IMAGE_COLOR;
     private Image BACKGROUND_IMAGE;
-    CompletableFuture<Void> searchTask;
+    private CompletableFuture<Void> searchTask;
     private final Object lock = new Object();
-    private CompletableFuture<Void> loadTask;
+    private Thread loadTask;
     private BufferedImage backgroundImage;
     private ExploreContainer() {
         super(new MigLayout(ComponentParameters.VerticalTileFlow));
@@ -69,7 +69,6 @@ public class ExploreContainer extends ViewPanel {
         super.addNotify();
     }
 
-    Thread thread;
 
 
     @Override
@@ -79,10 +78,10 @@ public class ExploreContainer extends ViewPanel {
 
     private void loadTiles() {
         if (loadTask != null) {
-            loadTask.cancel(true);
+            loadTask.interrupt();
             loadTask = null;
         }
-        loadTask = CompletableFuture.runAsync(() -> {
+        loadTask = Thread.startVirtualThread(() -> {
             if (!isTilesLoaded) {
                 AudioDataIndexer indexer = AudioDataIndexer.getInstance();
                 indexer.addIndexUpdatedListener(this::createAndAddAllTiles);
@@ -190,7 +189,7 @@ public class ExploreContainer extends ViewPanel {
 
     private void performUndoSearch(String query) {
         cancelSearchTask();
-        CompletableFuture.runAsync(() -> {
+        Thread.startVirtualThread(() -> {
             isSilentSearch = true;
             ViewManagerPanel.getInstance().getSearchHeader().getSearchBar().setText(query);
             if (query != null && !query.equals("")) {
@@ -204,7 +203,7 @@ public class ExploreContainer extends ViewPanel {
 
     private void performRedoSearch(String query) {
         cancelSearchTask();
-        CompletableFuture.runAsync(() -> {
+        Thread.startVirtualThread(() -> {
             isSilentSearch = true;
             ViewManagerPanel.getInstance().getSearchHeader().getSearchBar().setText(query);
             if (query != null && !query.equals("")) {

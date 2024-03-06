@@ -147,7 +147,7 @@ public class ThemeManager {
         //Generating noise image once asynchronously
         if (themeable != null) {
             if (DarkerColorOfNoise != themeable.getBackgroundColor()) {
-                CompletableFuture.runAsync(() -> {
+                Thread.startVirtualThread(() -> {
                     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
                     imageWithNoise = ImageProcessing.getNoise(ColorUtils.darken(ThemeColors.getBackground(), 3), ThemeColors.TransparentColor, screenSize.width, screenSize.height);
                     imageNoiseGenerationCompleted.handleNewImage(imageWithNoise);

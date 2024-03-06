@@ -52,52 +52,52 @@ public class AnimationLibrary {
 
     //TODO FIX THIS. IT BREAKS WHEN SAME COMPONENT IS ANIMATED MULTIPLE TIMES
     public static synchronized void animateBackground(JComponent component, Color toColor, float durationMs) {
-        Log.info("preparing animation for " + component);
-        if (component.isVisible() && toColor != null && component.getBackground() != null && !component.getBackground().equals(toColor)) {
-            BackgroundAnimation animation = getAnimation(component, BackgroundAnimation.class);
-            if (animation == null) {
-                animation = new BackgroundAnimation(component, durationMs);
-                ArrayList<ColorAnimationModel> arr = componentAnimations.get(component);
-                if (arr == null) {
-                    arr = new ArrayList<>(DEFAULT_SIZE_ARR);
-                    arr.add(animation);
-                    componentAnimations.put(component, arr);
-                } else
-                    arr.add(animation);
-            } else {
-                animation.forceCompleteAnimation();
-                Log.info("forced completed animation for " + component);
-
-                removeAnimation(component, animation);
-                animateBackground(component, toColor, durationMs);
-            }
-            animation.toColor(toColor);
-        } else
+//        Log.info("preparing animation for " + component);
+//        if (component.isVisible() && toColor != null && component.getBackground() != null && !component.getBackground().equals(toColor)) {
+//            BackgroundAnimation animation = getAnimation(component, BackgroundAnimation.class);
+//            if (animation == null) {
+//                animation = new BackgroundAnimation(component, durationMs);
+//                ArrayList<ColorAnimationModel> arr = componentAnimations.get(component);
+//                if (arr == null) {
+//                    arr = new ArrayList<>(DEFAULT_SIZE_ARR);
+//                    arr.add(animation);
+//                    componentAnimations.put(component, arr);
+//                } else
+//                    arr.add(animation);
+//            } else {
+//                animation.forceCompleteAnimation();
+//                Log.info("forced completed animation for " + component);
+//
+//                removeAnimation(component, animation);
+//                animateBackground(component, toColor, durationMs);
+//            }
+//            animation.toColor(toColor);
+//        } else
             component.setBackground(toColor);
     }
 
 
     public static synchronized void animateForeground(JComponent component, Color toColor, float durationMs) {
-        if (component.isVisible() && toColor != null && component.getForeground() != null && !component.getForeground().equals(toColor)) {
-            ForegroundAnimation animation = getAnimation(component, ForegroundAnimation.class);
-            if (animation == null) {
-                animation = new ForegroundAnimation(component, durationMs);
-                ArrayList<ColorAnimationModel> arr = componentAnimations.get(component);
-                if (arr == null) {
-                    arr = new ArrayList<>(DEFAULT_SIZE_ARR);
-                    arr.add(animation);
-                    componentAnimations.put(component, arr);
-                } else
-                    arr.add(animation);
-            } else {
-                animation.forceCompleteAnimation();
-                removeAnimation(component, animation);
-                animateForeground(component, toColor, durationMs);
-            }
-            animation.toColor(toColor);
-        } else {
+//        if (component.isVisible() && toColor != null && component.getForeground() != null && !component.getForeground().equals(toColor)) {
+//            ForegroundAnimation animation = getAnimation(component, ForegroundAnimation.class);
+//            if (animation == null) {
+//                animation = new ForegroundAnimation(component, durationMs);
+//                ArrayList<ColorAnimationModel> arr = componentAnimations.get(component);
+//                if (arr == null) {
+//                    arr = new ArrayList<>(DEFAULT_SIZE_ARR);
+//                    arr.add(animation);
+//                    componentAnimations.put(component, arr);
+//                } else
+//                    arr.add(animation);
+//            } else {
+//                animation.forceCompleteAnimation();
+//                removeAnimation(component, animation);
+//                animateForeground(component, toColor, durationMs);
+//            }
+//            animation.toColor(toColor);
+//        } else {
             component.setForeground(toColor);
-        }
+//        }
     }
 
     //TODO fix this unsafe code by making it safe

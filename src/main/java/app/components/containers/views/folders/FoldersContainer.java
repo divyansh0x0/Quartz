@@ -10,12 +10,11 @@ import app.components.misc.ViewerStatusLabel;
 import app.settings.constraints.ComponentParameters;
 import material.containers.MaterialPanel;
 import material.containers.MaterialScrollPane;
-import net.miginfocom.swing.MigLayout;
 import material.utils.Log;
+import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class FoldersContainer extends ViewPanel {
     private static final String tileConstraint = "growX, h 100!";
@@ -27,7 +26,7 @@ public class FoldersContainer extends ViewPanel {
     private static final MaterialPanel folderTilesContainer = new SelectablePanel(new MigLayout(ComponentParameters.PaddedVerticalTileFlow),true).setElevationDP(ComponentParameters.VIEWER_ELEVATION_DP);
     private static final MaterialScrollPane _rootScrollPane = new MaterialScrollPane(ROOT);
     private static final String CONTAINER_CONSTRAINT = "grow";
-    private CompletableFuture<Void> LoadTask;
+    private Thread LoadTask;
     public FoldersContainer() {
         super(containerLayout);
         add(_rootScrollPane,"w 100%,h 100%");
@@ -49,10 +48,12 @@ public class FoldersContainer extends ViewPanel {
 
     private void loadAllFolders(){
         if(LoadTask != null){
-            LoadTask.cancel(true);
-            LoadTask = null;
+            synchronized (LoadTask) {
+                LoadTask.interrupt();
+                LoadTask = null;
+            }
         }
-        LoadTask = CompletableFuture.runAsync(() -> {
+        LoadTask = Thread.startVirtualThread(() -> {
             folderTilesContainer.removeAll();
 //            folderTilesContainer.add(artistListHeader, "growX, h " + ComponentConstraints.ARTIST_TILE_CONTAINER_HEIGHT + "!");
             AudioDataIndexer indexer = AudioDataIndexer.getInstance();

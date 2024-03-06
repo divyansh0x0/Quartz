@@ -78,7 +78,7 @@ public class SelectablePanel extends MaterialPanel{
     }
     @Override
     protected void addImpl(Component comp, Object constraints, int index) {
-        CompletableFuture.runAsync(()->{
+        Thread.startVirtualThread(()->{
             if (comp instanceof MaterialComponent) {
                 if(!ComponentSelectionHandlers.containsKey(comp))
                     ComponentSelectionHandlers.put((MaterialComponent) comp, new SelectionHandler((MaterialComponent) comp));

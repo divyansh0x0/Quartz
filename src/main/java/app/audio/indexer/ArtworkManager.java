@@ -71,7 +71,7 @@ public class ArtworkManager {
             }
     }
     public void registerThumbnailAsync(@NotNull AudioData audio, byte @Nullable [] artworkData){
-        CompletableFuture.runAsync(() -> {
+        Thread.startVirtualThread(() -> {
             registerThumbnail(audio,artworkData);
         });
     }

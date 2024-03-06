@@ -47,7 +47,7 @@ public class AudioDataIndexer {
     }
 
     public void createAndAddAudioFileAsync(@NotNull AudioData audioData) {
-        CompletableFuture.runAsync(() -> addAudioFile(audioData));
+        Thread.startVirtualThread(() -> addAudioFile(audioData));
     }
 
     public synchronized void addAudioFile(@NotNull AudioData audioData) {
@@ -72,7 +72,7 @@ public class AudioDataIndexer {
      *********************************************/
 
     public void indexAudioFileByArtistsAsync() {
-        CompletableFuture.runAsync(this::indexAudioTilesByArtists);
+        Thread.startVirtualThread(this::indexAudioTilesByArtists);
     }
 
     public synchronized void indexAudioTilesByArtists() {
@@ -150,7 +150,7 @@ public class AudioDataIndexer {
                         FOLDERS
      *********************************************/
     public void indexAudioFileByFoldersAsync() {
-        CompletableFuture.runAsync(this::indexAudioTilesByFolders);
+        Thread.startVirtualThread(this::indexAudioTilesByFolders);
     }
 
     public synchronized void indexAudioTilesByFolders() {

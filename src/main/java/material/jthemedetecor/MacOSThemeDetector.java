@@ -40,7 +40,7 @@ class MacOSThemeDetector extends OsThemeDetector {
 
     private final Set<Consumer<Boolean>> listeners = new ConcurrentHashSet<>();
     private final Pattern themeNamePattern = Pattern.compile(".*dark.*", Pattern.CASE_INSENSITIVE);
-    private final ExecutorService callbackExecutor = Executors.newSingleThreadExecutor(DetectorThread::new);
+    private final ExecutorService callbackExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
     private final Callback themeChangedCallback = new Callback() {
         @SuppressWarnings("unused")
@@ -111,12 +111,5 @@ class MacOSThemeDetector extends OsThemeDetector {
         listeners.forEach(listener -> listener.accept(isDark));
     }
 
-    private static final class DetectorThread extends Thread {
-        DetectorThread(@NotNull Runnable runnable) {
-            super(runnable);
-            setName("MacOS Theme Detector Thread");
-            setDaemon(true);
-        }
-    }
 }
 

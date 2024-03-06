@@ -25,10 +25,9 @@ public abstract class MaterialFixedTimer {
 
     public MaterialFixedTimer(float delayMs) {
         this.delayMs = delayMs;
-        timerLoop = new Thread(this::loop);
-        timerLoop.start();
         allTimers.add(this);
         timerIndex = allTimers.size();
+        timerLoop = Thread.ofVirtual().name("Material timer [%s]".formatted(timerIndex)).start(this::loop);
         StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
         Log.warn(stackTraceElements[2].getFileName() + " created timer " + timerIndex);
     }

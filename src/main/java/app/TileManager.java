@@ -118,7 +118,7 @@ public class TileManager {
     }
 
     public static void removeAudioTileAsync(AudioData currentAudioData, boolean b) {
-        CompletableFuture.runAsync(() -> {
+        Thread.startVirtualThread(() -> {
             for (AudioTile audioTile : getMappedTiles(currentAudioData)) {
                 Container container = audioTile.getParent();
                 if (container != null)

@@ -14,13 +14,12 @@ import java.awt.image.BufferedImage;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 public class AudioInfoViewer extends MaterialComponent {
     private Image artwork = null;
     private static BufferedImage defaultArtworkImage;
     private AudioData audioData;
-    private CompletableFuture<Void> imageWriterTask;
+    private Thread imageWriterThread;
     private static final int padding = 5;
     private static Color audioNameColor = ThemeColors.getTextPrimary();
     private Color artistNameColor = ThemeColors.getTextSecondary();
@@ -49,11 +48,11 @@ public class AudioInfoViewer extends MaterialComponent {
 
     private void rewriteImage() {
         if (isLoaded) {
-            if(imageWriterTask != null){
-                imageWriterTask.cancel(true);
-                imageWriterTask = null;
+            if(imageWriterThread != null){
+                imageWriterThread.interrupt();
+                imageWriterThread = null;
             }
-            imageWriterTask = CompletableFuture.runAsync(() -> {
+            imageWriterThread = Thread.startVirtualThread(() -> {
                 final int iSize = Math.abs(getHeight() - padding * 2);
                 try {
                     // resize image
