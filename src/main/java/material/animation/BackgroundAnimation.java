@@ -1,5 +1,6 @@
 package material.animation;
 
+import javax.swing.*;
 import java.awt.*;
 
 public class BackgroundAnimation implements ColorAnimationModel {
@@ -48,7 +49,9 @@ public class BackgroundAnimation implements ColorAnimationModel {
     @Override
     public void forceCompleteAnimation() {
         setProgress(1f);
-        this.component.setBackground(to);
+        SwingUtilities.invokeLater(()->{
+            this.component.setBackground(to);
+        });
     }
 
 //    @Override

@@ -78,29 +78,30 @@ public class SystemSearch {
 
         long t1 = System.nanoTime();
 
-        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        ArrayList<Callable<Void>> tasks = new ArrayList<>();
-        for (File file : files) {
-            Callable<Void> callable= () -> {
-                if (file.exists() && AudioData.isValidAudio(file.toPath())) {
-                    AudioData audioData = new AudioData(file);
-                    AudioDataIndexer.getInstance().addAudioFile(audioData);
-                } else {
-                    FileCacheManager.getInstance().deleteCacheFile(file);
-                }
-                return null;
-            };
+        try (ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())) {
+            ArrayList<Callable<Void>> tasks = new ArrayList<>();
+            for (File file : files) {
+                Callable<Void> callable = () -> {
+                    if (file.exists() && AudioData.isValidAudio(file.toPath())) {
+                        AudioData audioData = new AudioData(file);
+                        AudioDataIndexer.getInstance().addAudioFile(audioData);
+                    } else {
+                        FileCacheManager.getInstance().deleteCacheFile(file);
+                    }
+                    return null;
+                };
 
-            validFiles++;
-            tasks.add(callable);
-        }
-        try {
-            executorService.invokeAll(tasks);
-        }catch (Exception e){
-            Log.error(e);
+                validFiles++;
+                tasks.add(callable);
+            }
+            try {
+                executorService.invokeAll(tasks);
+            } catch (Exception e) {
+                Log.error(e);
+            }
         }
         long t2 = System.nanoTime();
-        Log.success("Time taken to register artworks: " + ((t2 - t1)/0.000_0001)+ "ms");
+        Log.success("Time taken to register "+validFiles + "out of " + files.size() +" artworks: " + ((t2 - t1)/0.000_0001)+ "ms");
         return !files.isEmpty() && validFiles == files.size();
     }
 
@@ -147,14 +148,16 @@ public class SystemSearch {
 
     private void saveDataAsync(List<File> files) {
         Log.success("Number of MP3 files found:" + files.size());
-        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        ArrayList<Callable<Void>> tasks = getSavingTasks(files);
-        try {
-            executorService.invokeAll(tasks);
-        }catch (Exception e){
-            Log.error(e);
+        try (ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())) {
+            ArrayList<Callable<Void>> tasks = getSavingTasks(files);
+            try {
+                executorService.invokeAll(tasks);
+            } catch (Exception e) {
+                Log.error(e);
+            }
+            executorService.shutdown();
         }
-        executorService.shutdown();
+        Log.success("Saved " + files.size() + " files to memory");
         FileCacheManager.getInstance().saveCacheToStorage();
         files.clear();
     }

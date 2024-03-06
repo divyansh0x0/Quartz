@@ -4,6 +4,7 @@ import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.AudioHeader;
 import org.jaudiotagger.tag.Tag;
+import org.jaudiotagger.tag.datatype.Artwork;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import material.utils.Log;
@@ -36,6 +37,15 @@ public class MP3Tools {
             e.printStackTrace();
             return null;
         }
+    }
+    public static @Nullable byte[] getArtworkData(File f){
+        Tag tag = getTag(f)  ;
+        if(tag != null){
+            Artwork art = tag.getFirstArtwork();
+            if(art != null)
+                return art.getBinaryData();
+        }
+        return null;
     }
 
     public static @Nullable Tag getTag(@NotNull File f) {

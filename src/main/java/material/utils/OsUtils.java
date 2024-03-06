@@ -79,4 +79,8 @@ public class OsUtils {
     public static String getOsName() {
         return os;
     }
+
+    public static boolean isWindows11() {
+        return os.equals("windows 11");
+    }
 }

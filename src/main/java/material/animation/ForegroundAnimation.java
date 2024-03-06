@@ -51,13 +51,7 @@ public class ForegroundAnimation implements ColorAnimationModel {
         this.component.setBackground(to);
     }
 
-    @Override
-    public void prepareForNewAnimation() {
-        progress = 0f;
-        currTime = 0f;
-        from = null;
-        to = null;
-    }
+
 
     @Override
     public void incrementAnimationTime(float delta) {

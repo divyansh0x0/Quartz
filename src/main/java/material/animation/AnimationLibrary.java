@@ -36,7 +36,7 @@ public class AnimationLibrary {
                                 if (animation == null)
                                     continue;
                                 animation.incrementAnimationTime(delta);
-                                if(animation.isCompleted()){
+                                if (animation.isCompleted()) {
                                     Log.info("animation completed: " + animation);
                                     animationsArr.remove(animation);
 
@@ -51,7 +51,8 @@ public class AnimationLibrary {
     }
 
     //TODO FIX THIS. IT BREAKS WHEN SAME COMPONENT IS ANIMATED MULTIPLE TIMES
-    public static void animateBackground(JComponent component, Color toColor, float durationMs) {
+    public static synchronized void animateBackground(JComponent component, Color toColor, float durationMs) {
+        Log.info("preparing animation for " + component);
         if (component.isVisible() && toColor != null && component.getBackground() != null && !component.getBackground().equals(toColor)) {
             BackgroundAnimation animation = getAnimation(component, BackgroundAnimation.class);
             if (animation == null) {
@@ -65,8 +66,10 @@ public class AnimationLibrary {
                     arr.add(animation);
             } else {
                 animation.forceCompleteAnimation();
-                removeAnimation(component,BackgroundAnimation.class);
-                animateBackground(component,toColor,durationMs);
+                Log.info("forced completed animation for " + component);
+
+                removeAnimation(component, animation);
+                animateBackground(component, toColor, durationMs);
             }
             animation.toColor(toColor);
         } else
@@ -74,8 +77,7 @@ public class AnimationLibrary {
     }
 
 
-
-    public static void animateForeground(JComponent component, Color toColor, float durationMs) {
+    public static synchronized void animateForeground(JComponent component, Color toColor, float durationMs) {
         if (component.isVisible() && toColor != null && component.getForeground() != null && !component.getForeground().equals(toColor)) {
             ForegroundAnimation animation = getAnimation(component, ForegroundAnimation.class);
             if (animation == null) {
@@ -88,7 +90,9 @@ public class AnimationLibrary {
                 } else
                     arr.add(animation);
             } else {
-                animation.prepareForNewAnimation();
+                animation.forceCompleteAnimation();
+                removeAnimation(component, animation);
+                animateForeground(component, toColor, durationMs);
             }
             animation.toColor(toColor);
         } else {
@@ -108,15 +112,12 @@ public class AnimationLibrary {
         }
         return null;
     }
-    private static void removeAnimation(JComponent component, Class<?> animationClass) {
+
+    private static void removeAnimation(JComponent component, ColorAnimationModel model) {
         ArrayList<ColorAnimationModel> animations = componentAnimations.get(component);
         if (animations == null)
             return;
-        for (int i = animations.size() - 1; i >= 0; --i) {
-            ColorAnimationModel animationModel = animations.get(i);
-            if (animationModel.getClass().getSimpleName().equals(animationClass.getSimpleName()))
-                animations.remove(animationModel);
-        }
+        animations.remove(model);
     }
 
     private static Color interpolateColor(Color fromColor, Color toColor, float progress) {
