@@ -369,6 +369,10 @@ public class ExploreContainer extends ViewPanel {
             return instance;
         }
     }
+
+    public boolean isIsTilesLoaded() {
+        return isTilesLoaded;
+    }
 }
 
 

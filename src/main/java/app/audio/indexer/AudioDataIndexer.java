@@ -10,20 +10,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.concurrent.CompletableFuture;
 
 public class AudioDataIndexer {
-    private static final ArrayList<Runnable> indexUpdatedListeners = new ArrayList<>(10);
-    private static final int InitialCapacity = 500;
+    private static ArrayList<Runnable> indexUpdatedListeners = new ArrayList<>();
+    private static final int InitialCapacity = 50;
     private static AudioDataIndexer instance;
-    private final HashSet<String> audioFilePath = new HashSet<>(InitialCapacity);
+    private final ArrayList<String> audioFilePath = new ArrayList<>(InitialCapacity);
     private final ArrayList<AudioData> allAudioFiles = new ArrayList<>(InitialCapacity);
     private final ArrayList<Artist> audioFilesByArtist = new ArrayList<>(InitialCapacity);
     private final ArrayList<Folder> audioFilesByFolder = new ArrayList<>(InitialCapacity);
-    private final Hashtable<Playlist, ArrayList<AudioData>> audioFilesByPlaylist = new Hashtable<>(InitialCapacity);
-    private final ArrayList<AudioData> favoriteAudioData = new ArrayList<>(InitialCapacity);
+    private final ArrayList<Playlist> playlists = new ArrayList<>(5);
+    private final ArrayList<AudioData> favoriteAudioData = new ArrayList<>(5);
     private static IndexerSortingPolicy indexerSortingPolicy = IndexerSortingPolicy.ASCENDING;
     private boolean isSorted = false;
 
@@ -56,9 +53,9 @@ public class AudioDataIndexer {
             var playlists = audioData.getPlaylists();
             if (playlists != null) {
                 for (Playlist playlist : playlists) {
-                    if (!audioFilesByPlaylist.contains(playlist)) {
+                    if (!this.playlists.contains(playlist)) {
                         addPlaylist(playlist);
-                        addAudioFileToPlaylist(playlist, audioData);
+                        playlist.add(audioData);
                     }
                 }
             }
@@ -85,7 +82,7 @@ public class AudioDataIndexer {
         }
     }
 
-    private @NotNull Artist createOrGetArtist(String name) {
+    private @NotNull synchronized Artist createOrGetArtist(String name) {
         name = name.strip();
         for(Artist artist : audioFilesByArtist){
             if(artist.getName().equalsIgnoreCase(name)){
@@ -128,22 +125,15 @@ public class AudioDataIndexer {
                         PLAYLISTS
      *********************************************/
     public synchronized void removeAudioFileFromPlaylists(AudioData audioData) {
-        audioFilesByPlaylist.forEach((playlist, arr) -> {
-            arr.removeIf(el -> el.equals(audioData));
-        });
+        for (int i = 0; i < playlists.size(); i++) {
+            playlists.get(i).remove(audioData);
+        }
     }
 
-    public synchronized void addAudioFileToPlaylist(Playlist playlist, AudioData audioData) {
-        ArrayList<AudioData> arr = audioFilesByPlaylist.get(playlist);
-        if (arr == null)
-            arr = new ArrayList<>();
-        arr.add(audioData);
-        audioFilesByPlaylist.put(playlist, arr);
-    }
 
     public synchronized void addPlaylist(Playlist playlist) {
-        if (!audioFilesByPlaylist.contains(playlist))
-            audioFilesByPlaylist.put(playlist, new ArrayList<>(InitialCapacity));
+        if (!playlists.contains(playlist))
+            playlists.add(playlist);
     }
 
     /**********************************************
@@ -198,18 +188,21 @@ public class AudioDataIndexer {
         return isSorted;
     }
 
-    public void callIndexUpdated() {
-        for (Runnable r : indexUpdatedListeners)
+    public synchronized void callIndexUpdated() {
+        for (int i = 0; i < indexUpdatedListeners.size(); i++) {
+            Runnable r = indexUpdatedListeners.get(i);
             r.run();
+        }
     }
 
-    public void addIndexUpdatedListener(Runnable r) {
-        if(!indexUpdatedListeners.contains(r))
+    public synchronized void addIndexUpdatedListener(Runnable r) {
             indexUpdatedListeners.add(r);
     }
 
-    public void removeIndexUpdatedListener(Runnable r) {
+    public synchronized void removeIndexUpdatedListener(Runnable r) {
         indexUpdatedListeners.remove(r);
+        if(indexUpdatedListeners.isEmpty())
+            indexUpdatedListeners= new ArrayList<>(0);
     }
 
 //    public void createNewQueue(AudioTile audioTile, NavigationLink link) {
@@ -229,6 +222,9 @@ public class AudioDataIndexer {
     }
 
     public boolean isFileLoaded(File file) {
-        return audioFilePath.contains(file.getAbsolutePath());
+        return isFileLoaded(file.getAbsolutePath());
+    }
+    public boolean isFileLoaded(String path) {
+        return audioFilePath.contains(path);
     }
 }

@@ -47,22 +47,24 @@ public class AudioInfoViewer extends MaterialComponent {
     }
 
     private void rewriteImage() {
-        if (isLoaded) {
-            if(imageWriterThread != null){
-                imageWriterThread.interrupt();
-                imageWriterThread = null;
-            }
-            imageWriterThread = Thread.startVirtualThread(() -> {
-                final int iSize = Math.abs(getHeight() - padding * 2);
-                try {
-                    // resize image
-                    this.artwork = audioData.getArtwork();
-                    SwingUtilities.invokeLater(this::repaint);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
+        if (!isLoaded)
+            return;
+        if (imageWriterThread != null) {
+            imageWriterThread.interrupt();
+            imageWriterThread = null;
         }
+        if (audioData == null)
+            return;
+        imageWriterThread = Thread.startVirtualThread(() -> {
+            final int iSize = Math.abs(getHeight() - padding * 2);
+            try {
+                // resize image
+                this.artwork = audioData.getArtwork();
+                SwingUtilities.invokeLater(this::repaint);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Override
@@ -93,7 +95,7 @@ public class AudioInfoViewer extends MaterialComponent {
         if (audioData != null && artwork != null) {
             g2d.setComposite(AlphaComposite.SrcAtop);
 
-            g2d.drawImage(artwork, iX, iY, iSize,iSize,null);
+            g2d.drawImage(artwork, iX, iY, iSize, iSize, null);
             g2d.setComposite(AlphaComposite.Src);
             g2d.setClip(null);
 
@@ -117,10 +119,10 @@ public class AudioInfoViewer extends MaterialComponent {
             g2d.setColor(audioNameColor);
             audioName = GraphicsUtils.clipString(g2d, audioName, availableWidth);
 
-            if(getFont().canDisplayUpTo(audioName) == -1)
+            if (getFont().canDisplayUpTo(audioName) == -1)
                 g2d.drawString(audioName, tX, tY);
             else
-                drawCompatibleString(audioName,tX,tY,g2d,getFont());
+                drawCompatibleString(audioName, tX, tY, g2d, getFont());
 
             //artist name
             int artistFontSize = (int) Math.round(getFontSize() * 0.8); //80% of font size
@@ -132,10 +134,10 @@ public class AudioInfoViewer extends MaterialComponent {
 
             tY = tY + gap + fontMetrics.getAscent();
 
-            if(getFont().canDisplayUpTo(artistName) == -1)
+            if (getFont().canDisplayUpTo(artistName) == -1)
                 g2d.drawString(artistName, tX, tY);
             else
-                drawCompatibleString(artistName,tX,tY,g2d,artistFont);
+                drawCompatibleString(artistName, tX, tY, g2d, artistFont);
 
             g2d.setFont(getFont());
 

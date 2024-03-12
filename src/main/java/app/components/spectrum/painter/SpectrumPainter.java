@@ -7,8 +7,6 @@ import material.utils.Log;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
@@ -31,19 +29,7 @@ public abstract class SpectrumPainter {
     public SpectrumPainter(Spectrum spectrum) {
         this.spectrum = spectrum;
         SharedPainterTimer.getInstance().add(this);
-        this.spectrum.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                clearAmbientBuffer();
-                forceAmbientUpdate = true;
-                spectrum.repaint();
-            }
-        });
-
     }
-
-    protected abstract void clearAmbientBuffer();
-
     public abstract void paint(Graphics g);
 
     public synchronized void setMagnitudes(float[] magnitudes) {
@@ -74,7 +60,7 @@ public abstract class SpectrumPainter {
 
     ;
 
-    abstract void createAmbientImage();
+//    abstract void createAmbientImage();
 
     protected float[] getMagnitudes() {
         if (processedMagnitudes != null) {

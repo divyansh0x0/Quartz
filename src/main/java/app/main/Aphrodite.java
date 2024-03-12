@@ -38,6 +38,12 @@ public class Aphrodite {
     private static final FullscreenPanel FULLSCREEN_PANEL = FullscreenPanel.getInstance();
     private Mode MODE = Mode.DEFAULT;
 
+    //TODO Convert all singletons into normal classes and create a tab manager to manage context switching
+    public void showWhenReady() {
+//        if(MainPanel.getInstance())
+        show();
+    }
+
 
     private enum Mode {
         DEFAULT,

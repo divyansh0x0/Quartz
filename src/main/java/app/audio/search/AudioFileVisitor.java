@@ -2,6 +2,7 @@ package app.audio.search;
 
 import app.audio.AudioData;
 import app.audio.indexer.AudioDataIndexer;
+import app.settings.StartupSettings;
 import material.utils.Log;
 import material.utils.OsUtils;
 import material.utils.enums.OsType;
@@ -20,7 +21,7 @@ import java.util.Locale;
 
 public class AudioFileVisitor implements FileVisitor<Path> {
     private final ArrayList<File> AUDIO_FILE_PATHS = new ArrayList<>(1000);
-    private final List ignorePaths = List.of("windows", "system32", "bin", "etc", "lib", "data", "program files", "program files (x86)", "recovery", "program data");
+    private final List<String> ignorePaths = StartupSettings.EXCLUDED_FOLDERS;
 
     @Override
     public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
@@ -74,12 +75,13 @@ public class AudioFileVisitor implements FileVisitor<Path> {
     }
 
     private void addAudio(Path path) {
-        if (path != null) {
-            File file = path.toFile();
-            if (!AudioDataIndexer.getInstance().isFileLoaded(file)) {
-                AUDIO_FILE_PATHS.add(file);
-            }
-        }
+        if (path == null)
+            return;
+
+        if(AudioDataIndexer.getInstance().isFileLoaded(path.toString()) && AudioData.isValidAudio(path))
+            Log.warn("File already loaded: " + path);
+        File file = path.toFile();
+        AUDIO_FILE_PATHS.add(file);
     }
 
     public List<File> getAudioFileArrayList() {

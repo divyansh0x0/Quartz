@@ -26,7 +26,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 // `xprop -name 'Aphrodite' -format _MOTIF_WM_HINTS 32c -set _MOTIF_WM_HINTS '0x2, 0x2, 0x2, 0x2,0x2,0x2'` will remove windows border but won't remove mouse resize
 // ProcessBuilder processBuilder = new ProcessBuilder();
 //         processBuilder.command("xprop", "-name","" + getName() + "", "-format","_MOTIF_WM_HINTS", "32c", "-set", "_MOTIF_WM_HINTS", "0x2, 0x2, 0x2, 0x2,0x2,0x2"); [Took me 1 hour to figure this shit out]
+//TODO Add 6 methods: 3 to add components as close,minimise and maximize buttons and 3 to remove those.
 public class MaterialWindow extends JFrame {
+
     // private static final int WIDTH = 640, HEIGHT = WIDTH / 12 * 9;
     private final RootPanel _root = new RootPanel();
     private boolean isCaptionBarEnabled;

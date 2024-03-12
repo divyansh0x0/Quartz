@@ -121,7 +121,6 @@ public abstract class MaterialComponent extends JComponent implements Serializab
     }
 
     public void animateBG(Color to) {
-        Log.success("animating bg of: " + this);
         AnimationLibrary.animateBackground(this, to, MaterialParameters.COLOR_ANIMATION_DURATION.toMillis());
     }
 

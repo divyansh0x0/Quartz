@@ -7,15 +7,14 @@ import material.utils.Log;
 
 import java.io.*;
 import java.lang.reflect.Type;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FileCacheManager {
-    public static final int INITIAL_CAPACITY = 1000;
     private static FileCacheManager instance;
     private static final String CACHE_FILE_PATH = "file_cache.json";
 
-    private final HashMap<String,File> cachedFiles;
+    private final ArrayList<String> cachedFiles;
 
     private FileCacheManager() {
         cachedFiles = loadCache();
@@ -23,46 +22,42 @@ public class FileCacheManager {
     }
 
     public void cacheFile(File file) {
-        if (!cachedFiles.containsKey(file.toString())) {
-            cachedFiles.put(file.toString(),file);
-            Log.cache("File cached successfully: " + file.getAbsolutePath());
-        } else {
-            Log.cache("File already exists in the cache: " + file.getAbsolutePath());
+        if (!cachedFiles.contains(file.toString())) {
+            cachedFiles.add(file.toString());
+//            Log.cache("File cached successfully: " + file.getAbsolutePath());
         }
+//        else {
+//            Log.cache("File already exists in the cache: " + file.getAbsolutePath());
+//        }
     }
 
     public List<File> getCachedFiles() {
-        return new ArrayList<>((cachedFiles.values()));
+        List<File> l= new ArrayList<>(cachedFiles.size());
+        for(String str: cachedFiles){
+            l.add(new File(str));
+        }
+        return l;
     }
 
-    private HashMap<String,File> loadCache() {
+    private ArrayList<String> loadCache() {
         try (Reader reader = new FileReader(CACHE_FILE_PATH)) {
             Gson gson = new Gson();
             Type listType = new TypeToken<List<String>>() {
             }.getType();
-            List<String> filePaths = gson.fromJson(reader, listType);
 
-            HashMap<String, File> files = new HashMap<>(INITIAL_CAPACITY);
-            for (String filePath : filePaths) {
-                File file = new File(filePath);
-                files.put(file.toString(), file);
-            }
-            return files;
-        } catch (FileNotFoundException e) {
+            return gson.fromJson(reader, listType);
+        } catch (Exception e) {
             // Cache file does not exist yet, return an empty list
-            return new HashMap<>(INITIAL_CAPACITY);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return new HashMap<>(INITIAL_CAPACITY);
+            return new ArrayList<>(0);
         }
     }
 
     public void saveCacheToStorage() {
         try (Writer writer = new FileWriter(CACHE_FILE_PATH)) {
             Gson gson = new GsonBuilder().create();
-            gson.toJson(cachedFiles.keySet(), writer);
+            gson.toJson(cachedFiles, writer);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error("Couldn't save cache: " + e);
         }
     }
 
@@ -73,15 +68,8 @@ public class FileCacheManager {
     }
 
     public void deleteCacheFile(File file) {
-        Iterator<String> iterator = cachedFiles.keySet().iterator();
-        while (iterator.hasNext()) {
-            String cachedFile = iterator.next();
-            if (cachedFile.equals(file.toString())) {
-                iterator.remove();
-                return;
-            }
-        }
-        Log.cache("File not found in cache: " + file.getAbsolutePath());
+        if (cachedFiles.remove(file.toString()))
+            Log.cache("Removed file from cache: " + file.getAbsolutePath());
     }
 
     public static FileCacheManager getInstance() {

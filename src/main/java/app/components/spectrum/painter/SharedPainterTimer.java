@@ -5,7 +5,7 @@ import material.animation.MaterialFixedTimer;
 import java.util.ArrayList;
 
 public class SharedPainterTimer extends MaterialFixedTimer {
-    public static final int FPS = 120;
+    public static final int FPS = 24;
     private static final int DELAY = 1000/FPS;
     private static SharedPainterTimer instance;
     private final ArrayList<SpectrumPainter> painters = new ArrayList<>(5);

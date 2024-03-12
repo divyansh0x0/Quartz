@@ -18,7 +18,7 @@ public class Folder {
     public Folder(String folderPath) {
         this.name = StringUtils.getFileName(folderPath);
         this.path = folderPath;
-        Log.info("Folder path:"+path + "|name: " + name);
+        Log.info("Folder created path:"+path + "|name: " + name);
     }
 
     public ArrayList<AudioData> getAudioDatas() {

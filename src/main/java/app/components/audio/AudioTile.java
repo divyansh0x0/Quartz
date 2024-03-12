@@ -6,7 +6,6 @@ import app.audio.Playlist;
 import app.audio.indexer.AudioDataIndexer;
 import app.audio.player.AphroditeAudioController;
 import app.audio.player.AudioQueue;
-import app.components.Icons;
 import app.components.enums.NavigationLink;
 import app.components.listeners.AudioTileClickListener;
 import material.MaterialParameters;
@@ -20,13 +19,11 @@ import material.utils.GraphicsUtils;
 import material.utils.Log;
 import material.utils.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.kordamp.ikonli.swing.FontIcon;
 
 import javax.swing.*;
 import javax.swing.event.MouseInputListener;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
@@ -34,11 +31,10 @@ import java.time.Duration;
 import java.util.ArrayList;
 
 public class AudioTile extends MaterialComponent implements MouseInputListener, Serializable {
-    private static final FontIcon BROKEN_AUDIO_ICON = new FontIcon();
-    private static final Color BROKEN_AUDIO_COLOR = Color.RED;
-    private static float BROKEN_AUDIO_COLOR_ALPHA = 0.1f;
+//    private static final FontIcon BROKEN_AUDIO_ICON = new FontIcon();
+//    private static final Color BROKEN_AUDIO_COLOR = Color.RED;
+//    private static float BROKEN_AUDIO_COLOR_ALPHA = 0.1f;
     private final ArrayList<AudioTileClickListener> mouseClickListeners = new ArrayList<>();
-    private static BufferedImage defaultArtwork;
     private Playlist playlist;
     private Elevation elevation = null;
     private BufferedImage artwork = null;
@@ -49,10 +45,10 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
     private boolean isActive = false;
     private final int ThumbSize = 50;
     private Color actualBackgroundColor;
-    private Rectangle2D oldBounds;
-    private boolean isHighlighting;
+//    private Rectangle2D oldBounds;
+//    private boolean isHighlighting;
     private final NavigationLink LINK;
-    private final AudioUtilityPopupMenu audioUtilityPopupMenu = new AudioUtilityPopupMenu(this);
+    private static final AudioUtilityPopupMenu audioUtilityPopupMenu = new AudioUtilityPopupMenu();
     private static Color artworkBg = new Color(0x98000000, true);
 
     public AudioTile(@NotNull AudioData audioData, NavigationLink link) {
@@ -69,8 +65,8 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
         addLeftClickListener((audio) -> {
             play();
         });
-        if (BROKEN_AUDIO_ICON.getIkon() == null)
-            BROKEN_AUDIO_ICON.setIkon(Icons.BROKEN_AUDIO);
+//        if (BROKEN_AUDIO_ICON.getIkon() == null)
+//            BROKEN_AUDIO_ICON.setIkon(Icons.BROKEN_AUDIO);
     }
 
     public void play() {
@@ -132,7 +128,7 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
     private void showPopup() {
         Log.info("Showing popup");
 //        audioTile.setSelected(true);
-        audioUtilityPopupMenu.show(MouseInfo.getPointerInfo().getLocation());
+        audioUtilityPopupMenu.show(MouseInfo.getPointerInfo().getLocation(),this);
     }
 
     @Override
@@ -212,18 +208,18 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
             drawCompatibleString(artistName, tX, tY, g2d, artistFont);
         }
         //If audio is broken show an error visual for it
-        if (audioData.isBroken()) {
-            if (BROKEN_AUDIO_ICON.getIconSize() != this.getFontSize())
-                BROKEN_AUDIO_ICON.setIconSize((int) this.getFontSize());
-            ImageIcon icon = BROKEN_AUDIO_ICON.toImageIcon();
-            int dX = getWidth() - durationTextSize;
-            int dY = (getHeight() - BROKEN_AUDIO_ICON.getIconHeight()) / 2;
-            g2d.drawImage(icon.getImage(), dX, dY, null);
-            float ALPHA = 0.5f;
-            g2d.setColor(BROKEN_AUDIO_COLOR);
-            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, ALPHA));
-            g2d.fillRoundRect(0, 0, getWidth(), getHeight(), cornerRadius, cornerRadius);
-        } else {
+//        if (audioData.isBroken()) {
+//            if (BROKEN_AUDIO_ICON.getIconSize() != this.getFontSize())
+//                BROKEN_AUDIO_ICON.setIconSize((int) this.getFontSize());
+//            ImageIcon icon = BROKEN_AUDIO_ICON.toImageIcon();
+//            int dX = getWidth() - durationTextSize;
+//            int dY = (getHeight() - BROKEN_AUDIO_ICON.getIconHeight()) / 2;
+//            g2d.drawImage(icon.getImage(), dX, dY, null);
+//            float ALPHA = 0.5f;
+//            g2d.setColor(BROKEN_AUDIO_COLOR);
+//            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, ALPHA));
+//            g2d.fillRoundRect(0, 0, getWidth(), getHeight(), cornerRadius, cornerRadius);
+//        } else {
             //drawing duration
             g2d.setFont(getFont());
             fontMetrics = g2d.getFontMetrics();
@@ -231,18 +227,12 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
             int dY = (getHeight() + fontMetrics.getAscent()) / 2;
             g2d.drawString(audioDuration, dX, dY);
             g2d.setClip(null);
-        }
+//        }
         Toolkit.getDefaultToolkit().sync();
     }
 
 
-    private boolean isBoundsChanged() {
-        if (!getBounds().equals(oldBounds)) {
-            oldBounds = getBounds();
-            return true;
-        }
-        return false;
-    }
+
 
     private Dimension getRequiredDimensions() {
         if (getGraphics() != null) {

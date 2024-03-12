@@ -13,8 +13,8 @@ plugins {
  -XX:MinHeapFreeRatio=1
  -XX:MaxHeapFreeRatio=1
  */
-//applicationDefaultJvmArgs = ["-XX:+UseShenandoahGC", "-XX:+UnlockExperimentalVMOptions", "-XX:ShenandoahGarbageThreshold=1"]
-//applicationDefaultJvmArgs = ["-verbose:gc"]
+//applicationDefaultJvmArgs = ["-XX:+UseShenandoahGC", "-XX:+UnlockExperimentalVMOptions"]
+//applicationDefaultJvmArgs = ["-Xmx548m","-XX:+IgnoreUnrecognizedVMOptions"]
 mainClassName = 'app.MainClass'
 compileJava.options.encoding = 'UTF-8'
 compileJava.sourceCompatibility = '21'

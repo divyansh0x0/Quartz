@@ -55,4 +55,11 @@ public class Playlist implements Comparable<Playlist> {
     public int compareTo(@NotNull Playlist o) {
         return name.compareTo(o.name);
     }
+
+    public void remove(AudioData audioData) {
+    }
+
+    public void add(AudioData audioData) {
+
+    }
 }

@@ -10,10 +10,7 @@ import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AnimationLibrary {
-    private static final int ANIMATION_DURATION = (int) MaterialParameters.COLOR_ANIMATION_DURATION.toNanos(); // Duration of animation in nanos
     private static final int FPS = 60; // Number of animation steps
-    private static final Object componentAnimationsLock = new Object();
-    private static final int DEFAULT_SIZE_ARR = 10;
     private static MaterialFixedTimer timer;
     private static final ConcurrentHashMap<JComponent, ArrayList<ColorAnimationModel>> componentAnimations = new ConcurrentHashMap<>(100);
 

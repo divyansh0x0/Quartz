@@ -11,7 +11,6 @@ import org.kordamp.ikonli.Ikon;
 import java.awt.*;
 
 public class AudioUtilityPopupMenu {
-    private final AudioTile audioTile;
     private static final MaterialPopup popupMenu = new MaterialPopup();
     private static final int WIDTH = 200;
     private static final int HEIGHT = MaterialMenuItem.HEIGHT;
@@ -35,12 +34,11 @@ public class AudioUtilityPopupMenu {
         popupMenu.setElevation(Elevation._6);
     }
 
-    public AudioUtilityPopupMenu(AudioTile audioTile) {
+    public AudioUtilityPopupMenu() {
         super();
-        this.audioTile = audioTile;
     }
 
-    public void show(Point location) {
+    public void show(Point location,AudioTile audioTile) {
         removeAllListeners();
         _playBtn.addLeftClickListener(e -> {
             if (audioTile != null) {

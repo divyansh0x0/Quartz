@@ -14,7 +14,6 @@ import java.io.ByteArrayInputStream;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.TreeMap;
-import java.util.concurrent.CompletableFuture;
 
 public class ArtworkManager {
     private static BufferedImage DEFAULT_ARTWORK;
@@ -43,36 +42,40 @@ public class ArtworkManager {
 
 
     public void registerThumbnail(@NotNull AudioData audio, byte @Nullable [] artworkData) {
-
-            try {
-                if (artworkData != null) {
-                    ByteArrayInputStream bais = new ByteArrayInputStream(artworkData);
-                    BufferedImage artwork = ImageIO.read(bais);
-                    int hash = ImageComparator.calculateMurmurHash(artwork);
-                    if (!ARTWORKS.containsKey(hash)) {
-                        int w = artwork.getWidth(null);
-                        int h = artwork.getHeight(null);
-                        int maxSize = Math.min(w, h);
-                        int x = (w - maxSize) / 2;
-                        int y = (h - maxSize) / 2;
-                        artwork = GraphicsUtils.resize(artwork.getSubimage(x, y, maxSize, maxSize), ARTWORK_SIZE.getWidthInt(), ARTWORK_SIZE.getHeightInt());
-                        artwork.setAccelerationPriority(1f);
-                        ARTWORKS.put(hash, artwork);
-                        bais.close();
-                    } else
-                        Log.warn("Discarding duplicate artwork for " + audio.getFile() + "\n for hash: " + hash);
-
-                    ARTWORKS_POINTER.put(audio, hash);
-                } else
-                    ARTWORKS_POINTER.put(audio, DEFAULT_ARTWORK_POINTER);
-
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+        try {
+            if (artworkData == null) {
+                ARTWORKS_POINTER.put(audio, DEFAULT_ARTWORK_POINTER);
+                return;
             }
+            ByteArrayInputStream bais = new ByteArrayInputStream(artworkData);
+            BufferedImage artwork = ImageIO.read(bais);
+            if (artwork == null) {
+                ARTWORKS_POINTER.put(audio, DEFAULT_ARTWORK_POINTER);
+                return;
+            }
+            int hash = ImageComparator.calculateMurmurHash(artwork);
+            if (!ARTWORKS.containsKey(hash)) {
+                int w = artwork.getWidth(null);
+                int h = artwork.getHeight(null);
+                int maxSize = Math.min(w, h);
+                int x = (w - maxSize) / 2;
+                int y = (h - maxSize) / 2;
+                artwork = GraphicsUtils.resize(artwork.getSubimage(x, y, maxSize, maxSize), ARTWORK_SIZE.getWidthInt(), ARTWORK_SIZE.getHeightInt());
+                artwork.setAccelerationPriority(1f);
+                ARTWORKS.put(hash, artwork);
+                bais.close();
+            }
+            ARTWORKS_POINTER.put(audio, hash);
+
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
-    public void registerThumbnailAsync(@NotNull AudioData audio, byte @Nullable [] artworkData){
+
+    public void registerThumbnailAsync(@NotNull AudioData audio, byte @Nullable [] artworkData) {
         Thread.startVirtualThread(() -> {
-            registerThumbnail(audio,artworkData);
+            registerThumbnail(audio, artworkData);
         });
     }
 

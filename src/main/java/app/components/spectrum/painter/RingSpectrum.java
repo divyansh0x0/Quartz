@@ -2,15 +2,10 @@ package app.components.spectrum.painter;
 
 import app.components.spectrum.Spectrum;
 import material.theme.ThemeColors;
-import material.theme.ThemeListener;
-import material.theme.ThemeManager;
 import material.utils.Log;
-import material.utils.filters.FastGaussianBlur;
 
 import java.awt.*;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.util.LinkedList;
 
 public class RingSpectrum extends SpectrumPainter {
     private static final double BAR_HEIGHT_RATIO = 0.9d;
@@ -19,7 +14,7 @@ public class RingSpectrum extends SpectrumPainter {
     private static final int MINIMUM_HEIGHT = 2;
     private final Spectrum spectrum;
 
-    private final LinkedList<BufferedImage> _ambientImageBackgroundBuffer = new LinkedList<>();
+//    private final LinkedList<BufferedImage> _ambientImageBackgroundBuffer = new LinkedList<>();
     private BufferedImage bufferedImage;
     private Color oldAmbientFg;
 
@@ -27,14 +22,14 @@ public class RingSpectrum extends SpectrumPainter {
         super(spectrum);
         this.spectrum = spectrum;
 
-        ThemeManager.getInstance().addThemeListener((ThemeListener) this::clearAmbientBuffer);
+//        ThemeManager.getInstance().addThemeListener((ThemeListener) this::clearAmbientBuffer);
     }
 
 
     public void paint(Graphics g) {
         try {
             Graphics2D g2d = (Graphics2D) g.create();
-            drawAmbientBlur((Graphics2D) g2d.create());
+//            drawAmbientBlur((Graphics2D) g2d.create());
 
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
@@ -52,22 +47,22 @@ public class RingSpectrum extends SpectrumPainter {
     }
 
 
-    private void drawAmbientBlur(Graphics2D g2d) {
-        if (!_ambientImageBackgroundBuffer.isEmpty()) {
-            BufferedImage temp = _ambientImageBackgroundBuffer.removeFirst();
-            if (temp != null)
-                bufferedImage = temp;
-        }
-        if (bufferedImage != null) {
-            final int y = (spectrum.getHeight() - bufferedImage.getHeight()) / 2;
-            final int x = (spectrum.getWidth() - bufferedImage.getWidth()) / 2;//-1 * (getWidth() / 2)
-            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, AMBIENT_BLUR_TRANSPARENCY));
-            g2d.drawImage(bufferedImage, null, x, y);
-            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
-        }
-        g2d.dispose();
-        Toolkit.getDefaultToolkit().sync();
-    }
+//    private void drawAmbientBlur(Graphics2D g2d) {
+//        if (!_ambientImageBackgroundBuffer.isEmpty()) {
+//            BufferedImage temp = _ambientImageBackgroundBuffer.removeFirst();
+//            if (temp != null)
+//                bufferedImage = temp;
+//        }
+//        if (bufferedImage != null) {
+//            final int y = (spectrum.getHeight() - bufferedImage.getHeight()) / 2;
+//            final int x = (spectrum.getWidth() - bufferedImage.getWidth()) / 2;//-1 * (getWidth() / 2)
+//            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, AMBIENT_BLUR_TRANSPARENCY));
+//            g2d.drawImage(bufferedImage, null, x, y);
+//            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+//        }
+//        g2d.dispose();
+//        Toolkit.getDefaultToolkit().sync();
+//    }
 
 
     private void drawCircularVisualizer(Graphics2D g2d, float[] magnitudes) {
@@ -108,37 +103,37 @@ public class RingSpectrum extends SpectrumPainter {
 
 
 
+//
+//    protected void createAmbientImage() {
+//        try {
+//            if (oldAmbientFg != null && oldAmbientFg.getRGB() == spectrum.getForeground().getRGB() && !forceAmbientUpdate) {
+//                return;
+//            }
+//            final int w = Math.max(1, (int) (spectrum.getWidth() * 2)); //Gradient width
+//            final int h = Math.max(1, spectrum.getHeight());//Gradient height
+//            final Color[] colors = {spectrum.getForeground(), ThemeColors.TransparentColor};
+//            final float[] dist = {0f, 1.0f};
+//            final FastGaussianBlur fastGaussianBlur = new FastGaussianBlur(AMBIENT_BLUR_RADIUS);
+//            final Rectangle2D ambientBounds = new Rectangle2D.Double(0, 0, w, h);
+//            BufferedImage tempBufferedImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+//
+//            RadialGradientPaint paint = new RadialGradientPaint(ambientBounds, dist, colors, MultipleGradientPaint.CycleMethod.NO_CYCLE);
+//
+//            Graphics2D g = (Graphics2D) tempBufferedImage.getGraphics();
+//            g.setPaint(paint);
+//            g.fillRect(0, 0, w, h);
+//            g.dispose();
+//
+//            _ambientImageBackgroundBuffer.addLast(fastGaussianBlur.filter(tempBufferedImage, tempBufferedImage));
+//            oldAmbientFg = spectrum.getForeground();
+//            forceAmbientUpdate = false;
+//        } catch (Exception e) {
+//            Log.error(e.toString());
+//            Log.warn("skipping");
+//        }
+//    }
 
-    protected void createAmbientImage() {
-        try {
-            if (oldAmbientFg != null && oldAmbientFg.getRGB() == spectrum.getForeground().getRGB() && !forceAmbientUpdate) {
-                return;
-            }
-            final int w = Math.max(1, (int) (spectrum.getWidth() * 2)); //Gradient width
-            final int h = Math.max(1, spectrum.getHeight());//Gradient height
-            final Color[] colors = {spectrum.getForeground(), ThemeColors.TransparentColor};
-            final float[] dist = {0f, 1.0f};
-            final FastGaussianBlur fastGaussianBlur = new FastGaussianBlur(AMBIENT_BLUR_RADIUS);
-            final Rectangle2D ambientBounds = new Rectangle2D.Double(0, 0, w, h);
-            BufferedImage tempBufferedImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-
-            RadialGradientPaint paint = new RadialGradientPaint(ambientBounds, dist, colors, MultipleGradientPaint.CycleMethod.NO_CYCLE);
-
-            Graphics2D g = (Graphics2D) tempBufferedImage.getGraphics();
-            g.setPaint(paint);
-            g.fillRect(0, 0, w, h);
-            g.dispose();
-
-            _ambientImageBackgroundBuffer.addLast(fastGaussianBlur.filter(tempBufferedImage, tempBufferedImage));
-            oldAmbientFg = spectrum.getForeground();
-            forceAmbientUpdate = false;
-        } catch (Exception e) {
-            Log.error(e.toString());
-            Log.warn("skipping");
-        }
-    }
-
-    protected void clearAmbientBuffer() {
-        _ambientImageBackgroundBuffer.clear();
-    }
+//    protected void clearAmbientBuffer() {
+//        _ambientImageBackgroundBuffer.clear();
+//    }
 }

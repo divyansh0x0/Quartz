@@ -18,14 +18,10 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
-// TODO Add reload on pressing CTRL+R
-// TODO Save last search i.e. undo and redo
+// TODO Fix high memories usage due to file system search
 public class SystemSearch {
-    public static final int NUM_THREADS = Runtime.getRuntime().availableProcessors();
     private static final ArrayList<SearchCompletedListener> searchCompletedListeners = new ArrayList<>();
     private static SystemSearch instance;
     private static FileSystemView FSV = FileSystemView.getFileSystemView();
@@ -34,6 +30,7 @@ public class SystemSearch {
     private boolean isSearching = false;
     private boolean isBackgroundSearchRunning = false;
     private Thread searchThread;
+    private final int ThreadCount = StartupSettings.PARALLEL_THREAD_COUNT;
 
     private SystemSearch() {
 //        forceSearch();
@@ -50,24 +47,29 @@ public class SystemSearch {
             isSearching = false;
         }
         Log.warn("Starting system search");
-        searchThread = new Thread(this::search);
-        searchThread.setName("Search thread");
-        searchThread.start();
+        searchThread = Thread.startVirtualThread(()->this.beginSearch(true));
     }
 
-    private void search() {
+    private void beginSearch() {
+        this.beginSearch(false);
+    }
+    private void beginSearch(boolean doBackgroundSearchIfCacheLoaded) {
         isSearching = true;
-        if (cacheLoaded()) {
+        boolean isCacheLoaded = cacheLoaded();
+        if (isCacheLoaded) {
+            Log.info("CACHE LOADED");
             searchCompleted();
+        }
+
+        if (doBackgroundSearchIfCacheLoaded || !isCacheLoaded) {
+            Log.info("Beginning background search");
             isBackgroundSearchRunning = true;
+            switch (OsUtils.getOsType()) {
+                case LINUX, MAC -> rootFSSearch();
+                case WINDOWS -> windowsFSSearch();
+            }
         }
-        switch (OsUtils.getOsType()) {
-            case LINUX, MAC -> rootFSSearch();
-            case WINDOWS -> windowsFSSearch();
-        }
-
     }
-
     /**
      * Loads cache and checks if all files were loaded
      *
@@ -75,21 +77,11 @@ public class SystemSearch {
      */
     private synchronized boolean cacheLoaded() {
         List<File> files = FileCacheManager.getInstance().getCachedFiles();
-        int validFiles = 0;
-
-        long t1 = System.nanoTime();
-
-        try (ExecutorService executorService = Executors.newCachedThreadPool()) {
-            try {
-                for(Future<Integer> task : executorService.invokeAll(getSavingTasks(files))){
-                    validFiles += task.get();
-                }
-            } catch (Exception e) {
-                Log.error(e);
-            }
+        if (files.isEmpty()) {
+            return false;
         }
-        long t2 = System.nanoTime();
-        Log.success("Time taken to register " + validFiles + "out of " + files.size() + " artworks: " + ((t2 - t1) / 0.000_0001) + "ms");
+
+        int validFiles = saveDataAsync(files);
         return !files.isEmpty() && validFiles == files.size();
     }
 
@@ -117,7 +109,7 @@ public class SystemSearch {
             try {
                 Files.walkFileTree(root.toPath(), EnumSet.of(FileVisitOption.FOLLOW_LINKS), SEARCH_DEPTH, fileVisitor);
                 List<File> arr = fileVisitor.getAudioFileArrayList();
-                Log.success("Number of mp3 files found: " + arr.size());
+                Log.success( arr.size() +" mp3 files found in "+root);
                 saveDataAsync(arr);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -134,19 +126,45 @@ public class SystemSearch {
         FileCacheManager.getInstance().saveCacheToStorage();
     }
 
-    private void saveDataAsync(List<File> files) {
-        Log.success("Number of MP3 files found:" + files.size());
-        try (ExecutorService executorService = Executors.newCachedThreadPool()) {
-            ArrayList<Callable<Integer>> tasks = getSavingTasks(files);
+    private int saveDataAsync(List<File> files) {
+        if(files.isEmpty())
+            return 0;
+        AtomicInteger savedFilesNumber = new AtomicInteger();
+        long t1 = System.nanoTime();
+        Thread[] threads = new Thread[ThreadCount];
+        int stackSize = (int) Math.ceil((double) files.size() /ThreadCount);
+        for (int i = 0; i < threads.length; i++) {
+            int begin = i * stackSize;
+            int end = Math.min(begin + stackSize,files.size());
+            int finalI = i;
+            threads[i] = Thread.ofVirtual().name("Audio data extractor thread " + i).start(()->{
+                Log.info("["+ finalI +"]" + "begin:" + begin + " | end: " + end);
+                for (int j = begin; j < end; j++) {
+                    File file = files.get(j);
+                    if (file.exists() && AudioData.isValidAudio(file.toPath())) {
+                        AudioData audioData = new AudioData(file);
+                        AudioDataIndexer.getInstance().addAudioFile(audioData);
+                        savedFilesNumber.incrementAndGet();
+                        FileCacheManager.getInstance().cacheFile(file);
+                    } else {
+                        FileCacheManager.getInstance().deleteCacheFile(file);
+                        Log.error(file + " is not valid or doesn't exist");
+                    }
+                }
+            });
+        }
+        for(Thread thread:threads){
             try {
-                executorService.invokeAll(tasks);
-            } catch (Exception e) {
-                Log.error(e);
+                thread.join();
+            } catch (InterruptedException e) {
+                Log.error(thread.getName() + " was interrupted during cache loading");
             }
         }
-        Log.success("Saved " + files.size() + " files to memory");
+        long t2 = System.nanoTime();
+        Log.success("Time taken to register " + savedFilesNumber + " out of " + files.size() + " artworks: " + ((t2 - t1) / 0.000_0001) + "ms");
+        Log.success("Saved " + savedFilesNumber + " files to memory");
         FileCacheManager.getInstance().saveCacheToStorage();
-        files.clear();
+        return savedFilesNumber.get();
     }
 
     @NotNull

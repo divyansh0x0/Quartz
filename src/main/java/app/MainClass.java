@@ -63,56 +63,68 @@ public class MainClass {
 
     public static synchronized void startApp() {
         try {
+            long t1 = System.nanoTime();
             AphroditeLoader.getInstance().show();
             Log.info("Preparing system search");
-            AudioDataIndexer.getInstance().addIndexUpdatedListener(MainClass::hideLoaderAndLoadApp);
-            SystemSearch.getInstance().forceSearch();
-            if (AudioDataIndexer.getInstance().isIndexed()) {
-                hideLoaderAndLoadApp();
-            }
-        } catch (Exception e) {
-            Log.error(e);
-            e.printStackTrace();
+            AudioDataIndexer.getInstance().addIndexUpdatedListener(new Runnable() {
+                @Override
+                public void run() {
+                    hideLoaderAndLoadApp();
+                    long t2 = System.nanoTime();
+                    Log.info("Loading took : " + (t2 - t1)*1e-9 + "s");
+                    AudioDataIndexer.getInstance().removeIndexUpdatedListener(this);
+                }
+            });
+        SystemSearch.getInstance().forceSearch();
+        if (AudioDataIndexer.getInstance().isIndexed()) {
+            hideLoaderAndLoadApp();
         }
-    }
+    } catch(
+    Exception e)
 
-    private static void hideLoaderAndLoadApp() {
+    {
+        Log.error(e);
+        e.printStackTrace();
+    }
+}
+
+private static void hideLoaderAndLoadApp() {
+    Log.info("Hiding loader");
+    SwingUtilities.invokeLater(() -> {
+        AphroditeLoader.getInstance().hide();
+        Aphrodite.getInstance().showWhenReady();
+        Log.success("Aphrodite player opened");
+    });
+}
+
+public static void noLoaderSearch() {
+    SystemSearch.getInstance().onSearchComplete(() -> {
         Log.info("Hiding loader");
+
         SwingUtilities.invokeLater(() -> {
-            Aphrodite.getInstance().show();
+//                Aphrodite.getInstance().show();
+
             Log.success("Aphrodite player opened");
         });
         AphroditeLoader.getInstance().hide();
+    });
+    SystemSearch.getInstance().forceSearch();
+}
+
+private static MaterialFixedTimer gcCaller;
+
+private static void callGCPeriodically() {
+    Log.warn("Periodic GC call is on");
+    if (gcCaller != null) {
+        gcCaller.stop();
+        gcCaller = null;
     }
-
-    public static void noLoaderSearch() {
-        SystemSearch.getInstance().onSearchComplete(() -> {
-            Log.info("Hiding loader");
-
-            SwingUtilities.invokeLater(() -> {
-//                Aphrodite.getInstance().show();
-
-                Log.success("Aphrodite player opened");
-            });
-            AphroditeLoader.getInstance().hide();
-        });
-        SystemSearch.getInstance().forceSearch();
-    }
-
-    private static MaterialFixedTimer gcCaller;
-
-    private static void callGCPeriodically() {
-        Log.warn("Periodic GC call is on");
-        if (gcCaller != null) {
-            gcCaller.stop();
-            gcCaller = null;
+    gcCaller = new MaterialFixedTimer(5000) {
+        @Override
+        public void tick(float deltaMillis) {
+            System.gc();
         }
-        gcCaller = new MaterialFixedTimer(5000) {
-            @Override
-            public void tick(float deltaMillis) {
-                System.gc();
-            }
-        };
-        gcCaller.start();
-    }
+    };
+    gcCaller.start();
+}
 }
