@@ -22,14 +22,16 @@ public class GraphicsUtils {
     }
 
     public static String clipString(Graphics2D g2d, String string, int availableWidth) {
-        FontMetrics fontMetrics = g2d.getFontMetrics();
-        var rect = fontMetrics.getStringBounds(string, g2d);
-        int ellipseWidth = fontMetrics.stringWidth(StringUtils.ELLIPSIS);
-        if (availableWidth < rect.getWidth()) {
+        FontMetrics fm = g2d.getFontMetrics();
+        var strWidth = fm.stringWidth(string);
+        if (availableWidth >= strWidth) {
+            return string;
+        } else {
+            int ellipseWidth = fm.stringWidth(StringUtils.ELLIPSIS);
             StringBuilder sb = new StringBuilder();
-            int cWidth = 0; //clippedWidth
+            int cWidth = 0; //string width
             for (char c : string.toCharArray()) {
-                int charWidth = fontMetrics.charWidth(c);
+                int charWidth = fm.charWidth(c);
                 if (cWidth + charWidth + ellipseWidth < availableWidth) {
                     sb.append(c);
                     cWidth += charWidth;
@@ -37,8 +39,8 @@ public class GraphicsUtils {
                     break;
                 }
             }
-            return sb.toString().strip() + StringUtils.ELLIPSIS;
-        } else return string;
+            return sb + StringUtils.ELLIPSIS;
+        }
 
     }
 
@@ -51,14 +53,14 @@ public class GraphicsUtils {
                 boolean isSbCompatible = font.canDisplay(str.charAt(0)); //flag to check if string builder contains compatible strings
                 for (char c : str.toCharArray()) {
                     if (font.canDisplay(c)) {
-                        if (sb.length() > 0 && !isSbCompatible) { // If the string builder was filled with incompatible strings then add it to the LanguageCompatibleString
+                        if (!sb.isEmpty() && !isSbCompatible) { // If the string builder was filled with incompatible strings then add it to the LanguageCompatibleString
                             languageCompatibleString.addString(sb.toString(), false);
                             sb.delete(0, sb.length()); //Empty string builder
                             isSbCompatible = true;
                         }
                         sb.append(c);
                     } else {
-                        if (sb.length() > 0 && isSbCompatible) { // If the string builder was filled with compatible strings then add it to the LanguageCompatibleString
+                        if (!sb.isEmpty() && isSbCompatible) { // If the string builder was filled with compatible strings then add it to the LanguageCompatibleString
                             languageCompatibleString.addString(sb.toString(), true);
                             sb.delete(0, sb.length()); //then empty the builder
                             isSbCompatible = false;
@@ -67,7 +69,7 @@ public class GraphicsUtils {
                     }
                 }
 
-                if (sb.length() > 0) {
+                if (!sb.isEmpty()) {
                     languageCompatibleString.addString(sb.toString(), isSbCompatible);
                 }
                 LANGUAGE_COMPATIBLE_STRING_HASH_MAP.getAcquire().put(str, languageCompatibleString);

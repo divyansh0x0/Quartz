@@ -7,7 +7,6 @@ import app.local.cache.FileCacheManager;
 import app.settings.StartupSettings;
 import material.utils.Log;
 import material.utils.OsUtils;
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.filechooser.FileSystemView;
 import java.io.File;
@@ -17,7 +16,6 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 // TODO Fix high memories usage due to file system search
@@ -55,19 +53,19 @@ public class SystemSearch {
     }
     private void beginSearch(boolean doBackgroundSearchIfCacheLoaded) {
         isSearching = true;
-        boolean isCacheLoaded = cacheLoaded();
-        if (isCacheLoaded) {
-            Log.info("CACHE LOADED");
-            searchCompleted();
-        }
+//        boolean isCacheLoaded = cacheLoaded();
+//        if (isCacheLoaded) {
+//            Log.info("CACHE LOADED");
+//            searchCompleted();
+//        }
 
-        if (doBackgroundSearchIfCacheLoaded || !isCacheLoaded) {
+//        if (doBackgroundSearchIfCacheLoaded) {
             Log.info("Beginning background search");
-            isBackgroundSearchRunning = true;
+//            isBackgroundSearchRunning = true;
             switch (OsUtils.getOsType()) {
                 case LINUX, MAC -> rootFSSearch();
                 case WINDOWS -> windowsFSSearch();
-            }
+//            }
         }
     }
     /**
@@ -104,9 +102,9 @@ public class SystemSearch {
     private void windowsFSSearch() {
         Log.warn("Windows File System detected");
         File[] roots = File.listRoots();
-        AudioFileVisitor fileVisitor = new AudioFileVisitor();
         for (File root : roots) {
             try {
+                AudioFileVisitor fileVisitor = new AudioFileVisitor();
                 Files.walkFileTree(root.toPath(), EnumSet.of(FileVisitOption.FOLLOW_LINKS), SEARCH_DEPTH, fileVisitor);
                 List<File> arr = fileVisitor.getAudioFileArrayList();
                 Log.success( arr.size() +" mp3 files found in "+root);
@@ -121,9 +119,9 @@ public class SystemSearch {
     private synchronized void saveData(List<File> files) {
         for (File file : files) {
             AudioDataIndexer.getInstance().addAudioFile(new AudioData(file));
-            FileCacheManager.getInstance().cacheFile(file);
+//            FileCacheManager.getInstance().cacheFile(file);
         }
-        FileCacheManager.getInstance().saveCacheToStorage();
+//        FileCacheManager.getInstance().saveCacheToStorage();
     }
 
     private int saveDataAsync(List<File> files) {
@@ -145,9 +143,9 @@ public class SystemSearch {
                         AudioData audioData = new AudioData(file);
                         AudioDataIndexer.getInstance().addAudioFile(audioData);
                         savedFilesNumber.incrementAndGet();
-                        FileCacheManager.getInstance().cacheFile(file);
+//                        FileCacheManager.getInstance().cacheFile(file);
                     } else {
-                        FileCacheManager.getInstance().deleteCacheFile(file);
+//                        FileCacheManager.getInstance().deleteCacheFile(file);
                         Log.error(file + " is not valid or doesn't exist");
                     }
                 }
@@ -161,45 +159,18 @@ public class SystemSearch {
             }
         }
         long t2 = System.nanoTime();
-        Log.success("Time taken to register " + savedFilesNumber + " out of " + files.size() + " artworks: " + ((t2 - t1) / 0.000_0001) + "ms");
-        Log.success("Saved " + savedFilesNumber + " files to memory");
-        FileCacheManager.getInstance().saveCacheToStorage();
+        Log.success("Time taken to hot cache " + savedFilesNumber + " out of " + files.size() + " files: " + ((t2 - t1) / 0.000_0001) + "ms");
+//        FileCacheManager.getInstance().saveCacheToStorage();
         return savedFilesNumber.get();
     }
 
-    @NotNull
-    private static ArrayList<Callable<Integer>> getSavingTasks(List<File> files) {
-        ArrayList<Callable<Integer>> tasks = new ArrayList<>();
-        for (File file : files) {
-            Callable<Integer> callable = () -> {
-                if (file.exists() && AudioData.isValidAudio(file.toPath())) {
-                    AudioData audioData = new AudioData(file);
-                    AudioDataIndexer.getInstance().addAudioFile(audioData);
-                    return 0;
-                } else {
-                    FileCacheManager.getInstance().deleteCacheFile(file);
-                    return 1;
-                }
-            };
-            tasks.add(callable);
-        }
-        return tasks;
-    }
+
 
 
     public static SystemSearch getInstance() {
         if (instance == null)
             instance = new SystemSearch();
         return instance;
-    }
-
-    public int getSearchDepth() {
-        return SEARCH_DEPTH;
-    }
-
-    public SystemSearch setSearchDepth(int SEARCH_DEPTH) {
-        this.SEARCH_DEPTH = SEARCH_DEPTH;
-        return this;
     }
 
 
