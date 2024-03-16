@@ -47,29 +47,29 @@ public class ArtworkManager {
                 ARTWORKS_POINTER.put(audio, DEFAULT_ARTWORK_POINTER);
                 return;
             }
-            ByteArrayInputStream bais = new ByteArrayInputStream(artworkData);
-            BufferedImage artwork = ImageIO.read(bais);
-            if (artwork == null) {
-                ARTWORKS_POINTER.put(audio, DEFAULT_ARTWORK_POINTER);
-                return;
-            }
-            int hash = ImageComparator.calculateMurmurHash(artwork);
-            if (!ARTWORKS.containsKey(hash)) {
-                int w = artwork.getWidth(null);
-                int h = artwork.getHeight(null);
-                int maxSize = Math.min(w, h);
-                int x = (w - maxSize) / 2;
-                int y = (h - maxSize) / 2;
-                artwork = GraphicsUtils.resize(artwork.getSubimage(x, y, maxSize, maxSize), ARTWORK_SIZE.getWidthInt(), ARTWORK_SIZE.getHeightInt());
-                artwork.setAccelerationPriority(1f);
-                ARTWORKS.put(hash, artwork);
-                bais.close();
-            }
-            ARTWORKS_POINTER.put(audio, hash);
+            try (ByteArrayInputStream inputStream = new ByteArrayInputStream(artworkData)) {
 
-
+                BufferedImage artwork = ImageIO.read(inputStream);
+                if (artwork == null) {
+                    ARTWORKS_POINTER.put(audio, DEFAULT_ARTWORK_POINTER);
+                    return;
+                }
+                int hash = ImageComparator.calculateMurmurHash(artwork);
+                if (!ARTWORKS.containsKey(hash)) {
+                    int w = artwork.getWidth(null);
+                    int h = artwork.getHeight(null);
+                    int maxSize = Math.min(w, h);
+                    int x = (w - maxSize) / 2;
+                    int y = (h - maxSize) / 2;
+                    artwork = GraphicsUtils.resize(artwork.getSubimage(x, y, maxSize, maxSize), ARTWORK_SIZE.getWidthInt(), ARTWORK_SIZE.getHeightInt());
+                    artwork.setAccelerationPriority(1f);
+                    ARTWORKS.put(hash, artwork);
+                }
+                ARTWORKS_POINTER.put(audio, hash);
+            }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            Log.error("Error while writing artworks: " + e);
+            e.printStackTrace();
         }
     }
 

@@ -17,7 +17,7 @@ import material.tools.ColorUtils;
 import material.utils.HorizontalComponentResizer;
 import material.utils.OsUtils;
 import material.utils.StringUtils;
-import material.window.DecorationParameters;
+import material.window.win32procedures.DefaultDecorationParameter;
 import net.miginfocom.swing.MigLayout;
 import org.kordamp.ikonli.Ikon;
 import org.kordamp.ikonli.fluentui.FluentUiFilledAL;
@@ -59,7 +59,7 @@ public class SideNavigationPanel extends MaterialPanel {
 
         String titleLabelConstraint = "north, h " + ComponentParameters.SEARCH_HEADER_HEIGHT + "!, alignX left";
         if (OsUtils.isCustomWindowSupported())
-            titleLabelConstraint += ", gapY " + DecorationParameters.getTitleBarHeight();
+            titleLabelConstraint += ", gapY " + DefaultDecorationParameter.getTitleBarHeight();
         add(titleLabel, titleLabelConstraint);
         add(menuLabel_1, "gapX " + NAV_BTN_PADDING.getLeft() + " , gapY 10");
         addButtonsToLayout();

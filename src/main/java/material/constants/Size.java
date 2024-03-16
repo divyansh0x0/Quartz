@@ -5,6 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import java.awt.*;
 
 public class Size extends Dimension {
+    public static final Size ZERO = new Size(0);
+
     public Size(int width, int height) {
         super(width,height);
     }

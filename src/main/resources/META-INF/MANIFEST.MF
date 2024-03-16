@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Main-Class: app.MainClass
+Main-Class: app.main.MainClass
 Class-Path: annotations-23.0.0.jar jfa-1.1.9.jar ikonli-bootstrapicons-p
  ack-12.3.1.jar ikonli-materialdesign-pack-12.3.1.jar filters-2.0.235-1.
  jar javafx-controls-19-linux.jar timingframework-1.0.jar miglayout-swin

@@ -1,6 +1,6 @@
 package app.components.containers.views.artist;
 
-import app.TileManager;
+import app.main.TileManager;
 import app.audio.Artist;
 import app.audio.indexer.AudioDataIndexer;
 import app.components.AudioTilePanel;

@@ -1,4 +1,4 @@
-package material.window;
+package material.window.win32procedures;
 
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
@@ -6,13 +6,16 @@ import com.sun.jna.platform.win32.BaseTSD;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.win32.W32APIOptions;
 import material.utils.Log;
+import material.window.Dwmapi;
+import material.window.MaterialDialogWindow;
+import material.window.User32Ex;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 
 import static com.sun.jna.platform.win32.WinUser.*;
 
-public class BorderlessWindowProc implements WindowProc {
+public class DialogWindowProc implements WindowProc {
     private static final HWND HWND_TOP = new HWND(new Pointer(0));
     public final static long WS_EX_CLIENTEDGE = 0x00000200L;
     public final static long WS_EX_WINDOWEDGE = 0x00000100L;
@@ -33,7 +36,7 @@ public class BorderlessWindowProc implements WindowProc {
     private boolean isVisible = false;
     private int TITLE_BAR_HEIGHT = 27;
 
-    MaterialWindow window;
+    MaterialDialogWindow window;
     HWND hwnd = new HWND();
     BaseTSD.LONG_PTR defWndProc;
 
@@ -43,11 +46,11 @@ public class BorderlessWindowProc implements WindowProc {
     private int normalWindowStyle;
     private RECT normalWindowBounds = new RECT();
     private boolean isFullscreen;
-    public BorderlessWindowProc() {
+    public DialogWindowProc() {
         INSTANCEx = Native.load("user32", User32Ex.class, W32APIOptions.UNICODE_OPTIONS);
     }
 
-    public void init(MaterialWindow window) {
+    public void init(MaterialDialogWindow window) {
         if(window.isDisplayable() && !isInitialized) {
             this.window = window;
             this.hwnd = getHwnd(window);
@@ -175,12 +178,12 @@ public class BorderlessWindowProc implements WindowProc {
     private POINT ptMouse = new POINT();
     private RECT rcWindow = new RECT();
     private @NotNull LRESULT HitTest(HWND hwnd) {
-        int borderOffset = DecorationParameters.getResizeBorderThickness();
-        int borderThickness = DecorationParameters.getResizeBorderThickness();
+        int borderOffset = DefaultDecorationParameter.getResizeBorderThickness();
+        int borderThickness = DefaultDecorationParameter.getResizeBorderThickness();
 
         User32.INSTANCE.GetCursorPos(ptMouse);
         User32.INSTANCE.GetWindowRect(hwnd, rcWindow);
-        int captionBtnWidth = DecorationParameters.getTitleBarHeight();//caption buttons are square
+        int captionBtnWidth = DefaultDecorationParameter.getTitleBarHeight();//caption buttons are square
         int uRow = 1, uCol = 1;
         boolean fOnResizeBorder = false, fOnFrameDrag, fOnIcon = false,fOnMaximize = false;
 
@@ -201,7 +204,7 @@ public class BorderlessWindowProc implements WindowProc {
                 fOnResizeBorder = (ptMouse.y < (rcWindow.top + borderThickness)); //Top resizing
 //                    fOnIcon = (ptMouse.y <= rcWindow.top + TITLE_BAR_HEIGHT)
 //                              && (ptMouse.x > rcWindow.left)
-//                              && (ptMouse.x < (rcWindow.left + DecorationParameters.getIconWidth() + borderOffset));
+//                              && (ptMouse.x < (rcWindow.left + DefaultDecorationParameter.getIconWidth() + borderOffset));
                 uRow = 0; // Top Resizing or Caption Moving
             } else if (ptMouse.y < rcWindow.bottom && ptMouse.y >= rcWindow.bottom - borderThickness)
                 uRow = 2; // Bottom resizing
@@ -252,17 +255,4 @@ public class BorderlessWindowProc implements WindowProc {
             setNormalWindowState();
     }
 
-
-    void CreateThumbBarButtons(HWND hwnd)
-    {
-//        THUMBBUTTON rgtb[1];
-//        rgtb[0].iId = IDC_INCREMENT;
-//        rgtb[0].hIcon = g_hicoAlert;
-//        rgtb[0].dwFlags = THBF_ENABLED;
-//        rgtb[0].dwMask = THB_ICON | THB_TOOLTIP | THB_FLAGS;
-//        wcscpy_s(rgtb[0].szTip, L"Increment the value");
-//        ITaskbarList3Ptr sptb3;
-//        sptb3.CreateInstance(CLSID_TaskbarList);
-//        sptb3->ThumbBarAddButtons(hwnd, 1, rgtb);
-    }
 }

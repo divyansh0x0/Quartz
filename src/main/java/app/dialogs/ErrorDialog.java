@@ -5,8 +5,8 @@ import app.settings.constraints.ComponentParameters;
 import material.component.MaterialTextPane;
 import material.constants.Size;
 import material.utils.GraphicsUtils;
-import material.window.DecorationParameters;
 import material.window.MaterialWindow;
+import material.window.win32procedures.DefaultDecorationParameter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -50,7 +50,7 @@ class ErrorDialog extends AphroditeDialog {
         if(strW > maxW)
             rows = strW/maxW;
 
-        strH = (strH * rows) + DecorationParameters.getTitleBarHeight() + (DialogRootPanel.INSETS * 2) + fontMetrics.getAscent() + fontMetrics.getDescent();
+        strH = (strH * rows) + DefaultDecorationParameter.getTitleBarHeight() + (DialogRootPanel.INSETS * 2) + fontMetrics.getAscent() + fontMetrics.getDescent();
         strW = strW / rows - DialogRootPanel.INSETS * 2;
 
         _label.setText(GraphicsUtils.truncateString(g2d, str, strW));

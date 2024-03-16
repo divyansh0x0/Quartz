@@ -18,7 +18,6 @@ public class DialogFactory {
     private static void disposeLastDialog() {
         if (dialogInstance != null) {
             _componentMover.deregisterComponent(dialogInstance);
-            dialogInstance.close();
             dialogInstance.dispose();
             dialogInstance = null;
         }

@@ -103,7 +103,7 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
             animateBG(actualBackgroundColor);
     }
 
-    //TODO fix bad transitions in active status
+
     @Override
     public void updateTheme() {
         Color newBackground;

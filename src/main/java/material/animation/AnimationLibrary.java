@@ -1,6 +1,5 @@
 package material.animation;
 
-import material.MaterialParameters;
 import material.utils.Log;
 
 import javax.swing.*;
@@ -98,17 +97,17 @@ public class AnimationLibrary {
     }
 
     //TODO fix this unsafe code by making it safe
-    private static <model> model getAnimation(JComponent component, Class<model> animationClass) {
-        ArrayList<ColorAnimationModel> animations = componentAnimations.get(component);
-        if (animations == null)
-            return null;
-        for (int i = animations.size() - 1; i >= 0; --i) {
-            ColorAnimationModel animationModel = animations.get(i);
-            if (animationModel.getClass().getSimpleName().equals(animationClass.getSimpleName()))
-                return (model) animationModel;
-        }
-        return null;
-    }
+//    private static <model> model getAnimation(JComponent component, Class<model> animationClass) {
+//        ArrayList<ColorAnimationModel> animations = componentAnimations.get(component);
+//        if (animations == null)
+//            return null;
+//        for (int i = animations.size() - 1; i >= 0; --i) {
+//            ColorAnimationModel animationModel = animations.get(i);
+//            if (animationModel.getClass().getSimpleName().equals(animationClass.getSimpleName()))
+//                return (model) animationModel;
+//        }
+//        return null;
+//    }
 
     private static void removeAnimation(JComponent component, ColorAnimationModel model) {
         ArrayList<ColorAnimationModel> animations = componentAnimations.get(component);

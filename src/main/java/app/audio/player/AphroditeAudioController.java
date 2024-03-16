@@ -1,6 +1,7 @@
 package app.audio.player;
 
-import app.TileManager;
+import app.main.Aphrodite;
+import app.main.TileManager;
 import app.audio.AudioData;
 import app.audio.PlayerComponents;
 import app.audio.indexer.AudioDataIndexer;
@@ -15,7 +16,6 @@ import app.components.buttons.playback.VolumeButton;
 import app.components.containers.FullscreenPanel;
 import app.dialogs.DialogFactory;
 import app.local.notification.NotificationManager;
-import app.main.Aphrodite;
 import app.settings.Shortcuts;
 import app.settings.StartupSettings;
 import material.animation.MaterialFixedTimer;

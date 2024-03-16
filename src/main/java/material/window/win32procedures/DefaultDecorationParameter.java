@@ -1,6 +1,6 @@
-package material.window;
+package material.window.win32procedures;
 
-public class DecorationParameters {
+public class DefaultDecorationParameter {
     private static final int titleBarHeight = 27;
     private static final int controlBoxWidth = 27 * 3;
     private static final int iconWidth = 27;

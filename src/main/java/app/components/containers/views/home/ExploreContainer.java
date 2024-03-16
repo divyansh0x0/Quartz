@@ -1,6 +1,6 @@
 package app.components.containers.views.home;
 
-import app.TileManager;
+import app.main.TileManager;
 import app.audio.AudioData;
 import app.audio.indexer.AudioDataIndexer;
 import app.audio.search.IndexSearch;

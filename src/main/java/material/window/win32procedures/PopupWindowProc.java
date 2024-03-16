@@ -1,21 +1,27 @@
-package material.window;
+package material.window.win32procedures;
 
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.BaseTSD;
+import com.sun.jna.platform.win32.WinDef;
+import com.sun.jna.platform.win32.WinUser;
 import com.sun.jna.win32.W32APIOptions;
+import material.window.Dwmapi;
+import material.window.User32Ex;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 
 import static com.sun.jna.platform.win32.WinUser.*;
+import static com.sun.jna.platform.win32.WinUser.WM_DESTROY;
 
-public class PopupWindowProc implements WindowProc {
+
+public class PopupWindowProc implements WinUser.WindowProc {
     private boolean isVisible = false;
     private final static int WM_ERASEBKGND = 0x0014;
     private final static int WM_NCCALCSIZE = 0x0083;
 
-    private HWND hwnd = new HWND();
+    private WinDef.HWND hwnd = new WinDef.HWND();
     private BaseTSD.LONG_PTR defWndProc;
 
     final User32Ex INSTANCEx;
@@ -74,3 +80,4 @@ public class PopupWindowProc implements WindowProc {
     }
 
 }
+

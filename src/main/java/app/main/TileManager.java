@@ -1,4 +1,4 @@
-package app;
+package app.main;
 
 import app.audio.Artist;
 import app.audio.AudioData;

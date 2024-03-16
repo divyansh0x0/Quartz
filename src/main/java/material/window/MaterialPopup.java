@@ -8,7 +8,9 @@ import material.theme.enums.Elevation;
 import material.theme.models.ElevationModel;
 import material.utils.Log;
 import material.utils.OsUtils;
+import material.window.win32procedures.PopupWindowProc;
 import net.miginfocom.swing.MigLayout;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -44,7 +46,7 @@ public class MaterialPopup extends JFrame implements ElevationModel {
         this.addWindowFocusListener(new WindowAdapter() {
             @Override
             public void windowLostFocus(WindowEvent e) {
-                SwingUtilities.invokeLater(()->setVisible(false));
+                SwingUtilities.invokeLater(() -> setVisible(false));
                 Log.info("Hiding Popup");
             }
         });
@@ -92,7 +94,7 @@ public class MaterialPopup extends JFrame implements ElevationModel {
     }
 
     public void show(Point location) {
-        SwingUtilities.invokeLater(()->{
+        SwingUtilities.invokeLater(() -> {
             updateTheme();
             this.pack();
             calculatePositionForWindow(location);
@@ -106,24 +108,25 @@ public class MaterialPopup extends JFrame implements ElevationModel {
         Log.info(location + " is location of popup");
         int newX = location.x;
         int newY = location.y;
-        if(location.x + this.getWidth() > OsUtils.getScreenSize().width){
+        if (location.x + this.getWidth() > OsUtils.getScreenSize().width) {
             newX = OsUtils.getScreenSize().width - this.getWidth();
         }
 
-        if(location.y +  this.getHeight() > OsUtils.getScreenSize().height){
+        if (location.y + this.getHeight() > OsUtils.getScreenSize().height) {
             newY = OsUtils.getScreenSize().height - this.getHeight();
         }
-        location.move(newX,newY);
+        location.move(newX, newY);
         Log.info(location + " is corrected location of popup");
+    }
+
+    @Override
+    public @Nullable Elevation getElevation() {
+        return elevation;
     }
 
     public ElevationModel setElevation(Elevation elevation) {
         this.elevation = elevation;
         updateTheme();
         return null;
-    }
-
-    public Elevation getElevation() {
-        return elevation;
     }
 }

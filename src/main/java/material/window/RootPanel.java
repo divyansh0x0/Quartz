@@ -1,10 +1,10 @@
 package material.window;
 
-import java.awt.*;
-
 import material.containers.MaterialPanel;
 import material.theme.ThemeColors;
 import net.miginfocom.swing.MigLayout;
+
+import java.awt.*;
 
 public class RootPanel extends MaterialPanel {
 

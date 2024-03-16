@@ -15,7 +15,7 @@ plugins {
  */
 //applicationDefaultJvmArgs = ["-XX:+UseShenandoahGC", "-XX:+UnlockExperimentalVMOptions"]
 //applicationDefaultJvmArgs = ["-Xmx548m","-XX:+IgnoreUnrecognizedVMOptions"]
-mainClassName = 'app.MainClass'
+mainClassName = 'app.main.MainClass'
 compileJava.options.encoding = 'UTF-8'
 compileJava.sourceCompatibility = '21'
 compileJava.targetCompatibility = '21'
@@ -56,9 +56,6 @@ dependencies {
 
     //JAudioTagger
     implementation 'org.jaudiotagger:jaudiotagger:2.0.1'
-
-    //GUAVA
-    implementation("com.google.guava:guava:31.1-jre")
 
 
     //FREEDESKTOP DBUS

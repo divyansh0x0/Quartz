@@ -45,12 +45,13 @@ public class SystemSearch {
             isSearching = false;
         }
         Log.warn("Starting system search");
-        searchThread = Thread.startVirtualThread(()->this.beginSearch(true));
+        searchThread = Thread.startVirtualThread(() -> this.beginSearch(true));
     }
 
     private void beginSearch() {
         this.beginSearch(false);
     }
+
     private void beginSearch(boolean doBackgroundSearchIfCacheLoaded) {
         isSearching = true;
 //        boolean isCacheLoaded = cacheLoaded();
@@ -60,14 +61,15 @@ public class SystemSearch {
 //        }
 
 //        if (doBackgroundSearchIfCacheLoaded) {
-            Log.info("Beginning background search");
+        Log.info("Beginning background search");
 //            isBackgroundSearchRunning = true;
-            switch (OsUtils.getOsType()) {
-                case LINUX, MAC -> rootFSSearch();
-                case WINDOWS -> windowsFSSearch();
+        switch (OsUtils.getOsType()) {
+            case LINUX, MAC -> rootFSSearch();
+            case WINDOWS -> windowsFSSearch();
 //            }
         }
     }
+
     /**
      * Loads cache and checks if all files were loaded
      *
@@ -107,7 +109,7 @@ public class SystemSearch {
                 AudioFileVisitor fileVisitor = new AudioFileVisitor();
                 Files.walkFileTree(root.toPath(), EnumSet.of(FileVisitOption.FOLLOW_LINKS), SEARCH_DEPTH, fileVisitor);
                 List<File> arr = fileVisitor.getAudioFileArrayList();
-                Log.success( arr.size() +" mp3 files found in "+root);
+                Log.success(arr.size() + " mp3 files found in " + root);
                 saveDataAsync(arr);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -125,46 +127,50 @@ public class SystemSearch {
     }
 
     private int saveDataAsync(List<File> files) {
-        if(files.isEmpty())
-            return 0;
-        AtomicInteger savedFilesNumber = new AtomicInteger();
-        long t1 = System.nanoTime();
-        Thread[] threads = new Thread[ThreadCount];
-        int stackSize = (int) Math.ceil((double) files.size() /ThreadCount);
-        for (int i = 0; i < threads.length; i++) {
-            int begin = i * stackSize;
-            int end = Math.min(begin + stackSize,files.size());
-            int finalI = i;
-            threads[i] = Thread.ofVirtual().name("Audio data extractor thread " + i).start(()->{
-                Log.info("["+ finalI +"]" + "begin:" + begin + " | end: " + end);
-                for (int j = begin; j < end; j++) {
-                    File file = files.get(j);
-                    if (file.exists() && AudioData.isValidAudio(file.toPath())) {
-                        AudioData audioData = new AudioData(file);
-                        AudioDataIndexer.getInstance().addAudioFile(audioData);
-                        savedFilesNumber.incrementAndGet();
+        try {
+            if (files.isEmpty())
+                return 0;
+            AtomicInteger savedFilesNumber = new AtomicInteger();
+            long t1 = System.nanoTime();
+            Thread[] threads = new Thread[ThreadCount];
+            int stackSize = (int) Math.ceil((double) files.size() / ThreadCount);
+            for (int i = 0; i < threads.length; i++) {
+                int begin = i * stackSize;
+                int end = Math.min(begin + stackSize, files.size());
+                int finalI = i;
+                threads[i] = Thread.ofVirtual().name("Audio data extractor thread " + i).start(() -> {
+                    Log.info("[" + finalI + "]" + "begin:" + begin + " | end: " + end);
+                    for (int j = begin; j < end; j++) {
+                        File file = files.get(j);
+                        if (file.exists() && AudioData.isValidAudio(file.toPath())) {
+                            AudioData audioData = new AudioData(file);
+                            AudioDataIndexer.getInstance().addAudioFile(audioData);
+                            savedFilesNumber.incrementAndGet();
 //                        FileCacheManager.getInstance().cacheFile(file);
-                    } else {
+                        } else {
 //                        FileCacheManager.getInstance().deleteCacheFile(file);
-                        Log.error(file + " is not valid or doesn't exist");
+                            Log.error(file + " is not valid or doesn't exist");
+                        }
                     }
-                }
-            });
-        }
-        for(Thread thread:threads){
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                Log.error(thread.getName() + " was interrupted during cache loading");
+                });
             }
-        }
-        long t2 = System.nanoTime();
-        Log.success("Time taken to hot cache " + savedFilesNumber + " out of " + files.size() + " files: " + ((t2 - t1) / 0.000_0001) + "ms");
+            for (Thread thread : threads) {
+                try {
+                    thread.join();
+                } catch (InterruptedException e) {
+                    Log.error(thread.getName() + " was interrupted during cache loading");
+                }
+            }
+            long t2 = System.nanoTime();
+            Log.success("Time taken to hot cache " + savedFilesNumber + " out of " + files.size() + " files: " + ((t2 - t1) / 0.000_0001) + "ms");
 //        FileCacheManager.getInstance().saveCacheToStorage();
-        return savedFilesNumber.get();
+            return savedFilesNumber.get();
+        }catch (Exception e){
+            Log.error("error occurred while hot caching searched files: "  + e);
+            e.printStackTrace();
+            return 0;
+        }
     }
-
-
 
 
     public static SystemSearch getInstance() {

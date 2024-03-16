@@ -1,6 +1,7 @@
 package app.main;
 
 import app.audio.player.AphroditeAudioController;
+import app.audio.search.SystemSearch;
 import app.components.buttons.control.FullScreenButton;
 import app.components.containers.FullscreenPanel;
 import app.components.containers.MainPanel;
@@ -11,7 +12,6 @@ import material.containers.MaterialPanel;
 import material.theme.ThemeManager;
 import material.utils.Log;
 import material.window.MaterialWindow;
-import material.window.RootPanel;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -20,35 +20,24 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+//TODO Convert all singletons into normal classes and create a tab manager to manage context switching
 // TODO Add meta tag editor
 public class Aphrodite {
     private static Aphrodite instance;
-    private static final GraphicsDevice[] devices = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+    //    private static final GraphicsDevice[] devices = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
     private static final String NAME = "Aphrodite";
     public static final Size MIN_SIZE = new Size(640, 640 / 12 * 9);
-    private static final int TITLE_BAR_HEIGHT = 27;
+//    private static final int TITLE_BAR_HEIGHT = 27;
 
     private static final MaterialPanel GLASS_PANE = new MaterialPanel(new MigLayout("debug,nogrid, flowy, fill, inset 0, gap 0")).setElevationDP(null);
 
-    private static final MaterialWindow WINDOW = new MaterialWindow(NAME, MIN_SIZE,false);
-    private final static RootPanel ROOT = WINDOW.getRootPanel();
+    private static final MaterialWindow WINDOW = new MaterialWindow(NAME, MIN_SIZE, false);
+    private final static MaterialPanel ROOT = WINDOW.getRootPanel();
 
     private static final MainPanel MAIN_PANEL = MainPanel.getInstance();
     private static final PlaybackControlPanel PLAYBACK_CONTROL_PANEL = PlaybackControlPanel.getInstance();
     private static final FullscreenPanel FULLSCREEN_PANEL = FullscreenPanel.getInstance();
     private Mode MODE = Mode.DEFAULT;
-
-    //TODO Convert all singletons into normal classes and create a tab manager to manage context switching
-    public void showWhenReady() {
-//        if(MainPanel.getInstance())
-        show();
-    }
-
-
-    private enum Mode {
-        DEFAULT,
-        FULLSCREEN
-    }
 
     private Aphrodite() {
         EventQueue.invokeLater(() -> {
@@ -64,6 +53,37 @@ public class Aphrodite {
         });
     }
 
+
+    private enum Mode {
+        DEFAULT,
+        FULLSCREEN
+    }
+
+
+    public void startApplication() {
+//        Aphrodite.getInstance().show();
+
+        EventQueue.invokeLater(() -> {
+            AphroditeLoaderWindow aphroditeLoader = new AphroditeLoaderWindow(this);
+            aphroditeLoader.setVisible(true);
+            SystemSearch.getInstance().forceSearch();
+            SystemSearch.getInstance().onSearchComplete(() -> {
+                aphroditeLoader.close();
+                showMainWindow();
+                aphroditeLoader.dispose();
+            });
+        });
+    }
+
+    public void showMainWindow() {
+        if (!WINDOW.isVisible()) {
+            WINDOW.setVisible(true);
+            switch (MODE) {
+                case FULLSCREEN -> switchToChillMode();
+                case DEFAULT -> switchToDefaultMode();
+            }
+        }
+    }
 
 
     public void switchToDefaultMode() {
@@ -95,17 +115,6 @@ public class Aphrodite {
         WINDOW.setFullscreen(true);
     }
 
-    public void show() {
-        SwingUtilities.invokeLater(() -> {
-            if (!WINDOW.isVisible()) {
-                WINDOW.setVisible(true);
-                switch (MODE) {
-                    case FULLSCREEN -> switchToChillMode();
-                    case DEFAULT -> switchToDefaultMode();
-                }
-            }
-        });
-    }
 
     public void hide() {
         SwingUtilities.invokeLater(() -> {
@@ -165,9 +174,9 @@ public class Aphrodite {
     }
 
     public void handleKeyEvent(KeyEvent e) {
-        switch (e.getKeyCode()){
+        switch (e.getKeyCode()) {
             case KeyEvent.VK_ESCAPE -> {
-                if(MODE == Mode.FULLSCREEN)
+                if (MODE == Mode.FULLSCREEN)
                     switchToDefaultMode();
 //                System.exit(-1);
             }

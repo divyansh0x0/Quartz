@@ -1,5 +1,6 @@
 package material.window;
 
+import material.component.MaterialComponent;
 import material.constants.Size;
 import material.containers.MaterialPanel;
 import material.theme.ThemeColors;
@@ -10,6 +11,8 @@ import material.utils.OsUtils;
 import material.window.buttons.CloseButton;
 import material.window.buttons.MaxRestoreButton;
 import material.window.buttons.MinimizeButton;
+import material.window.win32procedures.BorderlessWindowProc;
+import material.window.win32procedures.DefaultDecorationParameter;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,10 +31,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 //         processBuilder.command("xprop", "-name","" + getName() + "", "-format","_MOTIF_WM_HINTS", "32c", "-set", "_MOTIF_WM_HINTS", "0x2, 0x2, 0x2, 0x2,0x2,0x2"); [Took me 1 hour to figure this shit out]
 //TODO Add 6 methods: 3 to add components as close,minimise and maximize buttons and 3 to remove those.
 public class MaterialWindow extends JFrame {
-
+    private static final int CAPTION_BUTTON_WIDTH = DefaultDecorationParameter.getIconWidth();
+    private MaterialWindowGrip GRIP = MaterialWindowGrip.CONSIDER_CAPTION_BAR.setGripHeight(DefaultDecorationParameter.getTitleBarHeight());
     // private static final int WIDTH = 640, HEIGHT = WIDTH / 12 * 9;
+    private MaterialComponent maxRestoreButton;
+    private MaterialComponent minimizeButton;
+    private MaterialComponent closeButton;
     private final RootPanel _root = new RootPanel();
-    private boolean isCaptionBarEnabled;
+    private boolean isDefaultCaptionBarEnabled;
     private boolean isMaximized = false;
     private @Nullable BorderlessWindowProc windowProc;
     private static final String insetsLayoutConstraints = "nogrid, flowy, fill, gap 0,";
@@ -42,15 +49,15 @@ public class MaterialWindow extends JFrame {
     private boolean wasMaximized = false;
     private final MaterialPanel INSETS_ROOT_PANE = new MaterialPanel(windowInsetsLayout);
     private boolean isMouseOnMaximizeBtn = false;
-    private Rectangle MouseDragArea = new Rectangle(0, 0, 0, 0);
     private final AtomicBoolean isMouseOnDragArea = new AtomicBoolean(false);
-    private MaterialPanel captionBar;
-    String CAPTION_BUTTONS_CONSTRAINT = "east, growy, w " + (DecorationParameters.getTitleBarHeight()) + "!";
-    private int GRIP_HEIGHT = DecorationParameters.getTitleBarHeight();
+
+    private final MaterialPanel defaultCaptionBar = new MaterialPanel(new MigLayout("fill"));
+    private MaterialPanel currentCaptionBar;
+    private int CAPTION_BAR_HEIGHT = 30;
 
 
-    public MaterialWindow(String name, Size minimumSize, boolean addCaptionBar, boolean addWindowProcedure) {
-        this.isCaptionBarEnabled = addCaptionBar;
+    public MaterialWindow(String name, Size minimumSize, boolean isDefaultCaptionBarEnabled, boolean addWindowProcedure) {
+        this.isDefaultCaptionBarEnabled = isDefaultCaptionBarEnabled;
         if (OsUtils.isCustomWindowSupported() && addWindowProcedure) {
             windowProc = new BorderlessWindowProc();
         }
@@ -74,10 +81,7 @@ public class MaterialWindow extends JFrame {
         this.add(INSETS_ROOT_PANE);
 
         //CaptionBar
-        if (addCaptionBar) {
-            captionBar = new MaterialPanel(new MigLayout("fill, insets 0 0 0 0"));
-            _root.add(captionBar, "top, align right");
-        }
+        setDefaultCaptionBar(isDefaultCaptionBarEnabled);
         ThemeManager.getInstance().addThemeListener(this::updateTheme);
 
         addComponentListener(new ComponentAdapter() {
@@ -107,10 +111,7 @@ public class MaterialWindow extends JFrame {
     }
 
     private void updateDragArea() {
-        if (isCaptionBarEnabled && captionBar != null) {
-            Rectangle rect = MouseDragArea == null ? new Rectangle(DecorationParameters.getResizeBorderThickness(), DecorationParameters.getResizeBorderThickness(), 0, 0) : MouseDragArea;
-            rect.setSize(getWidth() - captionBar.getWidth(), GRIP_HEIGHT);
-        }
+
     }
 
     private void updateTheme() {
@@ -120,29 +121,6 @@ public class MaterialWindow extends JFrame {
         }
     }
 
-    /* *************************************************************************
-     *                              GETTERS
-     ***************************************************************************/
-    public boolean isCaptionBarEnabled() {
-        return isCaptionBarEnabled;
-    }
-
-    public boolean isFullscreen() {
-        return isFullscreen;
-    }
-
-    public @NotNull JFrame getJFrame() {
-        return this;
-    }
-
-    public RootPanel getRootPanel() {
-        return _root;
-    }
-
-
-    public boolean isMaximized() {
-        return isMaximized;
-    }
 
     /* *************************************************************************
      *                              UTILITIES
@@ -193,16 +171,44 @@ public class MaterialWindow extends JFrame {
     /* **************************************************************************
      *                                SETTERS
      ****************************************************************************/
-    public void setCaptionBarEnabled(boolean b) {
-        this.isCaptionBarEnabled = b;
 
+    /* *************************************************************************
+     *                              GETTERS
+     ***************************************************************************/
+    public boolean isDefaultCaptionBarEnabled() {
+        return isDefaultCaptionBarEnabled;
+    }
+
+    public boolean isFullscreen() {
+        return isFullscreen;
+    }
+
+    public @NotNull JFrame getJFrame() {
+        return this;
+    }
+
+    public MaterialPanel getRootPanel() {
+        return _root;
+    }
+
+
+    public boolean isMaximized() {
+        return isMaximized;
+    }
+
+    public MaterialWindowGrip getGRIP() {
+        return GRIP;
+    }
+
+    public void setGrip(MaterialWindowGrip GRIP) {
+        this.GRIP = GRIP;
     }
 
     private void setMaximizedFlag(boolean b) {
         synchronized (getTreeLock()) {
             this.isMaximized = b;
             if (b) {
-                windowInsetsLayout.setLayoutConstraints(insetsLayoutConstraints + "insets " + DecorationParameters.getResizeBorderThickness());
+                windowInsetsLayout.setLayoutConstraints(insetsLayoutConstraints + "insets " + DefaultDecorationParameter.getResizeBorderThickness());
             } else {
                 windowInsetsLayout.setLayoutConstraints(insetsLayoutConstraints + "insets 1");
             }
@@ -247,17 +253,12 @@ public class MaterialWindow extends JFrame {
         }
     }
 
-    public void setGripHeight(int size) {
-        GRIP_HEIGHT = size;
-        if (captionBar != null)
-            MouseDragArea.setSize(getWidth() - captionBar.getWidth(), size);
-    }
-
     @Override
     public void setResizable(boolean resizable) {
         super.setResizable(resizable);
         if (windowProc != null)
             windowProc.setResizable(resizable);
+        updateCaptionBarComponents();
 //        if (captionBar != null) {
 //            if (!resizable)
 //                captionBar.remove(1);
@@ -266,6 +267,7 @@ public class MaterialWindow extends JFrame {
 //            captionBar.revalidate();
 //        }
     }
+
 
     private void setProperties() {
         System.setProperty("sun.java2d.opengl", "true");
@@ -291,11 +293,16 @@ public class MaterialWindow extends JFrame {
     public void setVisible(boolean b) {
         super.setVisible(b);
         try {
-            if (windowProc != null) {
-                Log.info("Preparing window procedure for material window");
-                windowProc.init(this);
-                windowProc.setVisible(b);
-            }
+//            synchronized (getTreeLock()) {
+                if (windowProc != null) {
+                    if (!windowProc.isInitialized()) {
+                        windowProc.init(this);
+//                    } else {
+                        windowProc.setVisible(b);
+
+                    }
+                }
+//            }
             KeyboardFocusManager.getCurrentKeyboardFocusManager().clearGlobalFocusOwner();
         } catch (Exception e) {
             Log.error(e.getMessage());
@@ -336,9 +343,21 @@ public class MaterialWindow extends JFrame {
 //        Log.info("checking for drag: " + MouseDragArea);
         Point p = MouseInfo.getPointerInfo().getLocation();
 //        SwingUtilities.convertPointFromScreen(p,this);
-        int x = getX() + MouseDragArea.x;
-        int y = getY() + MouseDragArea.y;
-        return p.x >= x && p.x <= x + MouseDragArea.width && p.y >= y && p.y <= y + MouseDragArea.height;
+        int x = getX() + GRIP.x;
+        int y = getY() + GRIP.y;
+        switch (GRIP) {
+            case CONSIDER_CAPTION_BAR -> {
+                int GripWidth = getWidth() - currentCaptionBar.getWidth();
+                int GripHeight = GRIP.height;
+                return p.y >= y && p.y <= y + GripHeight && p.x >= x && p.x <= x + GripWidth;
+            }
+            case IGNORE_CAPTION_BAR -> {
+                return p.y >= y && p.y <= y + GRIP.height && p.x >= x && p.x <= x + GRIP.width;
+            }
+            default -> {
+                return false;
+            }
+        }
     }
 
     public synchronized void allowWindowDrag(boolean b) {
@@ -346,26 +365,39 @@ public class MaterialWindow extends JFrame {
     }
 
 
-    public void setMouseDragArea(Rectangle rect) {
-        this.MouseDragArea = rect;
+    public void setDefaultCaptionBar(boolean isEnabled) {
+        isDefaultCaptionBarEnabled = isEnabled;
+        updateCaptionBarComponents();
     }
 
-    protected void addButtonsToCaptionBar() {
-        if (captionBar != null) {
-            captionBar.add(new CloseButton(), CAPTION_BUTTONS_CONSTRAINT);
-            captionBar.add(new MaxRestoreButton(), CAPTION_BUTTONS_CONSTRAINT);
-            captionBar.add(new MinimizeButton(), CAPTION_BUTTONS_CONSTRAINT);
+    public void setCustomCaptionBar(MaterialPanel captionBar) {
+        if (!isDefaultCaptionBarEnabled)
+            currentCaptionBar = captionBar;
+        else
+            throw new IllegalStateException("Already using default caption bar. Set it to false to use custom caption bar");
+    }
+
+    private void updateCaptionBarComponents() {
+        if (isDefaultCaptionBarEnabled) {
+            if (closeButton == null)
+                closeButton = new CloseButton();
+            if (minimizeButton == null)
+                minimizeButton = new MinimizeButton();
+            if (maxRestoreButton == null)
+                maxRestoreButton = new MaxRestoreButton();
+
+            defaultCaptionBar.removeAll();
+            defaultCaptionBar.add(closeButton, "east,w " + CAPTION_BUTTON_WIDTH + "!");
+            if (isResizable())
+                defaultCaptionBar.add(maxRestoreButton, "east, w " + CAPTION_BUTTON_WIDTH + "!");
+            defaultCaptionBar.add(minimizeButton, "east,w " + CAPTION_BUTTON_WIDTH + "!");
+            currentCaptionBar = defaultCaptionBar;
+
+            _root.add(defaultCaptionBar, "north,  w 100%!, h " + CAPTION_BAR_HEIGHT + "!");
+        } else {
+            _root.remove(defaultCaptionBar);
         }
-        else{
-            Log.error("Caption bar is null, cannot add buttons to it");
-        }
     }
 
-    public MaterialPanel getCaptionBar() {
-        return captionBar;
-    }
 
-    public void setCaptionBar(MaterialPanel captionBar) {
-        this.captionBar = captionBar;
-    }
 }
