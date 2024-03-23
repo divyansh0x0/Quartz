@@ -7,12 +7,12 @@ import material.listeners.MouseClickListener;
 import java.awt.event.InputEvent;
 
 public abstract class CaptionButton extends MaterialIconButton implements MouseClickListener {
-    private static final Padding PADDING = new Padding(5);
+    private static final Padding PADDING = new Padding(7);
     public CaptionButton() {
         super();
         setText(null);
         setPadding(PADDING);
-        setIconSizeRatio(0.9);
+        setIconSizeRatio(1);
         addLeftClickListener(this);
         setTransparentBackground(true);
         updateTheme();

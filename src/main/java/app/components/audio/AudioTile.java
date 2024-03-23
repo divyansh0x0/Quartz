@@ -191,7 +191,7 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
         if (getFont().canDisplayUpTo(audioName) == -1)
             g2d.drawString(audioName, tX, tY);
         else { //If there are unsupported characters then render them using default font
-            drawCompatibleString(audioName, tX, tY, g2d, getFont());
+            drawLanguageCompatibleString(audioName, tX, tY, g2d, getFont());
         }
 
         //artist name
@@ -205,7 +205,7 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
         if (getFont().canDisplayUpTo(audioName) == -1)
             g2d.drawString(artistName, tX, tY);
         else { //If there are unsupported characters then render them using default font
-            drawCompatibleString(artistName, tX, tY, g2d, artistFont);
+            drawLanguageCompatibleString(artistName, tX, tY, g2d, artistFont);
         }
         //If audio is broken show an error visual for it
 //        if (audioData.isBroken()) {

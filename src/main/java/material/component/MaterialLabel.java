@@ -140,7 +140,7 @@ public class MaterialLabel extends MaterialComponent {
             case BOTTOM -> tY = (int) (getHeight() - stringBounds.getHeight() - padding.getBottom());
 
         }
-        super.drawCompatibleString(clippedText, tX, tY, g2d, getFont());
+        super.drawLanguageCompatibleString(clippedText, tX, tY, g2d, getFont());
         g2d.dispose();
     }
     public LabelStyle getLabelStyle() {

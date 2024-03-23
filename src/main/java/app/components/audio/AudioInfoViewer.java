@@ -122,7 +122,7 @@ public class AudioInfoViewer extends MaterialComponent {
             if (getFont().canDisplayUpTo(audioName) == -1)
                 g2d.drawString(audioName, tX, tY);
             else
-                drawCompatibleString(audioName, tX, tY, g2d, getFont());
+                drawLanguageCompatibleString(audioName, tX, tY, g2d, getFont());
 
             //artist name
             int artistFontSize = (int) Math.round(getFontSize() * 0.8); //80% of font size
@@ -137,7 +137,7 @@ public class AudioInfoViewer extends MaterialComponent {
             if (getFont().canDisplayUpTo(artistName) == -1)
                 g2d.drawString(artistName, tX, tY);
             else
-                drawCompatibleString(artistName, tX, tY, g2d, artistFont);
+                drawLanguageCompatibleString(artistName, tX, tY, g2d, artistFont);
 
             g2d.setFont(getFont());
 
@@ -151,6 +151,7 @@ public class AudioInfoViewer extends MaterialComponent {
         this.audioData = audioData;
         setPreferredSize(getRequiredDimensions());
         rewriteImage();
+        repaint();
         return this;
     }
 

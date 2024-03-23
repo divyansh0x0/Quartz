@@ -163,8 +163,9 @@ public class AphroditeAudioController {
                 PlayerFixedTimer.getInstance().stop();
                 currentAudioData = null;
                 TileManager.setActiveAudioTiles(null);
+                updateUI();
             }
-            updatePlayerComponents();
+            loadPlayerComponents();
             updatePlayerButtons();
             updateAudioTileStatus();
             updateFullScreenMode();
@@ -226,14 +227,14 @@ public class AphroditeAudioController {
             pause();
             PlayerFixedTimer.getInstance().stop();
 
-            if (getPlayerComponents() != null) {
-                PlaybackBar bar = getPlayerComponents().getPlaybackBar();
-                if (bar != null) {
-                    TileManager.setActiveAudioTiles(null);
-                    bar.setCurrentTime(0);
-                    bar.setTotalTime(0);
-                }
-            }
+//            if (getPlayerComponents() != null) {
+//                PlaybackBar bar = getPlayerComponents().getPlaybackBar();
+//                if (bar != null) {
+//                    TileManager.setActiveAudioTiles(null);
+//                    bar.setCurrentTime(0);
+//                    bar.setTotalTime(0);
+//                }
+//            }
             load(null);
         } catch (Exception e) {
             Log.error(e);
@@ -440,7 +441,7 @@ public class AphroditeAudioController {
             this.playerComponents = playerComponents;
 
             if (isLoaded) {
-                updatePlayerComponents();
+                loadPlayerComponents();
                 updatePlayerButtons();
             }
         } catch (Exception e) {
@@ -462,7 +463,7 @@ public class AphroditeAudioController {
         }
     }
 
-    private synchronized void updatePlayerComponents() {
+    private synchronized void loadPlayerComponents() {
         SwingUtilities.invokeLater(() -> {
             try {
 

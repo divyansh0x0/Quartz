@@ -4,31 +4,32 @@ import app.components.spectrum.Spectrum;
 import app.settings.StartupSettings;
 import com.jhlabs.image.GaussianFilter;
 import material.utils.Log;
+import material.utils.OsUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.Random;
+import java.awt.image.VolatileImage;
 
 public abstract class SpectrumPainter {
     private final GaussianFilter gaussianFilter = new GaussianFilter(20);
     private final Spectrum spectrum;
     public final int MAX_DECIBELS = 110;
-    protected boolean forceAmbientUpdate = false;
     private float[] processedMagnitudes;
-    private final Object lock = new Object();
-    private boolean isProcessing = false;
     private float[] magnitudes;
-    private static Random random = new Random();
     private float timePassed = 0.0f;
-
-    public Object getSpectrumLock() {
-        return lock;
-    }
+    private VolatileImage volatileImage;
 
     public SpectrumPainter(Spectrum spectrum) {
         this.spectrum = spectrum;
         SharedPainterTimer.getInstance().add(this);
+    }
+    public void paintInVolatileImage(Graphics spectrumGraphicsObj){
+        if(volatileImage == null)
+            volatileImage = spectrum.createVolatileImage(OsUtils.getScreenSize().width, OsUtils.getScreenSize().height);
+
+        paint(volatileImage.getGraphics());
+        spectrumGraphicsObj.drawImage(volatileImage,0,0,null);
     }
     public abstract void paint(Graphics g);
 

@@ -10,13 +10,9 @@ import material.theme.ThemeColors;
 import org.jetbrains.annotations.Range;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
 
 public class Spectrum extends MaterialComponent {
     private SpectrumType spectrumType = StartupSettings.SPECTRUM_TYPE;
-    private static final int INTERVAL = 1000;
-
-    private BufferedImage imgForAvgColor;
     private final BarSpectrum barSpectrum = new BarSpectrum(this);
     private final WavySpectrum wavySpectrum = new WavySpectrum(this);
     private final RingSpectrum ringSpectrum = new RingSpectrum(this);
@@ -45,30 +41,12 @@ public class Spectrum extends MaterialComponent {
     protected void animateMouseExit() {
 
     }
-//    @Override
-//    public void animateFG(Color to) {
-////        if (getForeground() != null && getForeground().getRGB() != to.getRGB()) {
-////            if (fgAnimation == null || fgAnimation.isCompleted()) {
-////                fgAnimation = new ColorAnimation(this, ColorAnimationType.FOREGROUND, getForeground(), to, INTERVAL);
-////                fgAnimation.onCompleted(() -> {
-////                    setBackground(to);
-////                    repaint();
-////                });
-////                fgAnimation.start();
-////            } else {
-////                fgAnimation.stop();
-////                fgAnimation = null;
-////                animateFG(to);
-////            }
-////        } else
-////            setForeground(to);
-//        AnimationLibrary.animateForeground();
-//    }
+
 
     @Override
     public void paint(Graphics g) {
         super.paint(g);
-        activePainter.paint(g);
+        activePainter.paintInVolatileImage(g);
     }
 
 

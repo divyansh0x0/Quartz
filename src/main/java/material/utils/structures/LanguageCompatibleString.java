@@ -4,6 +4,8 @@ import java.util.Iterator;
 
 public class LanguageCompatibleString {
 
+    public static LanguageCompatibleString EMPTY = new LanguageCompatibleString("");
+
     public static class Node {
         private final String curr;
         public Node next;
@@ -49,7 +51,7 @@ public class LanguageCompatibleString {
             currNode.next = new Node(str, isSupported);
             currNode = currNode.next;
         }
-        if(!isSupported && isCompletelyCompatible)
+        if(!isSupported)
             isCompletelyCompatible = false;
     }
 

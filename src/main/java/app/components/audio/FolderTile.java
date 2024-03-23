@@ -100,7 +100,7 @@ public class FolderTile extends MaterialComponent {
         if(g2d.getFont().canDisplayUpTo(artistName) == -1) {
             g2d.drawString(artistName, tX, tY);
         }else{
-            drawCompatibleString(artistName,tX,tY,g2d,g2d.getFont());
+            drawLanguageCompatibleString(artistName,tX,tY,g2d,g2d.getFont());
         }
 
         //Number of songs

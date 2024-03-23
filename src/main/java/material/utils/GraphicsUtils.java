@@ -1,20 +1,15 @@
 package material.utils;
 
+import material.utils.structures.LanguageCompatibleString;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import material.utils.structures.LanguageCompatibleString;
 
 import java.awt.*;
 import java.awt.image.*;
-import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class GraphicsUtils {
-    private static final AtomicReference<HashMap<String, LanguageCompatibleString>> LANGUAGE_COMPATIBLE_STRING_HASH_MAP = new AtomicReference<>();
-
-    static {
-        LANGUAGE_COMPATIBLE_STRING_HASH_MAP.set(new HashMap<>());
-    }
+    private static final ConcurrentHashMap<String, LanguageCompatibleString> LANGUAGE_COMPATIBLE_STRING_HASH_MAP = new ConcurrentHashMap<>();
 
     public static GraphicsConfiguration getGraphicsConfiguration() {
         return GraphicsEnvironment.getLocalGraphicsEnvironment().
@@ -46,7 +41,7 @@ public class GraphicsUtils {
 
     public static LanguageCompatibleString getLanguageCompatibleString(String str, Font font) {
         if(str != null && !str.isEmpty()) {
-            LanguageCompatibleString preloaded = LANGUAGE_COMPATIBLE_STRING_HASH_MAP.get().get(str);
+            LanguageCompatibleString preloaded = LANGUAGE_COMPATIBLE_STRING_HASH_MAP.get(str);
             if (preloaded == null) {
                 LanguageCompatibleString languageCompatibleString = new LanguageCompatibleString(str);
                 StringBuilder sb = new StringBuilder();
@@ -72,12 +67,12 @@ public class GraphicsUtils {
                 if (!sb.isEmpty()) {
                     languageCompatibleString.addString(sb.toString(), isSbCompatible);
                 }
-                LANGUAGE_COMPATIBLE_STRING_HASH_MAP.getAcquire().put(str, languageCompatibleString);
+                LANGUAGE_COMPATIBLE_STRING_HASH_MAP.put(str, languageCompatibleString);
                 return languageCompatibleString;
             } else
                 return preloaded;
         }
-        return new LanguageCompatibleString("");
+        return LanguageCompatibleString.EMPTY;
     }
 
     /**

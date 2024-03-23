@@ -222,10 +222,7 @@ public abstract class MaterialComponent extends JComponent implements Serializab
         if (f != null) {
 
             if (isBold && isItalic) {
-                Map<TextAttribute, Object> attributeMap = new HashMap<>();
-                attributeMap.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD);
-                attributeMap.put(TextAttribute.POSTURE, TextAttribute.POSTURE_OBLIQUE);
-                this.setFont(f.deriveFont(attributeMap));
+                this.setFont(f.deriveFont(Font.BOLD | Font.ITALIC, getFontSize()));
             } else if (isBold) {
                 this.setFont(f.deriveFont(Collections.singletonMap(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD)));
             } else if (isItalic) {
@@ -267,20 +264,26 @@ public abstract class MaterialComponent extends JComponent implements Serializab
         return isSelected;
     }
 
-    protected void drawCompatibleString(String str, int x, int y, Graphics2D g2d, Font fontToUse) {
+    protected void drawLanguageCompatibleString(String str, int x, int y, Graphics2D g2d, Font fontToUse) {
         LanguageCompatibleString languageCompatibleString = GraphicsUtils.getLanguageCompatibleString(str, getFont());
-        Iterator<LanguageCompatibleString.Node> i = languageCompatibleString.getIterator();
-        Font defaultFont = getDefaultFont().deriveFont(fontToUse.getStyle(), fontToUse.getSize());
-        while (i.hasNext()) {
-            LanguageCompatibleString.Node node = i.next();
-            String sliceOfString = node.getCurr();
-            boolean isCompatible = node.isSupportedByFont();
-            if (isCompatible)
-                g2d.setFont(fontToUse);
-            else
-                g2d.setFont(defaultFont);
-            g2d.drawString(sliceOfString, x, y);
-            x += g2d.getFontMetrics().stringWidth(sliceOfString);
+        if(languageCompatibleString.isCompletelyCompatible()) {
+            g2d.setFont(fontToUse);
+            g2d.drawString(str,x,y);
+        }
+        else {
+            Iterator<LanguageCompatibleString.Node> i = languageCompatibleString.getIterator();
+            Font defaultFont = getDefaultFont().deriveFont(fontToUse.getStyle(), fontToUse.getSize());
+            while (i.hasNext()) {
+                LanguageCompatibleString.Node node = i.next();
+                String sliceOfString = node.getCurr();
+                boolean isCompatible = node.isSupportedByFont();
+                if (isCompatible)
+                    g2d.setFont(fontToUse);
+                else
+                    g2d.setFont(defaultFont);
+                g2d.drawString(sliceOfString, x, y);
+                x += g2d.getFontMetrics().stringWidth(sliceOfString);
+            }
         }
     }
 
