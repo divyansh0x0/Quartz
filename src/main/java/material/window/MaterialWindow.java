@@ -7,7 +7,7 @@ import material.theme.ThemeColors;
 import material.theme.ThemeManager;
 import material.theme.enums.Elevation;
 import material.utils.Log;
-import material.utils.OsUtils;
+import material.utils.OsInfo;
 import material.window.buttons.CloseButton;
 import material.window.buttons.MaxRestoreButton;
 import material.window.buttons.MinimizeButton;
@@ -58,7 +58,7 @@ public class MaterialWindow extends JFrame {
 
     public MaterialWindow(String name, Size minimumSize, boolean isDefaultCaptionBarEnabled, boolean addWindowProcedure) {
         this.isDefaultCaptionBarEnabled = isDefaultCaptionBarEnabled;
-        if (OsUtils.isCustomWindowSupported() && addWindowProcedure) {
+        if (OsInfo.isCustomWindowSupported() && addWindowProcedure) {
             windowProc = new BorderlessWindowProc();
         }
         setProperties();
@@ -102,11 +102,11 @@ public class MaterialWindow extends JFrame {
 
 
     public MaterialWindow(String name, Size minimumSize, boolean addCaptionButtons) {
-        this(name, minimumSize, addCaptionButtons, true);
+        this(name, minimumSize, addCaptionButtons, false);
     }
 
     public MaterialWindow(String name, Size minimumSize) {
-        this(name, minimumSize, true, true);
+        this(name, minimumSize, true, false);
 
     }
 
@@ -341,7 +341,7 @@ public class MaterialWindow extends JFrame {
 
     public boolean isOnDragArea() {
 //        Log.info("checking for drag: " + MouseDragArea);
-        Point p = MouseInfo.getPointerInfo().getLocation();
+        Point p = MousePointer.getPointerLocation();
 //        SwingUtilities.convertPointFromScreen(p,this);
         int x = getX() + GRIP.x;
         int y = getY() + GRIP.y;

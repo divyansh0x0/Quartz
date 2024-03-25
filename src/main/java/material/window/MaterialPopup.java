@@ -7,7 +7,7 @@ import material.theme.ThemeManager;
 import material.theme.enums.Elevation;
 import material.theme.models.ElevationModel;
 import material.utils.Log;
-import material.utils.OsUtils;
+import material.utils.OsInfo;
 import material.window.win32procedures.PopupWindowProc;
 import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.Nullable;
@@ -26,7 +26,7 @@ public class MaterialPopup extends JFrame implements ElevationModel {
     public MaterialPopup(LayoutManager layoutManager) {
         super();
 
-        if (OsUtils.isCustomWindowSupported())
+        if (OsInfo.isCustomWindowSupported())
             windowProc = new PopupWindowProc();
         else
             setUndecorated(true);
@@ -108,12 +108,12 @@ public class MaterialPopup extends JFrame implements ElevationModel {
         Log.info(location + " is location of popup");
         int newX = location.x;
         int newY = location.y;
-        if (location.x + this.getWidth() > OsUtils.getScreenSize().width) {
-            newX = OsUtils.getScreenSize().width - this.getWidth();
+        if (location.x + this.getWidth() > OsInfo.getScreenSize().width) {
+            newX = OsInfo.getScreenSize().width - this.getWidth();
         }
 
-        if (location.y + this.getHeight() > OsUtils.getScreenSize().height) {
-            newY = OsUtils.getScreenSize().height - this.getHeight();
+        if (location.y + this.getHeight() > OsInfo.getScreenSize().height) {
+            newY = OsInfo.getScreenSize().height - this.getHeight();
         }
         location.move(newX, newY);
         Log.info(location + " is corrected location of popup");

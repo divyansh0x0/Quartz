@@ -5,7 +5,6 @@ import app.settings.StartupSettings;
 import material.theme.ThemeColors;
 import material.theme.ThemeManager;
 import material.tools.ColorUtils;
-import material.utils.OsUtils;
 
 import java.awt.*;
 import java.awt.geom.Path2D;
@@ -47,8 +46,6 @@ public class WavySpectrum extends SpectrumPainter {
     public void paint(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
 //        drawAmbientBlur(g2d);
-        g.setColor(spectrum.getBackground());
-        g.fillRect(0, 0, OsUtils.getScreenSize().width, OsUtils.getScreenSize().height);
 
         drawWaves(g2d);
         g2d.dispose();

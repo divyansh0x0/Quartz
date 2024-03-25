@@ -14,7 +14,7 @@ public class AudioQueue {
     private ArrayList<Runnable> queueUpdateListeners = new ArrayList<>();
     private static AudioQueue instance;
     private ArrayList<AudioData> queue = new ArrayList<>();
-    private ArrayList<AudioData> unShuffledQueue;
+    private ArrayList<AudioData> unShuffledQueue = new ArrayList<>();
     private boolean isShuffled = false;
     private int currentAudioIndex = 0;
     private AudioData currentAudioData;
@@ -34,7 +34,8 @@ public class AudioQueue {
         if (queue.size() > 1) {
             Random random = new Random();
             if (!isShuffled) {
-                unShuffledQueue = new ArrayList<>(queue);
+                unShuffledQueue.clear();
+                unShuffledQueue.addAll(queue);
             }
             ArrayList<AudioData> shuffledQueue = new ArrayList<>(queue.size());
             for (int i = queue.size(); i > 0; i--) {
@@ -50,8 +51,10 @@ public class AudioQueue {
 
     public void unShuffle() {
         if (queue.size() > 1 && isShuffled) {
-            if (unShuffledQueue != null)
-                queue = unShuffledQueue;
+            if (unShuffledQueue != null) {
+                queue.clear();
+                queue.addAll(unShuffledQueue);
+            }
             isShuffled = false;
             queueUpdated();
         }
@@ -70,7 +73,7 @@ public class AudioQueue {
             if (queue.isEmpty()) {
                 return null;
             } else
-                return queue.get(0);
+                return queue.getFirst();
         }
     }
 

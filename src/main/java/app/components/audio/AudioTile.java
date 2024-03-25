@@ -18,6 +18,7 @@ import material.tools.ColorUtils;
 import material.utils.GraphicsUtils;
 import material.utils.Log;
 import material.utils.StringUtils;
+import material.window.MousePointer;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -27,7 +28,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
-import java.time.Duration;
 import java.util.ArrayList;
 
 public class AudioTile extends MaterialComponent implements MouseInputListener, Serializable {
@@ -128,8 +128,9 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
     private void showPopup() {
         Log.info("Showing popup");
 //        audioTile.setSelected(true);
-        audioUtilityPopupMenu.show(MouseInfo.getPointerInfo().getLocation(),this);
+        audioUtilityPopupMenu.show(MousePointer.getPointerLocation(),this);
     }
+    private RoundRectangle2D artworkBounds = new RoundRectangle2D.Float(0,0,0,0,MaterialParameters.CORNER_RADIUS,MaterialParameters.CORNER_RADIUS);
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -147,7 +148,7 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
         Image artwork = audioData.getArtwork();
 
         //Background
-        RoundRectangle2D artworkBounds = new RoundRectangle2D.Float(iX, iY, iSize, iSize, cornerRadius, cornerRadius);
+        artworkBounds.setFrame(iX,iY,iSize,iSize);
         Color tileBgColor = isSelected() ? ThemeColors.getSelectionColors().getBackground() : getBackground(); //If selected then change color to selection color else set it to default
         g2d.setColor(tileBgColor);
         g2d.fillRoundRect(0, 0, getWidth(), getHeight(), cornerRadius, cornerRadius);
@@ -163,14 +164,13 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
 
 
         //border of artwork
-        g2d.setColor(ColorUtils.darken(ThemeColors.getBackground(), 10));
+        g2d.setColor(ThemeColors.getBackground());
         g2d.draw(artworkBounds);
 
         //Drawing text
-        Duration duration = Duration.ofMillis((long) audioData.getDurationInSeconds() * 1000);
         String artistName = audioData.getArtistsConcatenated();
         String audioName = audioData.getName();
-        String audioDuration = StringUtils.formatTime(duration);
+        String audioDuration = StringUtils.getFormattedTimeMs(audioData.getDurationInMs());
 
         g2d.setFont(getFont());
 

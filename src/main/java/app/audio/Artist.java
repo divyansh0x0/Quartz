@@ -24,7 +24,7 @@ public class Artist {
 
     public ArrayList<AudioData> getAudioDataList() {
 //        Log.info(name +":\n" + audioData);
-        return new ArrayList<>(audioData);
+        return audioData;
     }
 
     public void addAudioDataList(ArrayList<AudioData> audioData) {

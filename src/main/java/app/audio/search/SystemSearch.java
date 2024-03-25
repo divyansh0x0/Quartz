@@ -6,7 +6,7 @@ import app.components.listeners.SearchCompletedListener;
 import app.local.cache.FileCacheManager;
 import app.settings.StartupSettings;
 import material.utils.Log;
-import material.utils.OsUtils;
+import material.utils.OsInfo;
 
 import javax.swing.filechooser.FileSystemView;
 import java.io.File;
@@ -18,7 +18,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-// TODO Fix high memories usage due to file system search
 public class SystemSearch {
     private static final ArrayList<SearchCompletedListener> searchCompletedListeners = new ArrayList<>();
     private static SystemSearch instance;
@@ -63,7 +62,7 @@ public class SystemSearch {
 //        if (doBackgroundSearchIfCacheLoaded) {
         Log.info("Beginning background search");
 //            isBackgroundSearchRunning = true;
-        switch (OsUtils.getOsType()) {
+        switch (OsInfo.getOsType()) {
             case LINUX, MAC -> rootFSSearch();
             case WINDOWS -> windowsFSSearch();
 //            }

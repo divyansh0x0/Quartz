@@ -15,7 +15,7 @@ import material.theme.enums.Elevation;
 import material.theme.enums.ThemeType;
 import material.tools.ColorUtils;
 import material.utils.HorizontalComponentResizer;
-import material.utils.OsUtils;
+import material.utils.OsInfo;
 import material.utils.StringUtils;
 import material.window.win32procedures.DefaultDecorationParameter;
 import net.miginfocom.swing.MigLayout;
@@ -58,7 +58,7 @@ public class SideNavigationPanel extends MaterialPanel {
         menuLabel_1.setFontSize(FONT_SIZE - 1);
 
         String titleLabelConstraint = "north, h " + ComponentParameters.SEARCH_HEADER_HEIGHT + "!, alignX left";
-        if (OsUtils.isCustomWindowSupported())
+        if (OsInfo.isCustomWindowSupported())
             titleLabelConstraint += ", gapY " + DefaultDecorationParameter.getTitleBarHeight();
         add(titleLabel, titleLabelConstraint);
         add(menuLabel_1, "gapX " + NAV_BTN_PADDING.getLeft() + " , gapY 10");

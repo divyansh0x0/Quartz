@@ -24,7 +24,7 @@ public class NotificationManager {
             AsyncTask = null;
         }
 //        AsyncTask = Thread.startVirtualThread(() -> {
-//            if(OsUtils.isUnix())
+//            if(OsInfo.isUnix())
 //                GnomeNotify.getInstance().sendNotification(audioData.getName(), audioData.getArtistsConcatenated(), NotifCacheManager.getInstance().writeNotifImageFile(audioData).getAbsolutePath());
 //        });
     }

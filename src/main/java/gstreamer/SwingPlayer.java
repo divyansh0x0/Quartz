@@ -120,9 +120,9 @@ public class SwingPlayer {
             position.onSeek(duration -> {
                 long dur = playbin.queryDuration(Format.TIME);
                     if (dur > 0) {
-                        playbin.seekSimple(Format.TIME,
-                                EnumSet.of(SeekFlags.FLUSH),
-                                duration.toNanos());
+//                        playbin.seekSimple(Format.TIME,
+//                                EnumSet.of(SeekFlags.FLUSH),
+//                                duration.toNanos());
                     }
             });
             // sync slider position to video when not dragging

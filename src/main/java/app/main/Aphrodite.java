@@ -31,7 +31,7 @@ public class Aphrodite {
 
     private static final MaterialPanel GLASS_PANE = new MaterialPanel(new MigLayout("debug,nogrid, flowy, fill, inset 0, gap 0")).setElevationDP(null);
 
-    private static final MaterialWindow WINDOW = new MaterialWindow(NAME, MIN_SIZE, false);
+    private static final MaterialWindow WINDOW = new MaterialWindow(NAME, MIN_SIZE, false,true);
     private final static MaterialPanel ROOT = WINDOW.getRootPanel();
 
     private static final MainPanel MAIN_PANEL = MainPanel.getInstance();

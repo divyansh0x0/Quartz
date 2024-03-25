@@ -32,7 +32,7 @@ public final class AudioData implements Serializable, Comparable<AudioData> {
     private @NotNull String artistsConcatenated;
     private @NotNull String album;
     private @NotNull String folderPath;
-    private double durationInSeconds;
+    private long durationInMs;
     private boolean isFavorite;
     private boolean isBroken = false;
     private ArrayList<Playlist> playlists;
@@ -44,12 +44,13 @@ public final class AudioData implements Serializable, Comparable<AudioData> {
         try {
             AudioHeader audioHeader = MP3Tools.getAudioHeader(file);
             if (audioHeader != null) {
+                double durationInSecs;
                 if (audioHeader instanceof MP3AudioHeader) {
-                    durationInSeconds = ((MP3AudioHeader) audioHeader).getPreciseTrackLength();
+                    durationInSecs = ((MP3AudioHeader) audioHeader).getPreciseTrackLength();
                 } else {
-                    durationInSeconds = audioHeader.getTrackLength();
+                    durationInSecs = audioHeader.getTrackLength();
                 }
-
+                durationInMs = (long) Math.floor(durationInSecs * 1000);
             }
 
             Tag tag = MP3Tools.getTag(file);
@@ -60,7 +61,7 @@ public final class AudioData implements Serializable, Comparable<AudioData> {
 
                 album = formatStringData(tag.getFirst(FieldKey.ALBUM));
                 Artwork artwork = tag.getFirstArtwork();
-                if(artwork != null)
+                if (artwork != null)
                     ArtworkManager.getInstance().registerThumbnail(this, artwork.getBinaryData());
                 else
                     ArtworkManager.getInstance().registerThumbnail(this, null);
@@ -72,7 +73,6 @@ public final class AudioData implements Serializable, Comparable<AudioData> {
             //Set everything to defaults if any exception occurs
             applyDefaultTags();
             Log.error(e);
-            e.printStackTrace();
         }
 
     }
@@ -96,12 +96,12 @@ public final class AudioData implements Serializable, Comparable<AudioData> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AudioData that = (AudioData) o;
-        return file.getPath().equals(that.file.getPath()) || (Double.compare(that.durationInSeconds, durationInSeconds) == 0 && name.equals(that.name) && artists.equals(that.artists));
+        return file.getPath().equals(that.file.getPath()) || (Double.compare(that.durationInMs, durationInMs) == 0 && name.equals(that.name) && artists.equals(that.artists));
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(file, name, artistsConcatenated, durationInSeconds);
+        return Objects.hash(file, name, artistsConcatenated, durationInMs);
     }
 
     public boolean containsString(String s) {
@@ -117,7 +117,7 @@ public final class AudioData implements Serializable, Comparable<AudioData> {
                 Artist: %s
                 Path: %s
                 ---------------------------------------------------------------------------------------------------
-                """).formatted(name, durationInSeconds, artists, getFile().getPath());
+                """).formatted(name, durationInMs, artists, getFile().getPath());
     }
 
     public static boolean isValidAudio(Path path) {
@@ -137,8 +137,12 @@ public final class AudioData implements Serializable, Comparable<AudioData> {
     //
     //SETTERS
     //
-    public void setDurationInSeconds(double durationInSeconds) {
-        this.durationInSeconds = durationInSeconds;
+    public void setDurationInMs(double durationInMs) {
+        setDurationInMs(Math.floor(durationInMs));
+    }
+
+    public void setDurationInMs(long durationInMs) {
+        this.durationInMs = (long) durationInMs;
     }
 
     public void setFile(@NotNull File file) {
@@ -194,8 +198,8 @@ public final class AudioData implements Serializable, Comparable<AudioData> {
         return album;
     }
 
-    public double getDurationInSeconds() {
-        return durationInSeconds;
+    public @NotNull long getDurationInMs() {
+        return durationInMs;
     }
 
 

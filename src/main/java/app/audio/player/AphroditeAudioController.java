@@ -1,7 +1,5 @@
 package app.audio.player;
 
-import app.main.Aphrodite;
-import app.main.TileManager;
 import app.audio.AudioData;
 import app.audio.PlayerComponents;
 import app.audio.indexer.AudioDataIndexer;
@@ -16,6 +14,8 @@ import app.components.buttons.playback.VolumeButton;
 import app.components.containers.FullscreenPanel;
 import app.dialogs.DialogFactory;
 import app.local.notification.NotificationManager;
+import app.main.Aphrodite;
+import app.main.TileManager;
 import app.settings.Shortcuts;
 import app.settings.StartupSettings;
 import material.animation.MaterialFixedTimer;
@@ -31,9 +31,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
-import java.time.Duration;
 import java.util.Arrays;
-
+//TODO Fix memory spike caused when playing an audio
 public class AphroditeAudioController {
     private static AphroditeAudioController instance;
     //    private MediaPlayer m_player;
@@ -47,8 +46,8 @@ public class AphroditeAudioController {
     private final RepeatMode repeatMode = RepeatMode.REPEAT_ALL;
     private double VOLUME = -1;
     private Thread UiUpdateTask;
-    private Duration currentTime;
-    private Duration durationToSeek = Duration.ofSeconds(0);
+    private long currentTime;
+    private long durationToSeek = 0;
     private boolean isSeeking = false;
     private boolean wasPausedBeforeSeeking = false;
     private boolean isVisualizerSamplingEnabled;
@@ -59,54 +58,48 @@ public class AphroditeAudioController {
 
     public void handleKeyEvent(KeyEvent e) {
         try {
-            if (durationToSeek.isZero()) {
+            if (durationToSeek == 0) {
                 wasPausedBeforeSeeking = isPaused();
             }
             switch (e.getID()) {
                 case KeyEvent.KEY_RELEASED -> {
                     switch (e.getKeyCode()) {
-                        case KeyEvent.VK_PAUSE, Shortcuts.AudioPlayerController.PLAY_PAUSE_TOGGLE -> {
+                        case KeyEvent.VK_PAUSE, Shortcuts.Controller.PLAY_PAUSE_TOGGLE -> {
                             if (isPaused())
                                 play();
                             else
                                 pause();
                         }
-                        case Shortcuts.AudioPlayerController.SEEK_BACKWARDS, Shortcuts.AudioPlayerController.SEEK_FORWARDS -> {
-                            if (currentTime != null) {
-                                if (playerComponents != null) {
-                                    PlaybackBar playbackBar = playerComponents.getPlaybackBar();
-                                    playbackBar.triggerSeekEvent(currentTime.plus(durationToSeek).toNanos());
-                                    if (!wasPausedBeforeSeeking)
-                                        play();
-                                    isSeeking = false;
-                                    durationToSeek = Duration.ofSeconds(0);
-                                }
+                        case Shortcuts.Controller.SEEK_BACKWARDS, Shortcuts.Controller.SEEK_FORWARDS -> {
+                            if (playerComponents != null) {
+                                PlaybackBar playbackBar = playerComponents.getPlaybackBar();
+                                playbackBar.triggerSeekEvent(currentTime + durationToSeek);
+                                if (!wasPausedBeforeSeeking)
+                                    play();
+                                isSeeking = false;
+                                durationToSeek =0;
                             }
                         }
                     }
                 }
                 case KeyEvent.KEY_PRESSED -> {
                     switch (e.getKeyCode()) {
-                        case Shortcuts.AudioPlayerController.SEEK_BACKWARDS -> {
-                            if (currentTime != null) {
+                        case Shortcuts.Controller.SEEK_BACKWARDS -> {
                                 if (!isPaused())
                                     pause();
-                                durationToSeek = durationToSeek.minusSeconds(SEEK_SECONDS);
-                                playerComponents.getPlaybackBar().setCurrentTime(currentTime.plus(durationToSeek).toNanos());
+                                durationToSeek = durationToSeek - SEEK_SECONDS;
+                                playerComponents.getPlaybackBar().setCurrentTime(currentTime + durationToSeek);
                                 isSeeking = true;
-                            }
                         }
-                        case Shortcuts.AudioPlayerController.SEEK_FORWARDS -> {
-                            if (currentTime != null) {
+                        case Shortcuts.Controller.SEEK_FORWARDS -> {
                                 if (!isPaused())
                                     pause();
-                                durationToSeek = durationToSeek.plusSeconds(SEEK_SECONDS);
-                                playerComponents.getPlaybackBar().setCurrentTime(currentTime.plus(durationToSeek).toNanos());
+                                durationToSeek = durationToSeek + SEEK_SECONDS;
+                                playerComponents.getPlaybackBar().setCurrentTime(currentTime + durationToSeek);
                                 isSeeking = true;
-                            }
                         }
-                        case Shortcuts.AudioPlayerController.VOLUME_UP -> setVolume(VOLUME + VOLUME_CHANGE);
-                        case Shortcuts.AudioPlayerController.VOLUME_DOWN -> setVolume(VOLUME - VOLUME_CHANGE);
+                        case Shortcuts.Controller.VOLUME_UP -> setVolume(VOLUME + VOLUME_CHANGE);
+                        case Shortcuts.Controller.VOLUME_DOWN -> setVolume(VOLUME - VOLUME_CHANGE);
                     }
                 }
             }
@@ -154,7 +147,7 @@ public class AphroditeAudioController {
                 Log.success("Loading audio: " + currentAudioData.getFile().getPath());
                 _AudioPlayer.load(audioData);
                 isLoaded = true;
-                currentTime = Duration.ZERO;
+                currentTime = 0;
                 TileManager.setActiveAudioTiles(currentAudioData);
                 AudioQueue.getInstance().setActiveAudio(audioData);
                 if (!Aphrodite.getInstance().getWindow().isFocused())
@@ -243,7 +236,7 @@ public class AphroditeAudioController {
 
     public synchronized void restart() {
         try {
-            _AudioPlayer.seek(Duration.ZERO);
+            _AudioPlayer.seek(0);
         } catch (Exception e) {
             handleError(e);
         }
@@ -524,18 +517,18 @@ public class AphroditeAudioController {
             if (!isSeeking) {
                 if (playerComponents != null && !_AudioPlayer.isDisposed()) {
                     PlaybackBar playbackBar = playerComponents.getPlaybackBar();
-                    long currentTimeTemp = _AudioPlayer.getCurrentTimeNanos();
+                    long currentTimeTemp = _AudioPlayer.getCurrentTimeMs();
                     SwingUtilities.invokeLater(() -> {
                         playbackBar.setCurrentTime(currentTimeTemp);
-                        currentTime = Duration.ofNanos(currentTimeTemp);
+                        currentTime = currentTimeTemp;
                     });
-                    if (_AudioPlayer.getTotalTimeNanos() != 0) {
-                        if (playbackBar.getTotalTimeNanos() != _AudioPlayer.getTotalTimeNanos())
+                    if (_AudioPlayer.getTotalTimeMs() != 0) {
+                        if (playbackBar.getTotalTimeMs() != _AudioPlayer.getTotalTimeMs())
                             SwingUtilities.invokeLater(() -> {
-                                playbackBar.setTotalTime(_AudioPlayer.getTotalTimeNanos());
+                                playbackBar.setTotalTime(_AudioPlayer.getTotalTimeMs());
                             });
-                        if (_AudioPlayer.getTotalTimeNanos() > 0 && currentAudioData.getDurationInSeconds() != _AudioPlayer.getTotalTimeNanos() / 1e9) {
-                            currentAudioData.setDurationInSeconds(_AudioPlayer.getTotalTimeNanos() / 1e9);
+                        if (_AudioPlayer.getTotalTimeMs() > 0 && currentAudioData.getDurationInMs() != _AudioPlayer.getTotalTimeMs()) {
+                            currentAudioData.setDurationInMs(_AudioPlayer.getTotalTimeMs());
                             TileManager.getMappedTiles(currentAudioData).forEach(Component::repaint);
                         }
 

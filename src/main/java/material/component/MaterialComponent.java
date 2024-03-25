@@ -8,7 +8,6 @@ import material.theme.ThemeColors;
 import material.theme.ThemeManager;
 import material.theme.enums.Elevation;
 import material.utils.GraphicsUtils;
-import material.utils.Log;
 import material.utils.structures.LanguageCompatibleString;
 
 import javax.swing.*;
@@ -17,7 +16,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 
 public abstract class MaterialComponent extends JComponent implements Serializable {
     private static final ArrayList<MaterialComponent> allInstances = new ArrayList<>();
@@ -43,8 +44,6 @@ public abstract class MaterialComponent extends JComponent implements Serializab
                 if (source instanceof MaterialComponent comp) {
                     if (animatingComp != null && animatingComp == comp) {
                         animatingComp.animateMouseExit();
-                        if(animatingComp instanceof MaterialNavButton)
-                            Log.error("Mouse exited from " + ((MaterialNavButton) animatingComp).getText());
                         animatingComp = null;
                     }
                 }
@@ -54,8 +53,6 @@ public abstract class MaterialComponent extends JComponent implements Serializab
                         if (animatingComp != comp) {
                             if (animatingComp != null) {
                                 animatingComp.animateMouseExit();
-                                if(animatingComp instanceof MaterialNavButton && comp instanceof MaterialNavButton)
-                                    Log.warn("exited animation from " + ((MaterialNavButton) animatingComp).getText() + " to " + ((MaterialNavButton) comp).getText());
                             }
                             animatingComp = comp;
                             animatingComp.animateMouseEnter();
@@ -64,7 +61,6 @@ public abstract class MaterialComponent extends JComponent implements Serializab
                 } else {
                     if (animatingComp != null) {
                         animatingComp.animateMouseExit();
-                        Log.warn("Unknown event: " + event.getID());
                         animatingComp = null;
                     }
 

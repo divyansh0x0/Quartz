@@ -1,17 +1,28 @@
 package material.utils;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 
 public class StringUtils {
     public static final String ELLIPSIS = "…";
-    public static @NotNull String formatTime(@NotNull Duration d) {
-        long m = d.toMillis();
-        long sec = (m / 1000) % 60;
-        long min = (m / 1000) / 60;
-        return "%02d:%02d".formatted(min, sec);
+    @Contract(pure = true)
+    public static @NotNull String getFormattedTimeMs(long ms) {
+        long totalSecs = ms/1000;
+        short sec = (short) (totalSecs%60);
+        long min = totalSecs/60;
+        if(min >= 60){
+            int hour = (int) (min % 60);
+            min = (short) (min % 60);
+            return  hour + "h "+min+"m "+sec + "s";
+        }
+        if(min > 0)
+            return min + "m " + sec + "s";
+        if(sec > 0)
+            return sec + "s";
+        else
+            return "0s";
     }
 
     /**

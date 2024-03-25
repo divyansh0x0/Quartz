@@ -38,7 +38,7 @@ public class AudioTileComparator {
     };
     public static Comparator<Component> DURATION_COMPARATOR = (o1, o2) -> {
         if(o1 instanceof AudioTile tile1 && o2 instanceof AudioTile tile2){
-            return Double.compare(tile1.getAudioData().getDurationInSeconds(),tile2.getAudioData().getDurationInSeconds());
+            return Double.compare(tile1.getAudioData().getDurationInMs(),tile2.getAudioData().getDurationInMs());
         }else
             throw new InvalidParameterException("Component o1 and o2 must be " + AudioTile.class + " but was " + o1.getClass() + " and " + o2.getClass() + "respectively");
     };

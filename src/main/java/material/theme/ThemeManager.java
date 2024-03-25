@@ -1,6 +1,5 @@
 package material.theme;
 
-import material.jthemedetecor.OsThemeDetector;
 import material.theme.colors.Dark;
 import material.theme.colors.Light;
 import material.theme.colors.Themeable;
@@ -13,7 +12,6 @@ import org.jetbrains.annotations.Nullable;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public class ThemeManager {
@@ -25,21 +23,21 @@ public class ThemeManager {
     private static final Themeable[] _themes = {new Dark(), new Light()};
     private ThemeType ACTIVE_THEME_TYPE;
     private boolean isBgTinted;
-    Consumer<Boolean> systemThemeListener = this::convertTheme;
+    Consumer<Boolean> systemThemeListener = this::setDarkMode;
 
     private ThemeManager() {
-        if (OsThemeDetector.isSupported()) {
-            OsThemeDetector.getDetector().registerListener(systemThemeListener);
-            convertTheme(OsThemeDetector.getDetector().isDark());
-        } else
-            setThemeType(ThemeType.Dark);
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            OsThemeDetector.getDetector().removeListener(systemThemeListener);
-        }));
+//        if (OsThemeDetector.isSupported()) {
+//            OsThemeDetector.getDetector().registerListener(systemThemeListener);
+            setDarkMode(true);
+//        } else
+//            setThemeType(ThemeType.Dark);
+//        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+//            OsThemeDetector.getDetector().removeListener(systemThemeListener);
+//        }));
     }
 
     public boolean isThemingSupported() {
-        return OsThemeDetector.isSupported();
+        return false;
     }
 
     public void setThemeType(ThemeType themeType) {
@@ -97,7 +95,7 @@ public class ThemeManager {
         }
     }
 
-    private void convertTheme(boolean isDark) {
+    private void setDarkMode(boolean isDark) {
         if (isDark)
             toDark();
         else toLight();

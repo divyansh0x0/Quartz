@@ -28,7 +28,7 @@ public class RingSpectrum extends SpectrumPainter {
 
     public void paint(Graphics g) {
         try {
-            Graphics2D g2d = (Graphics2D) g.create();
+            Graphics2D g2d = (Graphics2D) g;
 //            drawAmbientBlur((Graphics2D) g2d.create());
 
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -42,7 +42,6 @@ public class RingSpectrum extends SpectrumPainter {
             g2d.dispose();
         } catch (Exception e) {
             Log.error("Error while painting spectrum: " + e);
-            e.printStackTrace();
         }
     }
 

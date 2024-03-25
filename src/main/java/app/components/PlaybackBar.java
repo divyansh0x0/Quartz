@@ -6,9 +6,8 @@ import material.component.MaterialComponent;
 import material.listeners.SeekListener;
 import material.theme.ThemeColors;
 import material.theme.enums.Elevation;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import material.utils.Log;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -17,32 +16,34 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
-import java.time.Duration;
 import java.util.ArrayList;
 
 public class PlaybackBar extends MaterialComponent {
+    private static final int TOOLTIP_FONT_SIZE = 12;
 
+    private String TOTAL_TIME_MS_STR="00:00";
     int progressBarHeight = 8; //80% height
 
     private Elevation elevation;
     private Elevation TOOLTIP_ELEVATION = Elevation._24;
     private Color _fillColor = ThemeColors.getAccent();
     private Color TooltipColor = ThemeColors.getColorByElevation(TOOLTIP_ELEVATION);
-    private long CURRENT_TIME_NANOS;
-    private long TOTAL_TIME_NANOS;
+    private long CURRENT_TIME_MS;
+    private long TOTAL_TIME_MS;
     private final ArrayList<SeekListener> seekListeners = new ArrayList<>();
     private Point mousePressedPosition;
     private boolean isMousePressed = false;
     private boolean isMouseDragged = false;
     private boolean isMouseReleased = false;
     private RoundRectangle2D _validBarPressBounds;
+    private Font tooltipFont;
 
     private static   final Padding tooltipPadding = new Padding(2, 5);
     public PlaybackBar() {
         super();
         setDoubleBuffered(true);
-        CURRENT_TIME_NANOS = 0;
-        TOTAL_TIME_NANOS = 0;
+        CURRENT_TIME_MS = 0;
+        TOTAL_TIME_MS = 0;
         this.setFocusable(true);
     }
 
@@ -80,11 +81,9 @@ public class PlaybackBar extends MaterialComponent {
             Graphics2D g2d = (Graphics2D) g;
             final int gap = 5;
             final int tooltipRadius = 5;
-            final int TOOLTIP_FONT_SIZE = 12;
             int cornerRadius = MaterialParameters.CORNER_RADIUS;
 
-            String currStr = formatTime(CURRENT_TIME_NANOS);
-            String totalStr = formatTime(TOTAL_TIME_NANOS);
+            String currStr = getFormattedTimeMs(CURRENT_TIME_MS);
 
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
@@ -94,7 +93,7 @@ public class PlaybackBar extends MaterialComponent {
             FontMetrics fontMetrics = g2d.getFontMetrics();
 
             Rectangle2D cR2 = fontMetrics.getStringBounds(currStr, g2d);
-            Rectangle2D tR2 = fontMetrics.getStringBounds(totalStr, g2d);
+            Rectangle2D tR2 = fontMetrics.getStringBounds(TOTAL_TIME_MS_STR, g2d);
             int x = 0; // x position of current time text;
             int y = (int) (((getHeight() - cR2.getHeight()) / 2) + fontMetrics.getAscent()); // y position of current time text;
             g2d.drawString(currStr, x, y);
@@ -115,10 +114,10 @@ public class PlaybackBar extends MaterialComponent {
             g2d.setColor(getForeground());
             x = (int) (cR2.getWidth() + (gap * 2) + pWidth); //x position of total time text
             y = (int) (((getHeight() - tR2.getHeight()) / 2) + fontMetrics.getAscent());//y position of total time text
-            g2d.drawString(totalStr, x, y);
+            g2d.drawString(TOTAL_TIME_MS_STR, x, y);
 
             //filling progress bar
-            if (TOTAL_TIME_NANOS > 0) {
+            if (TOTAL_TIME_MS > 0) {
                 int fillWidth;
 
                 if (mousePressedPosition != null && (isMousePressed || isMouseDragged)) {
@@ -126,17 +125,15 @@ public class PlaybackBar extends MaterialComponent {
                     seekBarMouseX = (int) Math.min(Math.max(seekBarMouseX, 0), _validBarPressBounds.getWidth());
                     fillWidth = seekBarMouseX;
                     //Tooltip
-                    Font tooltipFont = new Font(getFont().getName(), getFont().getStyle(), TOOLTIP_FONT_SIZE);
                     fontMetrics = g2d.getFontMetrics(tooltipFont);
-                    long timeByPos = (long) ((fillWidth * TOTAL_TIME_NANOS) / _validBarPressBounds.getWidth());
-                    String tooltipText = formatTime(timeByPos);
+                    long timeByPos = (long) ((fillWidth * TOTAL_TIME_MS) / _validBarPressBounds.getWidth());
+                    String tooltipText = getFormattedTimeMs(timeByPos);
                     Rectangle2D tooltipTextBounds = fontMetrics.getStringBounds(tooltipText, g2d);
                     int mousePosX = (int) (seekBarMouseX + _validBarPressBounds.getX()); //position of mouse from (0,0) of component
                     int tWidth = (int) (tooltipTextBounds.getWidth() + (tooltipPadding.getLeft() + tooltipPadding.getRight())); //width of tooltip
                     int tHeight = (int) (tooltipTextBounds.getHeight() + (tooltipPadding.getTop() + tooltipPadding.getBottom())); //height of tooltip
-                    int tbX = mousePosX; // tooltip background x position
                     int tbY = (int) (_validBarPressBounds.getY() - tHeight / 2); // tooltip background y position
-                    RoundRectangle2D tBG = new RoundRectangle2D.Double(tbX, tbY, tWidth, tHeight, tooltipRadius, tooltipRadius); //Tooltip background round rectangle
+                    RoundRectangle2D tBG = new RoundRectangle2D.Double(mousePosX, tbY, tWidth, tHeight, tooltipRadius, tooltipRadius); //Tooltip background round rectangle
                     //Drawing tooltip background
                     g2d.setColor(TooltipColor);
                     g2d.fill(tBG);
@@ -152,12 +149,12 @@ public class PlaybackBar extends MaterialComponent {
                     if (isMouseReleased && mousePressedPosition != null) {
                         int seekBarMouseX = (int) (mousePressedPosition.getX() - _validBarPressBounds.getX());
                         fillWidth = (int) Math.min(Math.max(seekBarMouseX, 0), _validBarPressBounds.getWidth());
-                        this.CURRENT_TIME_NANOS = (long) ((fillWidth * TOTAL_TIME_NANOS) / _validBarPressBounds.getWidth());
+                        this.CURRENT_TIME_MS = (long) ((fillWidth * TOTAL_TIME_MS) / _validBarPressBounds.getWidth());
                         isMouseReleased = false;
                         mousePressedPosition = null;
-                        triggerSeekEvent(CURRENT_TIME_NANOS);
+                        triggerSeekEvent(CURRENT_TIME_MS);
                     } else {
-                        fillWidth = (int) Math.round(((double) CURRENT_TIME_NANOS / (double) TOTAL_TIME_NANOS * _validBarPressBounds.getWidth()));
+                        fillWidth = (int) Math.round(((float) CURRENT_TIME_MS / TOTAL_TIME_MS * _validBarPressBounds.getWidth()));
 
                     }
                 }
@@ -177,7 +174,6 @@ public class PlaybackBar extends MaterialComponent {
             }
         } catch (Exception e) {
             Log.error(e);
-            e.printStackTrace();
         }
     }
 
@@ -241,7 +237,7 @@ public class PlaybackBar extends MaterialComponent {
     }
 
     private boolean canInteract() {
-        return TOTAL_TIME_NANOS > 0;
+        return TOTAL_TIME_MS > 0;
     }
 
     private boolean isValidSeekMousePress(int x, int y) {
@@ -264,42 +260,30 @@ public class PlaybackBar extends MaterialComponent {
         animateFG(to);
     }
 
-    @Contract(pure = true)
-    private @NotNull String formatTime(@NotNull Duration d) {
-        long m = d.toMillis();
-        long sec = (m / 1000) % 60;
-        long min = (m / 1000) / 60;
-        return "%02d:%02d".formatted(min, sec);
-    }
-    @Contract(pure = true)
-    private @NotNull String formatTime(@NotNull long d) {
-        long m = (long) (d/1e6);
-        long sec = (m / 1000) % 60;
-        long min = (m / 1000) / 60;
-        return "%02d:%02d".formatted(min, sec);
-    }
+
 
     public long
     getCurrentTime() {
-        return CURRENT_TIME_NANOS;
+        return CURRENT_TIME_MS;
     }
 
-    public void setCurrentTime(long timeToSet) {
-        if (timeToSet < 0 || timeToSet == this.CURRENT_TIME_NANOS)
+    public void setCurrentTime(long timeToSetMS) {
+        if (timeToSetMS < 0 || timeToSetMS == this.CURRENT_TIME_MS)
             return;
-        if(timeToSet > getTotalTimeNanos()) //if time to set is greater than total time then set current time to total time
-            timeToSet = getTotalTimeNanos();
-        this.CURRENT_TIME_NANOS = timeToSet;
+        if(timeToSetMS > getTotalTimeMs()) //if time to set is greater than total time then set current time to total time
+            timeToSetMS = getTotalTimeMs();
+        this.CURRENT_TIME_MS = timeToSetMS;
         repaint();
     }
 
-    public long getTotalTimeNanos() {
-        return TOTAL_TIME_NANOS;
+    public long getTotalTimeMs() {
+        return TOTAL_TIME_MS;
     }
 
-    public void setTotalTime(long totalTime) {
-        if(TOTAL_TIME_NANOS == 0 || TOTAL_TIME_NANOS != totalTime) {
-            TOTAL_TIME_NANOS = totalTime;
+    public void setTotalTime(long totalTimeMs) {
+        if(TOTAL_TIME_MS == 0 || TOTAL_TIME_MS != totalTimeMs) {
+            TOTAL_TIME_MS = totalTimeMs;
+            TOTAL_TIME_MS_STR = getFormattedTimeMs(TOTAL_TIME_MS);
             repaint();
         }
     }
@@ -322,13 +306,19 @@ public class PlaybackBar extends MaterialComponent {
             seekListeners.add(listener);
     }
 
-    public void triggerSeekEvent(long newCurrTime) {
+    public void triggerSeekEvent(long newCurrTimeMS) {
         Log.success("seeking");
-        seekListeners.forEach(listener -> listener.seeked(Duration.ofNanos(newCurrTime)));
+        seekListeners.forEach(listener -> listener.seeked(newCurrTimeMS));
     }
 
     public Elevation getElevationDP() {
         return elevation;
+    }
+
+    @Override
+    public void setFont(Font font) {
+        super.setFont(font);
+        tooltipFont =  new Font(font.getName(), getFont().getStyle(), 10);
     }
 
     public void setElevationDP(Elevation elevation) {
@@ -343,5 +333,27 @@ public class PlaybackBar extends MaterialComponent {
         repaint();
         revalidate();
     }
+    private @NotNull String getFormattedTimeMs(long ms) {
+        long totalSecs = ms/1000;
+        short sec = (short) (totalSecs%60);
+        long min = totalSecs/60;
+        if(min >= 60){
+            int hour = (int) (min % 60);
+            min = (short) (min % 60);
+            return getMinTwoPlaces(hour) + ":"+getMinTwoPlaces(min)+":"+getMinTwoPlaces(sec);
+        }
+        if(min > 0)
+            return getMinTwoPlaces(min) + ":" + getMinTwoPlaces(sec);
+        if(sec > 0)
+            return "00:" + getMinTwoPlaces(sec);
+        else
+            return "00:00";
+    }
 
+    private String getMinTwoPlaces(long time) {
+        if(time < 10)
+            return "00";
+        else
+            return String.valueOf(time);
+    }
 }

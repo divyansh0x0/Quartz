@@ -35,6 +35,7 @@ public class BorderlessWindowProc implements WindowProc {
     private boolean isResizable = true;
     private boolean isVisible = false;
     private int TITLE_BAR_HEIGHT = 27;
+    private static final LRESULT DEFAULT_LRESULT = new LRESULT(0);
 
     MaterialWindow window;
     HWND hwnd = new HWND();
@@ -125,9 +126,8 @@ public class BorderlessWindowProc implements WindowProc {
         LRESULT lresult;
         switch (uMsg) {
             case WM_NCCALCSIZE:
-                Log.info("wParam %s LParam %s".formatted(wParam,lParam));
-                if (wParam.intValue() == 1 && !isFullscreen) {
-                    return new LRESULT(0);
+                if (wParam.byteValue() == 1 && !isFullscreen) {//Do not know whats going on here
+                    return DEFAULT_LRESULT;
                 }
                 return INSTANCEx.CallWindowProc(defWndProc, hwnd, uMsg, wParam, lParam);
             case WM_NCHITTEST:
@@ -135,14 +135,14 @@ public class BorderlessWindowProc implements WindowProc {
                     return INSTANCEx.CallWindowProc(defWndProc, hwnd, uMsg, wParam, lParam);
                 lresult = this.HitTest(hwnd); // Check for hit
 
-                if (lresult.intValue() == new LRESULT(0).intValue()) {
+                if (lresult.byteValue() == DEFAULT_LRESULT.byteValue()) {
                     return INSTANCEx.CallWindowProc(defWndProc, hwnd, uMsg, wParam, lParam);
                 }
                 return lresult;
             case  WM_NCLBUTTONDOWN:
                 switch (wParam.intValue()) {
                     case HTMAXBUTTON:
-                        return new LRESULT(0);
+                        return DEFAULT_LRESULT;
                     default:
                         return INSTANCEx.CallWindowProc(defWndProc, hwnd, uMsg, wParam, lParam);
                 }
@@ -150,18 +150,18 @@ public class BorderlessWindowProc implements WindowProc {
                 switch (wParam.intValue()) {
                     case HTMAXBUTTON:
                         toggleMaximize();
-                        return new LRESULT(0);
+                        return DEFAULT_LRESULT;
                     default:
                         return INSTANCEx.CallWindowProc(defWndProc, hwnd, uMsg, wParam, lParam);
                 }
             case WM_DESTROY:
                 INSTANCEx.SetWindowLongPtr(hwnd, User32Ex.GWLP_WNDPROC, defWndProc);
-                return new LRESULT(0);
+                return DEFAULT_LRESULT;
             case WM_SYSCOMMAND:
                 switch (wParam.intValue()) {
                     case SC_MINIMIZE:
                         INSTANCEx.ShowWindow(hwnd, SW_MINIMIZE);
-                        return new LRESULT(0);
+                        return DEFAULT_LRESULT;
                     default:
                         return INSTANCEx.CallWindowProc(defWndProc, hwnd, uMsg, wParam, lParam);
                 }

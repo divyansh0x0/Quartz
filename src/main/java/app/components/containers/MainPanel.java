@@ -7,7 +7,7 @@ import app.main.Aphrodite;
 import app.settings.StartupSettings;
 import app.settings.constraints.ComponentParameters;
 import material.containers.MaterialPanel;
-import material.utils.OsUtils;
+import material.utils.OsInfo;
 import material.window.buttons.CloseButton;
 import material.window.buttons.MaxRestoreButton;
 import material.window.buttons.MinimizeButton;
@@ -41,7 +41,7 @@ public class MainPanel extends MaterialPanel {
     }
 
     private void initTitleBar() {
-        if (OsUtils.isCustomWindowSupported()) {
+        if (OsInfo.isCustomWindowSupported()) {
             add(_titleBar, "north,align right, w " + (CAPTION_BUTTON_SIZE * 3) + "!, h " + CAPTION_BUTTON_SIZE + "!");
             addCaptionButtons();
 
@@ -69,7 +69,7 @@ public class MainPanel extends MaterialPanel {
         removeAll();
         add(_sidePanel, "west, h 0:100%:100%");
         add(_defaultView, "center, grow");
-        if (OsUtils.isWindowsVistaOrLater()) {
+        if (OsInfo.isWindowsVistaOrLater()) {
             setElevationDP(_defaultView.getSearchHeader().getElevationDP());
             initTitleBar();
         }
@@ -85,7 +85,7 @@ public class MainPanel extends MaterialPanel {
 
     private void switchToSpectrumView() {
         removeAll();
-        if (OsUtils.isWindowsVistaOrLater()) {
+        if (OsInfo.isWindowsVistaOrLater()) {
             setElevationDP(_spectrumViewer.getElevationDP());
             initTitleBar();
         }

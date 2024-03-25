@@ -23,7 +23,7 @@ public class Folder {
 
     public ArrayList<AudioData> getAudioDatas() {
 //        Log.info(name +":\n" + audioData);
-        return new ArrayList<>(audioData);
+        return audioData;//I know its modifiable so don't modify it plzz
     }
 
     public void setAudioDatas(ArrayList<AudioData> audioData) {

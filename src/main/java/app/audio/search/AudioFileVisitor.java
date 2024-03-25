@@ -4,7 +4,7 @@ import app.audio.AudioData;
 import app.audio.indexer.AudioDataIndexer;
 import app.settings.StartupSettings;
 import material.utils.Log;
-import material.utils.OsUtils;
+import material.utils.OsInfo;
 import material.utils.enums.OsType;
 
 import java.io.File;
@@ -26,7 +26,7 @@ public class AudioFileVisitor implements FileVisitor<Path> {
     @Override
     public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
         File file = dir.toFile();
-        if (OsUtils.getOsType() == OsType.WINDOWS) {
+        if (OsInfo.getOsType() == OsType.WINDOWS) {
             if (ignorePaths.contains(file.getName().toLowerCase(Locale.ROOT))) {
 //                Log.warn("Skipping system file " + file);
                 return FileVisitResult.SKIP_SUBTREE;

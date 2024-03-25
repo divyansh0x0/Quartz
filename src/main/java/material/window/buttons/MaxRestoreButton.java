@@ -1,6 +1,5 @@
 package material.window.buttons;
 
-import material.utils.OsUtils;
 import material.window.MaterialWindow;
 import org.kordamp.ikonli.Ikon;
 import org.kordamp.ikonli.fluentui.FluentUiRegularMZ;

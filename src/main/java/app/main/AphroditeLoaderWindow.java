@@ -4,7 +4,7 @@ import material.component.MaterialLabel;
 import material.component.enums.LabelStyle;
 import material.constants.Size;
 import material.utils.ComponentMover;
-import material.utils.OsUtils;
+import material.utils.OsInfo;
 import material.window.MaterialDialogWindow;
 import material.window.MaterialWindowGrip;
 
@@ -19,7 +19,7 @@ public class AphroditeLoaderWindow extends MaterialDialogWindow {
             super(parent.getWindow(),NAME, WINDOW_SIZE, false, true);
 
             this.setResizable(false);
-            if (!OsUtils.isCustomWindowSupported()) {
+            if (!OsInfo.isCustomWindowSupported()) {
                 makeWindowUndecorated();
             } else
                 setGrip(MaterialWindowGrip.IGNORE_CAPTION_BAR.setGripHeight(WINDOW_SIZE.getHeightInt()).setGripWidth(WINDOW_SIZE.getWidthInt()));

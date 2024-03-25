@@ -14,7 +14,7 @@ public class BarSpectrum extends SpectrumPainter {
     private static final int MINIMUM_HEIGHT = 2;
     private final Spectrum spectrum;
 
-//    private final LinkedList<BufferedImage> _ambientImageBackgroundBuffer = new LinkedList<>();
+    //    private final LinkedList<BufferedImage> _ambientImageBackgroundBuffer = new LinkedList<>();
     private BufferedImage bufferedImage;
     private Color oldAmbientFg;
     private float[] reversedMag;
@@ -27,13 +27,13 @@ public class BarSpectrum extends SpectrumPainter {
 
     public void paint(Graphics g) {
         try {
-            Graphics2D g2d = (Graphics2D) g.create();
+            Graphics2D g2d = (Graphics2D) g;
 //            drawAmbientBlur((Graphics2D) g2d.create());
 
 
             //Drawing visualizer
             if (getMagnitudes() != null)
-//                drawBars(g2d, getMirroredMagnitudes());
+                drawBars(g2d, getMirroredMagnitudes());
 
             //Releasing graphic resources
             Toolkit.getDefaultToolkit().sync();

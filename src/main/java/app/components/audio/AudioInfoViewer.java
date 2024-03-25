@@ -73,6 +73,7 @@ public class AudioInfoViewer extends MaterialComponent {
         artistNameColor = ThemeColors.getTextSecondary();
     }
 
+    private RoundRectangle2D imageBounds = new RoundRectangle2D.Float(0,0,0,0,MaterialParameters.CORNER_RADIUS,MaterialParameters.CORNER_RADIUS);
     @Override
     protected void paintComponent(Graphics g) {
         if (!isLoaded) {
@@ -80,19 +81,17 @@ public class AudioInfoViewer extends MaterialComponent {
             rewriteImage();
         }
         Graphics2D g2d = (Graphics2D) g;
-        int cornerRadius = MaterialParameters.CORNER_RADIUS;
         int iSize = getHeight() - padding * 2;
         int iX = padding;
         int iY = padding;
         int gap = 5;
-        RoundRectangle2D artworkBounds = new RoundRectangle2D.Float(iX, iY, iSize, iSize, cornerRadius, cornerRadius);
         g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         g2d.setColor(Color.WHITE);
 
-        g2d.setClip(artworkBounds);
         if (audioData != null && artwork != null) {
+            imageBounds.setFrame(iX,iY,iSize,iSize);
             g2d.setComposite(AlphaComposite.SrcAtop);
 
             g2d.drawImage(artwork, iX, iY, iSize, iSize, null);
@@ -100,7 +99,8 @@ public class AudioInfoViewer extends MaterialComponent {
             g2d.setClip(null);
 
             g2d.setColor(ThemeColors.getBackground());
-            g2d.draw(artworkBounds);
+            g2d.setClip(imageBounds);
+            g2d.draw(imageBounds);
 
             //Drawing font
             String artistName = audioData.getArtistsConcatenated();

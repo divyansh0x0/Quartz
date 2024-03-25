@@ -4,7 +4,7 @@ import app.components.spectrum.Spectrum;
 import app.settings.StartupSettings;
 import com.jhlabs.image.GaussianFilter;
 import material.utils.Log;
-import material.utils.OsUtils;
+import material.utils.OsInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,9 +26,11 @@ public abstract class SpectrumPainter {
     }
     public void paintInVolatileImage(Graphics spectrumGraphicsObj){
         if(volatileImage == null)
-            volatileImage = spectrum.createVolatileImage(OsUtils.getScreenSize().width, OsUtils.getScreenSize().height);
-
-        paint(volatileImage.getGraphics());
+            volatileImage = spectrum.createVolatileImage(OsInfo.getScreenSize().width, OsInfo.getScreenSize().height);
+        Graphics2D g = (Graphics2D) volatileImage.getGraphics();
+        g.setColor(spectrum.getBackground());
+        g.fillRect(0, 0, OsInfo.getScreenSize().width, OsInfo.getScreenSize().height);
+        paint(g);
         spectrumGraphicsObj.drawImage(volatileImage,0,0,null);
     }
     public abstract void paint(Graphics g);

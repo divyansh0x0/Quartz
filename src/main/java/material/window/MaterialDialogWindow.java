@@ -8,7 +8,7 @@ import material.theme.ThemeManager;
 import material.theme.enums.Elevation;
 import material.theme.models.ElevationModel;
 import material.utils.Log;
-import material.utils.OsUtils;
+import material.utils.OsInfo;
 import material.window.buttons.CloseButton;
 import material.window.buttons.MaxRestoreButton;
 import material.window.buttons.MinimizeButton;
@@ -52,7 +52,7 @@ public class MaterialDialogWindow extends JDialog implements ElevationModel {
     public MaterialDialogWindow(JFrame parent, String name, Size minimumSize, boolean addCaptionBar, boolean addWindowProcedure) {
         super(parent);
         this.isDefaultCaptionBarEnabled = addCaptionBar;
-        if (OsUtils.isCustomWindowSupported() && addWindowProcedure) {
+        if (OsInfo.isCustomWindowSupported() && addWindowProcedure) {
             windowProc = new DialogWindowProc();
         }
         setProperties();
@@ -211,7 +211,7 @@ public class MaterialDialogWindow extends JDialog implements ElevationModel {
 
     public boolean isOnDragArea() {
 //        Log.info("checking for drag: " + MouseDragArea);
-        Point p = MouseInfo.getPointerInfo().getLocation();
+        Point p = MousePointer.getPointerLocation();
 //        SwingUtilities.convertPointFromScreen(p,this);
         int x = getX() + GRIP.x;
         int y = getY() + GRIP.y;
