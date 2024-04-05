@@ -25,7 +25,6 @@ public class ColorPool {
         return pool;
     }
     public Color acquireColor(int red, int green, int blue) {
-        int rgb = (red << 16) | (green << 8) | blue;
         return acquireColor(red,green,blue,255);
     }
 

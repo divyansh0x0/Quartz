@@ -1,5 +1,7 @@
 package material.animation;
 
+import javax.swing.*;
+
 public interface ColorAnimationModel {
     float getProgress();
     float getDurationInMs();
@@ -7,4 +9,5 @@ public interface ColorAnimationModel {
     void incrementAnimationTime(float delta);
 
     boolean isCompleted();
+
 }

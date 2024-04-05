@@ -298,7 +298,7 @@ public class MaterialWindow extends JFrame {
                     if (!windowProc.isInitialized()) {
                         windowProc.init(this);
 //                    } else {
-                        windowProc.setVisible(b);
+//                        windowProc.setVisible(b);
 
                     }
                 }

@@ -4,17 +4,29 @@ import javax.swing.*;
 import java.awt.*;
 
 public class BackgroundAnimation implements ColorAnimationModel {
-    private final Component component;
-    private final float duration;
+    private final JComponent component;
+    private float duration;
     private Color from;
     private Color to;
     private float progress;
     private float currTime;
-
-    public BackgroundAnimation(Component component, float duration) {
+    private boolean isCompleted = false;
+    public void setDuration(float durationMs) {
+        duration = durationMs;
+    }
+    public BackgroundAnimation(JComponent component, float duration) {
         this.component = component;
         this.from = component.getBackground();
         this.duration = duration;
+    }
+
+    public void reuse(Color toColor, float durationMs) {
+        this.from = component.getBackground();
+        this.duration = durationMs;
+        this.to = toColor;
+        this.progress = 0f;
+        this.currTime = 0;
+        this.isCompleted = false;
     }
 
     public void toColor(Color to) {
@@ -33,25 +45,38 @@ public class BackgroundAnimation implements ColorAnimationModel {
     }
 
     public void setProgress(float p) {
+        if(isCompleted)
+            return;
         if (p > 1f)
             p = 1f;
-        if (to != null) {
-            if (from == null) {
-                this.component.setBackground(to);
-                p = 1f;
-            } else {
-                this.component.setBackground(Interpolator.lerpRBG(from, to, p));
+        progress = p;
+        if(p < 1f) {
+            if (to != null) {
+                if (from == null) {
+                    SwingUtilities.invokeLater(() -> {
+                        this.component.setBackground(to);
+
+                    });
+                } else {
+                    SwingUtilities.invokeLater(() -> {
+                        this.component.setBackground(Interpolator.lerpRBG(from, to, progress));
+                    });
+                }
+                this.component.repaint();
             }
         }
-        progress = p;
+        else {
+            SwingUtilities.invokeLater(() -> {
+
+                this.component.setBackground(to);
+                isCompleted = true;
+            });
+        }
     }
 
     @Override
     public void forceCompleteAnimation() {
         setProgress(1f);
-        SwingUtilities.invokeLater(()->{
-            this.component.setBackground(to);
-        });
     }
 
 //    @Override
@@ -77,16 +102,20 @@ public class BackgroundAnimation implements ColorAnimationModel {
 
     @Override
     public boolean isCompleted() {
-        return progress >= 1.0f;
+        return isCompleted;
     }
+
 
     @Override
     public String toString() {
         return "BackgroundAnimation{" +
                 "component=" + component +
-                ", duration=" + duration +
+                ", progress=" + progress +
                 ", from=" + from +
                 ", to=" + to +
                 '}';
     }
+
+
+
 }

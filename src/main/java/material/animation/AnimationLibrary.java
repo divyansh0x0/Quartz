@@ -4,14 +4,16 @@ import material.utils.Log;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AnimationLibrary {
-    private static final int FPS = 60; // Number of animation steps
+    private static final byte BACKGROUND_ANIMATION_INDEX = 0;
+    private static final byte FOREGROUND_ANIMATION_INDEX = 1;
+    private static final byte NUMBER_OF_ANIMATION_TYPES = 2;
+    private static final byte FPS = 60; // Number of animation steps
     private static MaterialFixedTimer timer;
-    private static final ConcurrentHashMap<JComponent, ArrayList<ColorAnimationModel>> componentAnimations = new ConcurrentHashMap<>(100);
+    private static final ConcurrentHashMap<JComponent, ColorAnimationModel[]> componentAnimations = new ConcurrentHashMap<>(0);
 
     static {
         //A permanent running timer which increments on going animations at every tick
@@ -21,21 +23,18 @@ public class AnimationLibrary {
             public void tick(float delta) {
                 if (!componentAnimations.isEmpty()) {
                     synchronized (componentAnimations) {
-                        Collection<ArrayList<ColorAnimationModel>> values = componentAnimations.values();
-                        ArrayList<?>[] animationModels = values.toArray(new ArrayList[0]);
-                        for (int i = animationModels.length - 1; i >= 0; i--) {
-                            var animationsArr = animationModels[i];
+                        Collection<ColorAnimationModel[]> animationModels = componentAnimations.values();
+
+                        for (ColorAnimationModel[] animationsArr : animationModels) {
                             if (animationsArr == null)
                                 continue;
-                            for (int j = animationsArr.size() - 1; j >= 0; j--) {
-                                ColorAnimationModel animation = (ColorAnimationModel) animationsArr.get(j);
+                            for (int j = animationsArr.length - 1; j >= 0; j--) {
+                                ColorAnimationModel animation = animationsArr[j];
                                 if (animation == null)
                                     continue;
                                 animation.incrementAnimationTime(delta);
                                 if (animation.isCompleted()) {
-                                    Log.info("animation completed: " + animation);
-                                    animationsArr.remove(animation);
-
+                                    animation.forceCompleteAnimation();
                                 }
                             }
                         }
@@ -50,52 +49,64 @@ public class AnimationLibrary {
     public static synchronized void animateBackground(JComponent component, Color toColor, float durationMs) {
 //        Log.info("preparing animation for " + component);
 //        if (component.isVisible() && toColor != null && component.getBackground() != null && !component.getBackground().equals(toColor)) {
-//            BackgroundAnimation animation = getAnimation(component, BackgroundAnimation.class);
-//            if (animation == null) {
-//                animation = new BackgroundAnimation(component, durationMs);
-//                ArrayList<ColorAnimationModel> arr = componentAnimations.get(component);
-//                if (arr == null) {
-//                    arr = new ArrayList<>(DEFAULT_SIZE_ARR);
-//                    arr.add(animation);
-//                    componentAnimations.put(component, arr);
-//                } else
-//                    arr.add(animation);
-//            } else {
-//                animation.forceCompleteAnimation();
-//                Log.info("forced completed animation for " + component);
+            BackgroundAnimation animation = getBackgroundAnimation(component, durationMs);
+            animation.reuse(toColor,durationMs);
+            Log.info("[animated] " + component + " to " + toColor);
+//        }
+//        else{
+//            SwingUtilities.invokeLater(()->{
+//                component.setBackground(toColor);
+//            });
+//            Log.info("[static]" + component + " to " + toColor);
 //
-//                removeAnimation(component, animation);
-//                animateBackground(component, toColor, durationMs);
-//            }
-//            animation.toColor(toColor);
-//        } else
-            component.setBackground(toColor);
+//        }
+    }
+
+    private static BackgroundAnimation getBackgroundAnimation(JComponent component, float durationMs) {
+        ColorAnimationModel[] animationModels = componentAnimations.get(component);
+
+        if(animationModels != null) {
+            for (ColorAnimationModel animation : animationModels) {
+                if (animation instanceof BackgroundAnimation)
+                    return (BackgroundAnimation) animation;
+            }
+        }
+        else {
+            animationModels = new ColorAnimationModel[NUMBER_OF_ANIMATION_TYPES];
+        }
+        BackgroundAnimation animation = new BackgroundAnimation(component, durationMs);
+
+        animationModels[BACKGROUND_ANIMATION_INDEX] = animation;
+
+        componentAnimations.put(component, animationModels);
+        return animation;
     }
 
 
     public static synchronized void animateForeground(JComponent component, Color toColor, float durationMs) {
-//        if (component.isVisible() && toColor != null && component.getForeground() != null && !component.getForeground().equals(toColor)) {
-//            ForegroundAnimation animation = getAnimation(component, ForegroundAnimation.class);
-//            if (animation == null) {
-//                animation = new ForegroundAnimation(component, durationMs);
-//                ArrayList<ColorAnimationModel> arr = componentAnimations.get(component);
-//                if (arr == null) {
-//                    arr = new ArrayList<>(DEFAULT_SIZE_ARR);
-//                    arr.add(animation);
-//                    componentAnimations.put(component, arr);
-//                } else
-//                    arr.add(animation);
-//            } else {
-//                animation.forceCompleteAnimation();
-//                removeAnimation(component, animation);
-//                animateForeground(component, toColor, durationMs);
-//            }
-//            animation.toColor(toColor);
-//        } else {
-            component.setForeground(toColor);
-//        }
+        ForegroundAnimation animation = getForegroundAnimation(component, durationMs);
+        animation.reuse(toColor,durationMs);
+        Log.info("[animated] " + component + " to " + toColor);
     }
+    private static ForegroundAnimation getForegroundAnimation(JComponent component, float durationMs) {
+        ColorAnimationModel[] animationModels = componentAnimations.get(component);
 
+        if(animationModels != null) {
+            for (ColorAnimationModel animation : animationModels) {
+                if (animation instanceof ForegroundAnimation)
+                    return (ForegroundAnimation) animation;
+            }
+        }
+        else {
+            animationModels = new ColorAnimationModel[NUMBER_OF_ANIMATION_TYPES];
+        }
+        ForegroundAnimation animation = new ForegroundAnimation(component, durationMs);
+
+        animationModels[FOREGROUND_ANIMATION_INDEX] = animation;
+
+        componentAnimations.put(component, animationModels);
+        return animation;
+    }
     //TODO fix this unsafe code by making it safe
 //    private static <model> model getAnimation(JComponent component, Class<model> animationClass) {
 //        ArrayList<ColorAnimationModel> animations = componentAnimations.get(component);
@@ -109,14 +120,9 @@ public class AnimationLibrary {
 //        return null;
 //    }
 
-    private static void removeAnimation(JComponent component, ColorAnimationModel model) {
-        ArrayList<ColorAnimationModel> animations = componentAnimations.get(component);
-        if (animations == null)
-            return;
-        animations.remove(model);
-    }
 
-    private static Color interpolateColor(Color fromColor, Color toColor, float progress) {
-        return Interpolator.lerpRBG(fromColor, toColor, progress);
+    private static void putNewAnimation(BackgroundAnimation animation) {
+
     }
 }
+

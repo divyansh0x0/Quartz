@@ -26,7 +26,6 @@ import javax.swing.event.MouseInputListener;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
-import java.awt.image.BufferedImage;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -37,7 +36,6 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
     private final ArrayList<AudioTileClickListener> mouseClickListeners = new ArrayList<>();
     private Playlist playlist;
     private Elevation elevation = null;
-    private BufferedImage artwork = null;
     private final @NotNull AudioData audioData;
     private int padding = 10;
     private Color audioNameColor = ThemeColors.getTextPrimary();
@@ -65,8 +63,6 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
         addLeftClickListener((audio) -> {
             play();
         });
-//        if (BROKEN_AUDIO_ICON.getIkon() == null)
-//            BROKEN_AUDIO_ICON.setIkon(Icons.BROKEN_AUDIO);
     }
 
     public void play() {
@@ -78,7 +74,6 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
                 Artist artist = AudioDataIndexer.getInstance().getArtistByName(audioData.getArtistsConcatenated());
                 if (artist != null) {
                     AudioQueue.getInstance().newQueue(audioData, artist.getAudioDataList());
-//                Log.success("QUEUE: " + artist.getAudioDatas());
                 }
             }
             case EXPLORE -> {
@@ -110,19 +105,15 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
         if (isActive) {
             newBackground = ColorUtils.RgbToArgb(ThemeColors.getActiveBackgroundColor(), 0.4f);
         } else {
-//            newBackground = elevationDP == null ? ThemeColors.TransparentColor : ThemeColors.getColorByElevation(elevationDP);
             newBackground = ThemeColors.TransparentColor;
         }
         audioNameColor = ThemeColors.getTextPrimary();
         artistNameColor = ThemeColors.getTextSecondary();
         artworkBg = ColorUtils.darken(newBackground, 10);
         actualBackgroundColor = newBackground;
-//        if(isActive)
-//            setBackground(newBackground);
-//        else
+
         animateBG(newBackground);
 
-        //        BROKEN_AUDIO_COLOR = ColorUtils.RgbToArgb(ThemeColors.getBackgroundDanger(), BROKEN_AUDIO_COLOR_ALPHA);
     }
 
     private void showPopup() {
@@ -135,11 +126,7 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-//        float dividerWidthPercentage = 1f;
         Graphics2D g2d = (Graphics2D) g.create();
-//        int highlightPercentage = 2;
-//        int activePercentage = 10;
-//        int dividerHeight = 1;
         int cornerRadius = MaterialParameters.CORNER_RADIUS;
         int iSize = getHeight() - padding * 2;
         int iX = padding;
@@ -349,9 +336,6 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
         this.playlist = playlist;
     }
 
-    public BufferedImage getArtwork() {
-        return artwork;
-    }
 
     public @NotNull AudioData getAudioData() {
         return audioData;
