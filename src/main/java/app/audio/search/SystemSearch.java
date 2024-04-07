@@ -136,9 +136,7 @@ public class SystemSearch {
             for (int i = 0; i < threads.length; i++) {
                 int begin = i * stackSize;
                 int end = Math.min(begin + stackSize, files.size());
-                int finalI = i;
                 threads[i] = Thread.ofVirtual().name("Audio data extractor thread " + i).start(() -> {
-                    Log.info("[" + finalI + "]" + "begin:" + begin + " | end: " + end);
                     for (int j = begin; j < end; j++) {
                         File file = files.get(j);
                         if (file.exists() && AudioData.isValidAudio(file.toPath())) {

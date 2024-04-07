@@ -13,7 +13,7 @@ public class StringUtils {
         short sec = (short) (totalSecs%60);
         long min = totalSecs/60;
         if(min >= 60){
-            int hour = (int) (min % 60);
+            int hour = (int) (min / 60);
             min = (short) (min % 60);
             return  hour + "h "+min+"m "+sec + "s";
         }
@@ -28,7 +28,7 @@ public class StringUtils {
     /**
      * @return A new string in which first letter of each word is in uppercase;
      */
-    public static @NotNull String toHeading(@NotNull String str) {
+    public static @NotNull String titleCase(@NotNull String str) {
         str = str.toLowerCase();
         StringBuilder sb = new StringBuilder();
         char[] arr = str.toCharArray();

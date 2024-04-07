@@ -1,7 +1,7 @@
 package app.components.buttons.control;
 
 import app.components.Icons;
-import app.main.Aphrodite;
+import app.main.Quartz;
 
 public class FullScreenButton extends ControlButton{
     private static FullScreenButton instance;
@@ -13,7 +13,7 @@ public class FullScreenButton extends ControlButton{
     protected void toggled(boolean isActive) {
         if(isActive) {
             setIcon(Icons.FULLSCREEN_OPEN);
-            Aphrodite.getInstance().switchToChillMode();
+            Quartz.getInstance().switchToChillMode();
             setToolTipText("Turn on Fullscreen");
         }else{
             setIcon(Icons.FULLSCREEN_EXIT);

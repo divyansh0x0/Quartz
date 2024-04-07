@@ -28,7 +28,7 @@ public class MainClass {
     }
 
     private static void testStartApp() {
-        Aphrodite.getInstance().showMainWindow();
+        Quartz.getInstance().showMainWindow();
 //        SystemSearch.getInstance().forceSearch();
     }
 
@@ -57,7 +57,7 @@ public class MainClass {
     }
 
     public static synchronized void startApp() {
-        Aphrodite.getInstance().startApplication();
+        Quartz.getInstance().startApplication();
     }
 
     private static MaterialFixedTimer gcCaller;

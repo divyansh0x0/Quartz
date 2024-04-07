@@ -16,11 +16,17 @@ import java.awt.*;
 import static com.sun.jna.platform.win32.WinUser.*;
 
 public class DialogWindowProc implements WindowProc {
+    private boolean isLeftMouseDown;
+    private static final LRESULT ZERO = new LRESULT(0);
+
+    private final static int WM_LBUTTONDOWN = 0x0201;
+    private final static int WM_LBUTTONUP = 0x0202;
+
     private static final HWND HWND_TOP = new HWND(new Pointer(0));
     public final static long WS_EX_CLIENTEDGE = 0x00000200L;
     public final static long WS_EX_WINDOWEDGE = 0x00000100L;
     public final static int HTTOPLEFT = 13, HTTOP = 12, HTCAPTION = 2, HTTOPRIGHT = 14, HTLEFT = 10, HTNOWHERE = 0,
-            HTRIGHT = 11, HTBOTTOMLEFT = 16, HTBOTTOM = 15, HTBOTTOMRIGHT = 17, HTSYSMENU = 3,HTMAXBUTTON = 9;
+            HTRIGHT = 11, HTBOTTOMLEFT = 16, HTBOTTOM = 15, HTBOTTOMRIGHT = 17, HTSYSMENU = 3, HTMAXBUTTON = 9;
     public final static long WS_EX_DLGMODALFRAME = 0x00000001L;
     public final static long WS_EX_STATICEDGE = 0x00020000L;
     public final static int SW_MINIMIZE = 6;
@@ -29,7 +35,7 @@ public class DialogWindowProc implements WindowProc {
     public final static int WM_NCHITTEST = 0x0084;
     public final static int WM_NCLBUTTONDOWN = 0x00A1;
     public final static int WM_NCLBUTTONUP = 0x00A2;
-    public final static int WM_MOUSEHOVER= 0x02A1;
+    public final static int WM_MOUSEHOVER = 0x02A1;
     public final static int SC_CLOSE = 0xF060;
     public final static int SC_RESTORE = 0xF120;
     private boolean isResizable = true;
@@ -46,12 +52,13 @@ public class DialogWindowProc implements WindowProc {
     private int normalWindowStyle;
     private RECT normalWindowBounds = new RECT();
     private boolean isFullscreen;
+
     public DialogWindowProc() {
         INSTANCEx = Native.load("user32", User32Ex.class, W32APIOptions.UNICODE_OPTIONS);
     }
 
     public void init(MaterialDialogWindow window) {
-        if(window.isDisplayable() && !isInitialized) {
+        if (window.isDisplayable() && !isInitialized) {
             this.window = window;
             this.hwnd = getHwnd(window);
             defWndProc = INSTANCEx.SetWindowLongPtr(hwnd, User32Ex.GWLP_WNDPROC, this);
@@ -62,18 +69,18 @@ public class DialogWindowProc implements WindowProc {
             setNormalWindowState();
 //            Dwmapi.enableMMCSS(true);
             Dwmapi.addShadowEffect(hwnd);
-            Dwmapi.useImmersiveDarkMode(hwnd,true);
-            isInitialized =true;
+            Dwmapi.useImmersiveDarkMode(hwnd, true);
+            isInitialized = true;
         }
     }
 
-    private void setNormalWindowState(){
+    private void setNormalWindowState() {
         INSTANCEx.SetWindowLongPtr(hwnd, GWL_STYLE, Pointer.createConstant(normalWindowStyle));
         isFullscreen = false;
     }
 
-    private void setFullscreenWindowState(){
-        if(!isFullscreen) {
+    private void setFullscreenWindowState() {
+        if (!isFullscreen) {
 
             //This boolean will disable hit testing
             isFullscreen = true;
@@ -92,20 +99,21 @@ public class DialogWindowProc implements WindowProc {
 
     private boolean isMaximized = false;
     private final WINDOWPLACEMENT windowplacement = new WINDOWPLACEMENT();
-    public void toggleMaximize(){
-        INSTANCEx.GetWindowPlacement(hwnd,windowplacement);
-        if (windowplacement.showCmd != SW_MAXIMIZE){
+
+    public void toggleMaximize() {
+        INSTANCEx.GetWindowPlacement(hwnd, windowplacement);
+        if (windowplacement.showCmd != SW_MAXIMIZE) {
             INSTANCEx.ShowWindow(hwnd, SW_MAXIMIZE);
-        }
-        else {
+        } else {
             INSTANCEx.ShowWindow(hwnd, SW_RESTORE);
         }
 
     }
 
-    public boolean isMaximized(){
+    public boolean isMaximized() {
         return windowplacement.showCmd == SW_MAXIMIZE;
     }
+
     public void minimizeWindow() {
         INSTANCEx.ShowWindow(hwnd, SW_MINIMIZE);
         Log.info("MINIMIZING WINDOW");
@@ -114,7 +122,8 @@ public class DialogWindowProc implements WindowProc {
     public void restoreWindow() {
         INSTANCEx.ShowWindow(hwnd, SW_RESTORE);
     }
-    public void closeWindow(){
+
+    public void closeWindow() {
         Log.warn("Destroying window : " + hwnd);
 //        defWndProc = INSTANCEx.SetWindowLongPtr(hwnd, User32Ex.GWLP_WNDPROC, new BaseTSD.LONG_PTR(0));
 //        INSTANCEx.PostMessage(hwnd, WM_CLOSE, new WPARAM(0), new LPARAM(0));
@@ -127,47 +136,54 @@ public class DialogWindowProc implements WindowProc {
         switch (uMsg) {
             case WM_NCCALCSIZE:
                 if (wParam.intValue() == 1 && !isFullscreen) {
-                    return new LRESULT(0);
+                    return ZERO;
                 }
                 return INSTANCEx.CallWindowProc(defWndProc, hwnd, uMsg, wParam, lParam);
             case WM_NCHITTEST:
-                if(isFullscreen)
+                if (isFullscreen)
                     return INSTANCEx.CallWindowProc(defWndProc, hwnd, uMsg, wParam, lParam);
                 lresult = this.HitTest(hwnd); // Check for hit
 
-                if (lresult.intValue() == new LRESULT(0).intValue()) {
+                if (lresult.intValue() == ZERO.intValue()) {
                     return INSTANCEx.CallWindowProc(defWndProc, hwnd, uMsg, wParam, lParam);
                 }
                 return lresult;
-            case  WM_NCLBUTTONDOWN:
+            case WM_NCLBUTTONDOWN:
                 switch (wParam.intValue()) {
                     case HTMAXBUTTON:
-                        return new LRESULT(0);
+                        return ZERO;
                     default:
                         return INSTANCEx.CallWindowProc(defWndProc, hwnd, uMsg, wParam, lParam);
                 }
-            case  WM_NCLBUTTONUP:
+            case WM_NCLBUTTONUP:
                 switch (wParam.intValue()) {
                     case HTMAXBUTTON:
                         toggleMaximize();
-                        return new LRESULT(0);
+                        return ZERO;
                     default:
                         return INSTANCEx.CallWindowProc(defWndProc, hwnd, uMsg, wParam, lParam);
                 }
             case WM_DESTROY:
                 INSTANCEx.SetWindowLongPtr(hwnd, User32Ex.GWLP_WNDPROC, defWndProc);
-                return new LRESULT(0);
+                return ZERO;
             case WM_SYSCOMMAND:
                 switch (wParam.intValue()) {
                     case SC_MINIMIZE:
                         INSTANCEx.ShowWindow(hwnd, SW_MINIMIZE);
-                        return new LRESULT(0);
+                        return ZERO;
                     default:
                         return INSTANCEx.CallWindowProc(defWndProc, hwnd, uMsg, wParam, lParam);
                 }
+            case WM_LBUTTONDOWN:
+                isLeftMouseDown = true;
+                break;
+            case WM_LBUTTONUP:
+                isLeftMouseDown = false;
+                break;
             default:
-                return INSTANCEx.CallWindowProc(defWndProc, hwnd, uMsg, wParam, lParam);
+                break;
         }
+        return INSTANCEx.CallWindowProc(defWndProc, hwnd, uMsg, wParam, lParam);
     }
 
     public void setGripSize(int size) {
@@ -177,6 +193,7 @@ public class DialogWindowProc implements WindowProc {
     //TODO add snap menu in maximize button
     private POINT ptMouse = new POINT();
     private RECT rcWindow = new RECT();
+
     private @NotNull LRESULT HitTest(HWND hwnd) {
         int borderOffset = DefaultDecorationParameter.getResizeBorderThickness();
         int borderThickness = DefaultDecorationParameter.getResizeBorderThickness();
@@ -185,9 +202,7 @@ public class DialogWindowProc implements WindowProc {
         User32.INSTANCE.GetWindowRect(hwnd, rcWindow);
         int captionBtnWidth = DefaultDecorationParameter.getTitleBarHeight();//caption buttons are square
         int uRow = 1, uCol = 1;
-        boolean fOnResizeBorder = false, fOnFrameDrag, fOnIcon = false,fOnMaximize = false;
-
-
+        boolean fOnResizeBorder = false, fOnFrameDrag = false, fOnIcon = false, fOnMaximize = false;
 
 
         fOnFrameDrag = window.isOnDragArea();
@@ -216,7 +231,7 @@ public class DialogWindowProc implements WindowProc {
                 uCol = 2; // Right resizing
 
             int[][] hitTests = {
-                    {HTTOPLEFT, fOnResizeBorder ? HTTOP : fOnIcon ? HTSYSMENU : fOnFrameDrag ? HTCAPTION :  fOnMaximize ? HTMAXBUTTON : HTNOWHERE, HTTOPRIGHT},
+                    {HTTOPLEFT, fOnResizeBorder ? HTTOP : fOnIcon ? HTSYSMENU : fOnFrameDrag ? HTCAPTION : fOnMaximize ? HTMAXBUTTON : HTNOWHERE, HTTOPRIGHT},
                     {HTLEFT, HTNOWHERE, HTRIGHT},
                     {HTBOTTOMLEFT, HTBOTTOM, HTBOTTOMRIGHT}
 
@@ -238,9 +253,9 @@ public class DialogWindowProc implements WindowProc {
         isResizable = resizable;
     }
 
-    public void setVisible(boolean visible){
-        if(isVisible != visible) {
-            if(visible)
+    public void setVisible(boolean visible) {
+        if (isVisible != visible) {
+            if (visible)
                 INSTANCEx.ShowWindow(hwnd, SW_SHOW);
             else
                 INSTANCEx.ShowWindow(hwnd, SW_HIDE);
@@ -249,7 +264,7 @@ public class DialogWindowProc implements WindowProc {
     }
 
     public void setFullscreen(boolean fullscreen) {
-        if(fullscreen && isInitialized)
+        if (fullscreen && isInitialized)
             setFullscreenWindowState();
         else
             setNormalWindowState();

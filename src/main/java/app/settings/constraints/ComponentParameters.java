@@ -1,11 +1,8 @@
 package app.settings.constraints;
 
-import app.dialogs.DialogRootPanel;
-import material.window.win32procedures.DefaultDecorationParameter;
 import material.theme.enums.Elevation;
 
 public class ComponentParameters {
-    public static final String DIALOG_CONTENT_CONSTRAINT = "alignX center,w (100% - "+(DialogRootPanel.INSETS * 2)+")!, h (100% - " + (DialogRootPanel.INSETS * 2 + DefaultDecorationParameter.getTitleBarHeight()) + ")!, gapY 0";
     public static final String SEARCH_TEXT = "Search by artist, playlist, album, or songs!";
     public static final String NO_MUSIC_FOUND = "No MP3 files found on your PC";
     public static final String NO_FAVORITES_FOUND = "You don't have any favorites";

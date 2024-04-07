@@ -8,6 +8,7 @@ import material.theme.ThemeColors;
 import material.theme.ThemeManager;
 import material.theme.enums.Elevation;
 import material.utils.GraphicsUtils;
+import material.utils.Log;
 import material.utils.structures.LanguageCompatibleString;
 
 import javax.swing.*;
@@ -21,7 +22,6 @@ import java.util.Collections;
 import java.util.Iterator;
 
 public abstract class MaterialComponent extends JComponent implements Serializable {
-    private static final ArrayList<MaterialComponent> allInstances = new ArrayList<>();
     private boolean allowMouseAnimation = true;
     private static final Point LastMouseLocation = new Point();
     public static final Dimension SCREEN_SIZE = Toolkit.getDefaultToolkit().getScreenSize();
@@ -87,7 +87,6 @@ public abstract class MaterialComponent extends JComponent implements Serializab
     public MaterialComponent() throws HeadlessException {
         super();
         setOpaque(false);
-        allInstances.add(this);
         if (GraphicsEnvironment.isHeadless()) {
             throw new HeadlessException();
         }

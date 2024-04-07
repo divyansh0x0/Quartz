@@ -25,10 +25,10 @@ import org.freedesktop.dbus.messages.DBusSignal;
  * - CanSeek		b	                    Read only
  * - CanControl		b	                    Read only
  */
-@DBusInterfaceName("org.mpris.MediaPlayer2.Aphrodite")
+@DBusInterfaceName("org.mpris.MediaPlayer2.Quartz")
 public interface PlayerInterface extends DBusInterface {
-    public static String BUS_NAME = "org.mpris.MediaPlayer2.Aphrodite";
-    public static String PATH = "/org/mpris/MediaPlayer2/Aphrodite";  void Next();
+    public static String BUS_NAME = "org.mpris.MediaPlayer2.Quartz";
+    public static String PATH = "/org/mpris/MediaPlayer2/Quartz";  void Next();
 
     void Previous();
 

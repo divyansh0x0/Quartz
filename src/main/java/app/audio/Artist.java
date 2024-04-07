@@ -19,7 +19,7 @@ public class Artist {
 
 
     public Artist(String name) {
-        this.name = StringUtils.toHeading(name);
+        this.name = StringUtils.titleCase(name);
     }
 
     public ArrayList<AudioData> getAudioDataList() {

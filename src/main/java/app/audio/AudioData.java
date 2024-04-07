@@ -21,7 +21,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 /**
- * AudioData class used for storing and getting necessary data used by app.main.Aphrodite Project
+ * AudioData class used for storing and getting necessary data used by app.main.Quartz Project
  */
 
 

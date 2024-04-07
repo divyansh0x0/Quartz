@@ -3,6 +3,7 @@ package material.window;
 import material.animation.MaterialFixedTimer;
 import material.utils.OsInfo;
 
+import javax.swing.*;
 import java.awt.*;
 
 public class MousePointer {

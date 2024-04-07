@@ -51,7 +51,6 @@ public class AnimationLibrary {
 //        if (component.isVisible() && toColor != null && component.getBackground() != null && !component.getBackground().equals(toColor)) {
             BackgroundAnimation animation = getBackgroundAnimation(component, durationMs);
             animation.reuse(toColor,durationMs);
-            Log.info("[animated] " + component + " to " + toColor);
 //        }
 //        else{
 //            SwingUtilities.invokeLater(()->{
@@ -86,7 +85,6 @@ public class AnimationLibrary {
     public static synchronized void animateForeground(JComponent component, Color toColor, float durationMs) {
         ForegroundAnimation animation = getForegroundAnimation(component, durationMs);
         animation.reuse(toColor,durationMs);
-        Log.info("[animated] " + component + " to " + toColor);
     }
     private static ForegroundAnimation getForegroundAnimation(JComponent component, float durationMs) {
         ColorAnimationModel[] animationModels = componentAnimations.get(component);

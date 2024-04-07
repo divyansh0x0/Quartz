@@ -30,9 +30,9 @@ public class Dark implements Themeable {
     private static final Color TextSecondary = new Color(0xA1A1A1);
 
 
-    private static final Color BackgroundDanger = new Color(0x621414);
-    private static final Color BackgroundSuccess = new Color(0x145E14);
-    private static final Color BackgroundWarn = new Color(0x3B420A);
+    private static final Color BackgroundDanger = new Color(0x450000);
+    private static final Color BackgroundSuccess = new Color(0x003A0B);
+    private static final Color BackgroundWarn = new Color(0x312B00);
     private static final Color FocusedBorderColor = Color.yellow;
     private static ElevationColors ELEVATION_COLORS;
     private static ThemeSelectionColors SELECTION_COLORS;

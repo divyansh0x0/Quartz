@@ -18,13 +18,11 @@ public class MaterialMenuItem extends MaterialIconButton{
     @Override
     protected void animateMouseExit() {
         super.animateMouseExit();
-        Log.info("mouse exited");
     }
 
     @Override
     protected void animateMouseEnter() {
         super.animateMouseEnter();
-        Log.info("mouse entered");
     }
 
     public MaterialMenuItem(String str) {

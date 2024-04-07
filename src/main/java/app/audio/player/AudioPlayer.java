@@ -56,9 +56,9 @@ class AudioPlayer implements AudioPlayerModel {
          * is a higher version.
          */
 
-        Gst.init(Version.BASELINE, "Aphrodite");
+        Gst.init(Version.BASELINE, "Quartz");
         this.SPECTRUM = ElementFactory.make(SPECTRUM_ELEMENT_NAME, SPECTRUM_ELEMENT_NAME);
-        PLAY_BIN = new PlayBin("Aphrodite-Playbin");
+        PLAY_BIN = new PlayBin("Quartz-Playbin");
         PLAY_BIN.set("audio-filter", SPECTRUM);
 //        PLAY_BIN.getBus().connect((Bus.ASYNC_DONE) source -> setVolume(VOLUME));
         PLAY_BIN.getBus().connect((Bus.ERROR) (source, code, message) -> handleError(code, message));

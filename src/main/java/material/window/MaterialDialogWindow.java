@@ -7,6 +7,7 @@ import material.theme.ThemeColors;
 import material.theme.ThemeManager;
 import material.theme.enums.Elevation;
 import material.theme.models.ElevationModel;
+import material.utils.ComponentMover;
 import material.utils.Log;
 import material.utils.OsInfo;
 import material.window.buttons.CloseButton;
@@ -23,29 +24,26 @@ import java.util.Enumeration;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MaterialDialogWindow extends JDialog implements ElevationModel {
-    private static final int CAPTION_BUTTON_SIZE = 20;
-    private MaterialWindowGrip GRIP = MaterialWindowGrip.IGNORE_CAPTION_BAR;
+    protected static final ComponentMover componentMover = new ComponentMover();
+    private static final int CAPTION_BUTTON_SIZE = 30;
+    private int CAPTION_BAR_HEIGHT = CAPTION_BUTTON_SIZE;
+    private MaterialWindowGrip GRIP = MaterialWindowGrip.CUSTOM;
     // private static final int WIDTH = 640, HEIGHT = WIDTH / 12 * 9;
     private MaterialComponent maxRestoreButton;
     private MaterialComponent minimizeButton;
     private MaterialComponent closeButton;
-    private final RootPanel _root = new RootPanel();
+    private final MaterialPanel _root = new RootPanel();
     private boolean isDefaultCaptionBarEnabled;
     private boolean isMaximized = false;
     private @Nullable DialogWindowProc windowProc;
     private static final String insetsLayoutConstraints = "nogrid, flowy, fill, gap 0,";
     private final MigLayout windowInsetsLayout = new MigLayout(insetsLayoutConstraints + "insets 1");
     private boolean isFullscreen = false;
-    private Dimension nonMaximizedSize = null;
-    private Point lastNonMaximizedPos = null;
-    private boolean wasMaximized = false;
     private final MaterialPanel INSETS_ROOT_PANE = new MaterialPanel(windowInsetsLayout);
-    private boolean isMouseOnMaximizeBtn = false;
     private final AtomicBoolean isMouseOnDragArea = new AtomicBoolean(false);
 
-    private final MaterialPanel defaultCaptionBar = new MaterialPanel(new MigLayout("fill"));
+    private final MaterialPanel defaultCaptionBar = new MaterialPanel(new MigLayout("fill")).setElevationDP(null);
     private MaterialPanel currentCaptionBar;
-    private int CAPTION_BAR_HEIGHT = 30;
     private Elevation elevationDP = Elevation._0;
 
 
@@ -103,7 +101,7 @@ public class MaterialDialogWindow extends JDialog implements ElevationModel {
 
     }
 
-    private void updateTheme() {
+    protected void updateTheme() {
         _root.animateBG(ThemeColors.getColorByElevation(elevationDP));
         if (windowProc != null) {
             this.setBackground(ThemeColors.getColorByElevation(elevationDP));
@@ -213,19 +211,20 @@ public class MaterialDialogWindow extends JDialog implements ElevationModel {
 //        Log.info("checking for drag: " + MouseDragArea);
         Point p = MousePointer.getPointerLocation();
 //        SwingUtilities.convertPointFromScreen(p,this);
-        int x = getX() + GRIP.x;
-        int y = getY() + GRIP.y;
+        int gripPosX = getX() + GRIP.x;
+        int gripPosY = getY() + GRIP.y;
         switch (GRIP) {
-            case CONSIDER_CAPTION_BAR -> {
+            case EXCLUDE_CAPTION_BAR_WIDTH -> {
                 int GripWidth = getWidth() - currentCaptionBar.getWidth();
                 int GripHeight = GRIP.height;
-                boolean b = p.y >= y  && p.y <= y + GripHeight && p.x >= x && p.x <= x + GripWidth ;
-                Log.info(b);
-                return b;
+                return p.y >= gripPosY && p.y <= gripPosY + GripHeight && p.x >= gripPosX && p.x <= gripPosX + GripWidth;
             }
-            case IGNORE_CAPTION_BAR ->
+            case CUSTOM -> {
+                return p.y >= gripPosY && p.y <= gripPosY + GRIP.height && p.x >= gripPosX && p.x <= gripPosX + GRIP.width;
+            }
+            case FULL_WINDOW ->
             {
-                return p.y >= y  && p.y <= y + GRIP.height && p.x >= x && p.x <= x + GRIP.width;
+                return p.y >= getY() && p.y <= getY() + getHeight() && p.x >= getX() && p.x <= getX() + getWidth();
             }
             default-> {
                 return false;
@@ -250,6 +249,7 @@ public class MaterialDialogWindow extends JDialog implements ElevationModel {
     }
     private void updateCaptionBarComponents() {
         if (isDefaultCaptionBarEnabled) {
+            byte addedBtns = 0;
             if(closeButton == null)
                 closeButton = new CloseButton();
             if(minimizeButton == null)
@@ -259,18 +259,20 @@ public class MaterialDialogWindow extends JDialog implements ElevationModel {
 
             defaultCaptionBar.removeAll();
             defaultCaptionBar.add(closeButton,"east,w "+ CAPTION_BUTTON_SIZE +"!");
-            if(isResizable())
-                defaultCaptionBar.add(maxRestoreButton,"east, w "+ CAPTION_BUTTON_SIZE +"!");
+            if(isResizable()) {
+                defaultCaptionBar.add(maxRestoreButton, "east, w " + CAPTION_BUTTON_SIZE + "!");
+                addedBtns++;
+            }
             defaultCaptionBar.add(minimizeButton,"east,w "+CAPTION_BUTTON_SIZE+"!");
+            addedBtns += 2;
             currentCaptionBar = defaultCaptionBar;
 
-            _root.add(defaultCaptionBar,"north,  w 100%!, h "+CAPTION_BAR_HEIGHT+"!");
+            _root.add(defaultCaptionBar,"north, align right, w "+CAPTION_BUTTON_SIZE *addedBtns+ "!, h "+CAPTION_BAR_HEIGHT+"!");
         }
         else{
             _root.remove(defaultCaptionBar);
         }
     }
-
     @Override
     public @Nullable Elevation getElevation() {
         return elevationDP;

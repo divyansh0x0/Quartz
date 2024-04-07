@@ -10,6 +10,7 @@ public class RootPanel extends MaterialPanel {
 
     public RootPanel() {
         super(new MigLayout("nogrid, flowy, fill, inset 0, gap 0"));
+        setFocusable(true);
     }
 
     @Override

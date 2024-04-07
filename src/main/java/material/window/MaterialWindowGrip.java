@@ -1,8 +1,18 @@
 package material.window;
 
 public enum MaterialWindowGrip {
-    IGNORE_CAPTION_BAR,
-    CONSIDER_CAPTION_BAR;
+    /**
+     * Use custom bounds
+     */
+    CUSTOM,
+    /**
+     * Uses the whole window as GRIP for moving
+     */
+    FULL_WINDOW,
+    /**
+     * Has same bounds as the caption bar
+     */
+    EXCLUDE_CAPTION_BAR_WIDTH;
 
     public int height = 20;
     public int x;

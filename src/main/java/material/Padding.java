@@ -1,6 +1,8 @@
 package material;
 
 public class Padding {
+    public static final Padding ZERO = new Padding(0);
+    public static final Padding ONE = new Padding(1);
     private int top;
     private int right;
     private int bottom;

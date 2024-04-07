@@ -3,13 +3,17 @@ package app.dialogs;
 import material.utils.ComponentMover;
 
 public class DialogFactory {
-    private static AphroditeDialog dialogInstance;
+    private static QuartzDialog dialogInstance;
     private static ComponentMover _componentMover = new ComponentMover();
 
     public static void showErrorDialog(String error) {
-//        disposeLastDialog();
-//        registerDialogMover();
-        new ErrorDialog(error);
+        new StringDialog(error,DialogType.ERROR);
+    }
+    public static void showSuccessDialog(String success) {
+        new StringDialog(success,DialogType.SUCCESS);
+    }
+    public static void showWarningDialog(String warning) {
+        new StringDialog(warning,DialogType.WARN);
     }
 
     //--------------------------------------------------------------------------------

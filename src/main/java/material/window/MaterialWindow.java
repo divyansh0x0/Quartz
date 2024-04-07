@@ -25,14 +25,14 @@ import java.awt.event.WindowEvent;
 import java.util.Enumeration;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-// `xprop -name 'Aphrodite' -format _MOTIF_WM_HINTS 32c -set _MOTIF_WM_HINTS 2` command can be used to remove windows border in x11 linux distros
-// `xprop -name 'Aphrodite' -format _MOTIF_WM_HINTS 32c -set _MOTIF_WM_HINTS '0x2, 0x2, 0x2, 0x2,0x2,0x2'` will remove windows border but won't remove mouse resize
+// `xprop -name 'Quartz' -format _MOTIF_WM_HINTS 32c -set _MOTIF_WM_HINTS 2` command can be used to remove windows border in x11 linux distros
+// `xprop -name 'Quartz' -format _MOTIF_WM_HINTS 32c -set _MOTIF_WM_HINTS '0x2, 0x2, 0x2, 0x2,0x2,0x2'` will remove windows border but won't remove mouse resize
 // ProcessBuilder processBuilder = new ProcessBuilder();
 //         processBuilder.command("xprop", "-name","" + getName() + "", "-format","_MOTIF_WM_HINTS", "32c", "-set", "_MOTIF_WM_HINTS", "0x2, 0x2, 0x2, 0x2,0x2,0x2"); [Took me 1 hour to figure this shit out]
 //TODO Add 6 methods: 3 to add components as close,minimise and maximize buttons and 3 to remove those.
 public class MaterialWindow extends JFrame {
     private static final int CAPTION_BUTTON_WIDTH = DefaultDecorationParameter.getIconWidth();
-    private MaterialWindowGrip GRIP = MaterialWindowGrip.CONSIDER_CAPTION_BAR.setGripHeight(DefaultDecorationParameter.getTitleBarHeight());
+    private MaterialWindowGrip GRIP = MaterialWindowGrip.EXCLUDE_CAPTION_BAR_WIDTH.setGripHeight(DefaultDecorationParameter.getTitleBarHeight());
     // private static final int WIDTH = 640, HEIGHT = WIDTH / 12 * 9;
     private MaterialComponent maxRestoreButton;
     private MaterialComponent minimizeButton;
@@ -346,12 +346,12 @@ public class MaterialWindow extends JFrame {
         int x = getX() + GRIP.x;
         int y = getY() + GRIP.y;
         switch (GRIP) {
-            case CONSIDER_CAPTION_BAR -> {
+            case EXCLUDE_CAPTION_BAR_WIDTH -> {
                 int GripWidth = getWidth() - currentCaptionBar.getWidth();
                 int GripHeight = GRIP.height;
                 return p.y >= y && p.y <= y + GripHeight && p.x >= x && p.x <= x + GripWidth;
             }
-            case IGNORE_CAPTION_BAR -> {
+            case CUSTOM -> {
                 return p.y >= y && p.y <= y + GRIP.height && p.x >= x && p.x <= x + GRIP.width;
             }
             default -> {

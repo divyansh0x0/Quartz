@@ -4,7 +4,7 @@ import app.audio.Artist;
 import app.audio.AudioData;
 import app.audio.Playlist;
 import app.audio.indexer.AudioDataIndexer;
-import app.audio.player.AphroditeAudioController;
+import app.audio.player.QuartzAudioController;
 import app.audio.player.AudioQueue;
 import app.components.enums.NavigationLink;
 import app.components.listeners.AudioTileClickListener;
@@ -66,8 +66,8 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
     }
 
     public void play() {
-        AphroditeAudioController.getInstance().load(audioData);
-        AphroditeAudioController.getInstance().play();
+        QuartzAudioController.getInstance().load(audioData);
+        QuartzAudioController.getInstance().play();
 
         switch (LINK) {
             case ARTIST -> {
@@ -194,19 +194,6 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
         else { //If there are unsupported characters then render them using default font
             drawLanguageCompatibleString(artistName, tX, tY, g2d, artistFont);
         }
-        //If audio is broken show an error visual for it
-//        if (audioData.isBroken()) {
-//            if (BROKEN_AUDIO_ICON.getIconSize() != this.getFontSize())
-//                BROKEN_AUDIO_ICON.setIconSize((int) this.getFontSize());
-//            ImageIcon icon = BROKEN_AUDIO_ICON.toImageIcon();
-//            int dX = getWidth() - durationTextSize;
-//            int dY = (getHeight() - BROKEN_AUDIO_ICON.getIconHeight()) / 2;
-//            g2d.drawImage(icon.getImage(), dX, dY, null);
-//            float ALPHA = 0.5f;
-//            g2d.setColor(BROKEN_AUDIO_COLOR);
-//            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, ALPHA));
-//            g2d.fillRoundRect(0, 0, getWidth(), getHeight(), cornerRadius, cornerRadius);
-//        } else {
             //drawing duration
             g2d.setFont(getFont());
             fontMetrics = g2d.getFontMetrics();
@@ -214,7 +201,6 @@ public class AudioTile extends MaterialComponent implements MouseInputListener, 
             int dY = (getHeight() + fontMetrics.getAscent()) / 2;
             g2d.drawString(audioDuration, dX, dY);
             g2d.setClip(null);
-//        }
         Toolkit.getDefaultToolkit().sync();
     }
 

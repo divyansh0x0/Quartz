@@ -92,28 +92,24 @@ public class PlaybackBar extends MaterialComponent {
             g2d.setFont(getFont());
             FontMetrics fontMetrics = g2d.getFontMetrics();
 
-            Rectangle2D cR2 = fontMetrics.getStringBounds(currStr, g2d);
-            Rectangle2D tR2 = fontMetrics.getStringBounds(TOTAL_TIME_MS_STR, g2d);
+            int currTimeWidth = fontMetrics.stringWidth(currStr);
+            int totalTimeWidth = fontMetrics.stringWidth(TOTAL_TIME_MS_STR);
             int x = 0; // x position of current time text;
-            int y = (int) (((getHeight() - cR2.getHeight()) / 2) + fontMetrics.getAscent()); // y position of current time text;
+            int y = (int) (((getHeight() - fontMetrics.getHeight()) / 2) + fontMetrics.getAscent()); // y position of current time text;
             g2d.drawString(currStr, x, y);
 
 
             //progressbar background fill
             g2d.setColor(getBackground());
-            x = (int) (cR2.getWidth() + gap); // x position of progress bar;
+            x = (int) (currTimeWidth + gap); // x position of progress bar;
             y = (getHeight() - progressBarHeight) / 2; // y position of progress bar
-            int pWidth = (int) (getWidth() - ((cR2.getWidth() + tR2.getWidth()) + (gap * 2))); // width of progress bar
+            int pWidth = (int) (getWidth() - ((currTimeWidth + totalTimeWidth) + (gap * 2))); // width of progress bar
             _validBarPressBounds = new RoundRectangle2D.Double(x, y, pWidth, progressBarHeight, cornerRadius, cornerRadius);
             g2d.fill(_validBarPressBounds);
-            //progress bar Border
-//            g2d.setColor(ColorUtils.darken(getBackground(),10));
-//            g2d.draw(new RoundRectangle2D.Double(x - 1, y - 1, pWidth + 1, progressBarHeight + 1, cornerRadius,cornerRadius));
-
             //Total time label
             g2d.setColor(getForeground());
-            x = (int) (cR2.getWidth() + (gap * 2) + pWidth); //x position of total time text
-            y = (int) (((getHeight() - tR2.getHeight()) / 2) + fontMetrics.getAscent());//y position of total time text
+            x = (int) (currTimeWidth + (gap * 2) + pWidth); //x position of total time text
+            y = (int) (((getHeight() - fontMetrics.getHeight()) / 2) + fontMetrics.getAscent());//y position of total time text
             g2d.drawString(TOTAL_TIME_MS_STR, x, y);
 
             //filling progress bar
@@ -128,19 +124,19 @@ public class PlaybackBar extends MaterialComponent {
                     fontMetrics = g2d.getFontMetrics(tooltipFont);
                     long timeByPos = (long) ((fillWidth * TOTAL_TIME_MS) / _validBarPressBounds.getWidth());
                     String tooltipText = getFormattedTimeMs(timeByPos);
-                    Rectangle2D tooltipTextBounds = fontMetrics.getStringBounds(tooltipText, g2d);
+                    int tooltipWidth = fontMetrics.stringWidth(tooltipText);
                     int mousePosX = (int) (seekBarMouseX + _validBarPressBounds.getX()); //position of mouse from (0,0) of component
-                    int tWidth = (int) (tooltipTextBounds.getWidth() + (tooltipPadding.getLeft() + tooltipPadding.getRight())); //width of tooltip
-                    int tHeight = (int) (tooltipTextBounds.getHeight() + (tooltipPadding.getTop() + tooltipPadding.getBottom())); //height of tooltip
+                    int tWidth = tooltipWidth + (tooltipPadding.getLeft() + tooltipPadding.getRight()); //width of tooltip
+                    int tHeight = fontMetrics.getHeight() + (tooltipPadding.getTop() + tooltipPadding.getBottom()); //height of tooltip
                     int tbY = (int) (_validBarPressBounds.getY() - tHeight / 2); // tooltip background y position
-                    RoundRectangle2D tBG = new RoundRectangle2D.Double(mousePosX, tbY, tWidth, tHeight, tooltipRadius, tooltipRadius); //Tooltip background round rectangle
+//                    RoundRectangle2D tBG = new RoundRectangle2D.Double(); //Tooltip background round rectangle
                     //Drawing tooltip background
                     g2d.setColor(TooltipColor);
-                    g2d.fill(tBG);
+                    g2d.fillRoundRect(mousePosX, tbY, tWidth, tHeight, tooltipRadius, tooltipRadius);
 
                     //Tooltip Text
-                    int ttX = (int) Math.round(tBG.getX() + (tBG.getWidth() / 2 - tooltipTextBounds.getWidth() / 2)); // tooltip text x position
-                    int ttY = (int) Math.round(((tBG.getY() + tBG.getHeight() / 2) - tooltipTextBounds.getHeight() / 2) + fontMetrics.getAscent()); // tooltip text y positionLog.info("");
+                    int ttX = mousePosX + (tWidth- tooltipWidth)/2; // tooltip text x position
+                    int ttY = tbY+ ((tHeight - fontMetrics.getHeight()) / 2) + fontMetrics.getAscent(); // tooltip text y positionLog.info("");
                     g2d.setFont(tooltipFont);
                     g2d.setColor(getForeground());
                     g2d.drawString(tooltipText, ttX, ttY);
@@ -164,8 +160,7 @@ public class PlaybackBar extends MaterialComponent {
                 g2d.fillRect((int) _validBarPressBounds.getX(), (int) _validBarPressBounds.getY(), fillWidth, progressBarHeight);
 
                 //Smoothen the  playback position by drawing border
-                Rectangle progressbarRect = new Rectangle((int) _validBarPressBounds.getX(), (int) _validBarPressBounds.getY(), fillWidth, progressBarHeight);
-                g2d.setClip(progressbarRect);
+                g2d.setClip((int) _validBarPressBounds.getX(), (int) _validBarPressBounds.getY(), fillWidth, progressBarHeight);
                 g2d.draw(_validBarPressBounds);
 
 
@@ -338,13 +333,13 @@ public class PlaybackBar extends MaterialComponent {
         short sec = (short) (totalSecs%60);
         long min = totalSecs/60;
         if(min >= 60){
-            int hour = (int) (min % 60);
+            int hour = (int) (min / 60);
             min = (short) (min % 60);
             return getMinTwoPlaces(hour) + ":"+getMinTwoPlaces(min)+":"+getMinTwoPlaces(sec);
         }
-        if(min > 0)
+        else if(min > 0)
             return getMinTwoPlaces(min) + ":" + getMinTwoPlaces(sec);
-        if(sec > 0)
+        else if(sec > 0)
             return "00:" + getMinTwoPlaces(sec);
         else
             return "00:00";
@@ -352,7 +347,7 @@ public class PlaybackBar extends MaterialComponent {
 
     private String getMinTwoPlaces(long time) {
         if(time < 10)
-            return "00";
+            return "0"+time;
         else
             return String.valueOf(time);
     }

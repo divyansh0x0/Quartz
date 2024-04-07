@@ -105,7 +105,6 @@ public class AudioQueue {
         for (Runnable runnable : queueUpdateListeners) {
             runnable.run();
         }
-        Log.info("NEW QUEUE: \n" + queue.toString() + "\n---- QUEUE END ----- \n\n");
     }
 
     private void onQueueUpdate(Runnable runnable) {

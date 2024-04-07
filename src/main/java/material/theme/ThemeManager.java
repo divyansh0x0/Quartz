@@ -78,7 +78,7 @@ public class ThemeManager {
             ThemeColors.setBackground(themeable.getBackgroundColor());
             ThemeColors.setActiveBackgroundColor(themeable.getActiveBackgroundColor());
             ThemeColors.setBackgroundDanger(themeable.getBackgroundColorDanger());
-            ThemeColors.setBackgroundSuccess(themeable.getBackgroundColorWarn());
+            ThemeColors.setBackgroundSuccess(themeable.getBackgroundColorSuccess());
             ThemeColors.setBackgroundWarn(themeable.getBackgroundColorWarn());
 
             ThemeColors.setAccent(themeable.getAccentColor());

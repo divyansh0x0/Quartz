@@ -1,9 +1,9 @@
 package app.components.containers;
 
-import app.audio.player.AphroditeAudioController;
+import app.audio.player.QuartzAudioController;
 import app.components.enums.ViewType;
 import app.components.spectrum.SpectrumViewer;
-import app.main.Aphrodite;
+import app.main.Quartz;
 import app.settings.StartupSettings;
 import app.settings.constraints.ComponentParameters;
 import material.containers.MaterialPanel;
@@ -52,11 +52,11 @@ public class MainPanel extends MaterialPanel {
         _titleBar.add(MINIMIZE_BUTTON,captionBtnConstraint);
         _titleBar.add(MAX_RESTORE_BUTTON, captionBtnConstraint);
         _titleBar.add(CLOSE_BUTTON, captionBtnConstraint);
-        Aphrodite.getInstance().getWindow().setCustomCaptionBar(_titleBar);
+        Quartz.getInstance().getWindow().setCustomCaptionBar(_titleBar);
     }
     public synchronized void switchView(@NotNull ViewType mainPanelView) {
         currentView = mainPanelView;
-        AphroditeAudioController.getInstance().enableVisualizerSampling(mainPanelView == ViewType.SpectrumView);
+        QuartzAudioController.getInstance().enableVisualizerSampling(mainPanelView == ViewType.SpectrumView);
 
         switch (mainPanelView) {
             case DefaultView -> switchToDefaultView();
