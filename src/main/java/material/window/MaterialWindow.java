@@ -376,9 +376,9 @@ public class MaterialWindow extends JFrame {
         else
             throw new IllegalStateException("Already using default caption bar. Set it to false to use custom caption bar");
     }
-
     private void updateCaptionBarComponents() {
         if (isDefaultCaptionBarEnabled) {
+            byte btnsAdded = 0;
             if (closeButton == null)
                 closeButton = new CloseButton();
             if (minimizeButton == null)
@@ -388,12 +388,15 @@ public class MaterialWindow extends JFrame {
 
             defaultCaptionBar.removeAll();
             defaultCaptionBar.add(closeButton, "east,w " + CAPTION_BUTTON_WIDTH + "!");
-            if (isResizable())
+            if (isResizable()) {
                 defaultCaptionBar.add(maxRestoreButton, "east, w " + CAPTION_BUTTON_WIDTH + "!");
+                btnsAdded++;
+            }
             defaultCaptionBar.add(minimizeButton, "east,w " + CAPTION_BUTTON_WIDTH + "!");
+            btnsAdded += 2;
             currentCaptionBar = defaultCaptionBar;
 
-            _root.add(defaultCaptionBar, "north,  w 100%!, h " + CAPTION_BAR_HEIGHT + "!");
+            _root.add(defaultCaptionBar, "north, w " + CAPTION_BUTTON_WIDTH * btnsAdded + "!, align right, h " + CAPTION_BAR_HEIGHT + "!");
         } else {
             _root.remove(defaultCaptionBar);
         }
