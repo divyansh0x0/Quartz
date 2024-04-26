@@ -4,8 +4,12 @@ import material.Padding;
 import material.listeners.MouseClickListener;
 import material.theme.ThemeColors;
 import material.theme.colors.ButtonColors;
+import material.theme.enums.Elevation;
+import material.theme.models.ElevationModel;
+import material.tools.ColorUtils;
 import material.utils.Log;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.kordamp.ikonli.Ikon;
 import org.kordamp.ikonli.swing.FontIcon;
 
@@ -15,7 +19,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
-public class MaterialIconButton extends MaterialComponent {
+public class MaterialIconButton extends MaterialComponent implements ElevationModel {
     protected final ArrayList<MouseClickListener> mouseClickListeners = new ArrayList<>();
     private final int gap = 10;
     private double iconSizeRatio = 0.9; //Percentage of the size of the icon in comparison to the button;
@@ -27,6 +31,9 @@ public class MaterialIconButton extends MaterialComponent {
     private String Text;
 
     private boolean isTransparentBackground;
+    private Elevation elevation;
+    private Color brighterBg;
+    private Color bg;
 
     public MaterialIconButton(Ikon icon, String text, boolean isAnimated) {
         super();
@@ -59,26 +66,30 @@ public class MaterialIconButton extends MaterialComponent {
     }
 
     protected void animateMouseExit() {
-        if (!isTransparentBackground) {
-            this.animateBG(ThemeColors.getIconButtonColors().getBackgroundColor());
-        } else {
-            this.animateBG(ThemeColors.TransparentColor);
-        }
+            this.animateBG(bg);
     }
 
     protected void animateMouseEnter() {
-        animateBG(ThemeColors.getIconButtonColors().getBackgroundMouseOverColor());
+        animateBG(brighterBg);
     }
 
     @Override
-    public void updateTheme() {
+    public synchronized void updateTheme() {
         ButtonColors buttonColors = ThemeColors.getIconButtonColors();
         this.animateFG(buttonColors.getForegroundColor());
-        if (!isTransparentBackground) {
-            this.animateBG(buttonColors.getBackgroundColor());
-        } else {
-            this.animateBG(ThemeColors.TransparentColor);
+
+        if(elevation == null) {
+            if (!isTransparentBackground) {
+                bg =(buttonColors.getBackgroundColor());
+            } else {
+                bg =(ThemeColors.TransparentColor);
+            }
         }
+        else
+            bg = ThemeColors.getColorByElevation(elevation);
+        if(bg != null)
+            brighterBg = ColorUtils.lighten(bg,6);
+        this.animateBG(bg);
     }
 
     @Override
@@ -135,7 +146,7 @@ public class MaterialIconButton extends MaterialComponent {
             int alignX = (int) (getAlignmentX() * (getWidth() - ft.stringWidth(getText())));
             int tX = alignX + iX + iSize;
             tX += iX != 0 ? gap : 0;
-            int tY = (int) (((this.getHeight() - ft.getAscent()) * getAlignmentY()) + ft.getAscent()); //Text y coordinate
+            int tY = (int) (((this.getHeight() - ft.getHeight()) * getAlignmentY()) + ft.getAscent()); //Text y coordinate
 
             g2d.setColor(this.getForeground());
             g2d.drawString(getText(), tX, tY);
@@ -262,5 +273,17 @@ public class MaterialIconButton extends MaterialComponent {
     @Override
     public String toString() {
         return "IconButton{text=" + getText() + "}";
+    }
+
+    @Override
+    public @Nullable Elevation getElevation() {
+        return elevation;
+    }
+
+    @Override
+    public ElevationModel setElevation(@Nullable Elevation elevation) {
+        this.elevation = elevation;
+        updateTheme();
+        return this;
     }
 }

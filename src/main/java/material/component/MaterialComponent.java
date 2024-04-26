@@ -29,7 +29,7 @@ public abstract class MaterialComponent extends JComponent implements Serializab
 
     private Font font;
     private static Font defaultFont = new Font("Dialog", Font.PLAIN, 16);
-    private boolean isBold = true;
+    private boolean isBold = false;
     private boolean isItalic = false;
     private Dimension preferredSize;
     private boolean isSelected;

@@ -7,6 +7,7 @@ import java.io.InputStream;
 
 public class MaterialFonts {
     public static final float size = 15f;
+    private static Font DEFAULT_FONT = null;
 
     private static MaterialFonts instance;
     private static Font ROBOTO;
@@ -22,7 +23,15 @@ public class MaterialFonts {
             addFont(ROBOTO);
         if(NOTOSANS != null)
             addFont(NOTOSANS);
+        setDefaultFont(ROBOTO);
+    }
 
+    private boolean setDefaultFont(Font font) {
+        if(font == null)
+            return false;
+
+        DEFAULT_FONT = font;
+        return true;
     }
 
     private void addFont(Font f) {
@@ -33,7 +42,7 @@ public class MaterialFonts {
     }
 
     public Font getDefaultFont() {
-        return ROBOTO;
+        return DEFAULT_FONT;
     }
 
     private Font read(String path) {
@@ -51,5 +60,15 @@ public class MaterialFonts {
         if (instance == null)
             instance = new MaterialFonts();
         return instance;
+    }
+
+    public boolean setDefaultFont(String resourceURL) {
+        ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+        try (InputStream is = classloader.getResourceAsStream(resourceURL)) {
+            Font font = Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(size);
+            return setDefaultFont(font);
+        }catch (Exception e){
+            return false;
+        }
     }
 }
