@@ -94,12 +94,12 @@ public class AudioInfoViewer extends MaterialComponent {
             imageBounds.setFrame(iX,iY,iSize,iSize);
             g2d.setComposite(AlphaComposite.SrcAtop);
 
+            g2d.setClip(imageBounds);
             g2d.drawImage(artwork, iX, iY, iSize, iSize, null);
             g2d.setComposite(AlphaComposite.Src);
             g2d.setClip(null);
 
             g2d.setColor(ThemeColors.getBackground());
-            g2d.setClip(imageBounds);
             g2d.draw(imageBounds);
 
             //Drawing font

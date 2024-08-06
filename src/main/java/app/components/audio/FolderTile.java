@@ -62,7 +62,7 @@ public class FolderTile extends MaterialComponent {
         animateFG(ThemeColors.getTextPrimary());
         animateBG(ThemeColors.getColorByElevation(elevation));
         if(FOLDER_ICON != null)
-            FOLDER_ICON.setIconColor(ColorUtils.AlphaCompositedRGB(getForeground(),getBackground(),0.5f));
+            FOLDER_ICON.setIconColor(ColorUtils.AlphaCompositedRGB(ThemeColors.getTextPrimary(),ThemeColors.getColorByElevation(elevation),0.5f));
     }
 
     @Override
