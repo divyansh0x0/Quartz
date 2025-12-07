@@ -126,6 +126,7 @@ public class SystemSearch {
     }
 
     private int saveDataAsync(List<File> files) {
+        Log.info("Saving "+files.size()+" file(s) to cache");
         try {
             if (files.isEmpty())
                 return 0;
@@ -140,9 +141,15 @@ public class SystemSearch {
                     for (int j = begin; j < end; j++) {
                         File file = files.get(j);
                         if (file.exists() && AudioData.isValidAudio(file.toPath())) {
-                            AudioData audioData = new AudioData(file);
-                            AudioDataIndexer.getInstance().addAudioFile(audioData);
-                            savedFilesNumber.incrementAndGet();
+                            try{
+                                AudioData audioData = new AudioData(file);
+                                AudioDataIndexer.getInstance().addAudioFile(audioData);
+                                savedFilesNumber.incrementAndGet();
+                            }
+                            catch (Exception e){
+                                Log.error( "Error occurred while reading file: "+e.getMessage());
+                            }
+
 //                        FileCacheManager.getInstance().cacheFile(file);
                         } else {
 //                        FileCacheManager.getInstance().deleteCacheFile(file);

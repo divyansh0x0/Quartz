@@ -38,7 +38,7 @@ public class QuartzAudioController {
     //    private MediaPlayer m_player;
     private static final short SEEK_SECONDS = 5;
     private static final double VOLUME_CHANGE = 0.05d;
-    private AudioPlayer _AudioPlayer;
+    private AudioPlayerModel _AudioPlayer;
     private AudioData currentAudioData;
     private PlayerComponents playerComponents;
     private boolean isLoaded = false;
@@ -51,6 +51,7 @@ public class QuartzAudioController {
     private boolean isSeeking = false;
     private boolean wasPausedBeforeSeeking = false;
     private boolean isVisualizerSamplingEnabled;
+    private Exception lastException = null;
 
     private QuartzAudioController() {
         super();
@@ -111,11 +112,11 @@ public class QuartzAudioController {
     public void init() {
         try {
 
-            if (_AudioPlayer != null) {
+            if (!_AudioPlayer.isDisposed()) {
                 _AudioPlayer.dispose();
-                _AudioPlayer = null;
+//                _AudioPlayer = null;
             }
-            _AudioPlayer = new AudioPlayer();
+            _AudioPlayer = AudioPlayerFactory.createPlayer();
             _AudioPlayer.addVisualizerDataListener(Spectrum.getInstance());
             _AudioPlayer.addMediaEndedListener(this::mediaEnded);
             _AudioPlayer.setThreshold(StartupSettings.SPECTRUM_THRESHOLD);
@@ -139,6 +140,7 @@ public class QuartzAudioController {
         try {
             if (_AudioPlayer == null) {
                 Log.error("call init() before loading an audio");
+                return;
             }
 
             if (audioData != null) {
@@ -170,6 +172,11 @@ public class QuartzAudioController {
 
 
     private void handleError(Exception e) {
+        if(lastException != null && lastException.getMessage().equals(e.getMessage())){
+            return;
+        }
+        else
+            lastException = e;
         if (e instanceof AudioControllerException)
             DialogFactory.showErrorDialog(((AudioControllerException) e).getCode() + ":" + e.getMessage());
         else

@@ -6,7 +6,6 @@ import app.components.buttons.control.FullScreenButton;
 import app.components.containers.FullscreenPanel;
 import app.components.containers.MainPanel;
 import app.components.containers.PlaybackControlPanel;
-import app.dialogs.DialogFactory;
 import material.animation.MaterialFixedTimer;
 import material.constants.Size;
 import material.containers.MaterialPanel;
@@ -65,13 +64,13 @@ public class Quartz {
 //        Quartz.getInstance().show();
 
         EventQueue.invokeLater(() -> {
-            QuartzLoaderWindow aphroditeLoader = new QuartzLoaderWindow(this);
-            aphroditeLoader.setVisible(true);
+            QuartzLoaderWindow loaderWindow = new QuartzLoaderWindow(this);
+            loaderWindow.setVisible(true);
             SystemSearch.getInstance().forceSearch();
             SystemSearch.getInstance().onSearchComplete(() -> {
-                aphroditeLoader.close();
+                loaderWindow.close();
                 showMainWindow();
-                aphroditeLoader.dispose();
+                loaderWindow.dispose();
             });
         });
     }
@@ -139,7 +138,7 @@ public class Quartz {
         WINDOW.addWindowListener(new WindowAdapter() {
             @Override
             public void windowOpened(WindowEvent e) {
-                initializeAphroditeAudioController();
+                initializeAudioController();
             }
 
             @Override
@@ -156,7 +155,7 @@ public class Quartz {
         });
     }
 
-    private void initializeAphroditeAudioController() {
+    private void initializeAudioController() {
         QuartzAudioController.getInstance().init();
         QuartzAudioController.getInstance().installPlayerComponents(PLAYBACK_CONTROL_PANEL.getPlayerComponents());
     }

@@ -11,17 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-/*
-        if (stereo)
-            pSample1 = visualizerModel.pLeftChannel;
-        else // not?Then merge the array
-            pSample1 = visualizerModel.stereoMerge(visualizerDrawer.pLeftChannel, visualizerDrawer.pRightChannel);
- */
+
 class AudioPlayer implements AudioPlayerModel {
     private static final float DEFAULT_MASTER_GAIN_VALUE = 0.0f;
-    private AudioData CURRENT_AUDIO;
+    private AudioData currentAudio;
     private final Object lock = new Object();
-    private final PlayBin PLAY_BIN;
+    private final PlayBin playBin;
     private final ArrayList<Runnable> MediaEndedListeners = new ArrayList<>();
     private final ArrayList<AudioPlayerExceptionListener> audioPlayerExceptionListeners = new ArrayList<>();
     private final ArrayList<AudioVisualizerListener> visualizerListeners = new ArrayList<>();
@@ -43,28 +38,18 @@ class AudioPlayer implements AudioPlayerModel {
     private boolean isDisposed;
 
     public AudioPlayer() {
-        /*
-         * Set up paths to native GStreamer libraries - see adjacent file.
-         */
+
         GStreamerConfig.configurePaths();
 
-        /*
-         * Initialize GStreamer. Always pass the lowest version you require -
-         * Version.BASELINE is GStreamer 1.8. Use Version.of() for higher.
-         * Features requiring later versions of GStreamer than passed here will
-         * throw an exception in the bindings even if the actual native library
-         * is a higher version.
-         */
+
 
         Gst.init(Version.BASELINE, "Quartz");
         this.SPECTRUM = ElementFactory.make(SPECTRUM_ELEMENT_NAME, SPECTRUM_ELEMENT_NAME);
-        PLAY_BIN = new PlayBin("Quartz-Playbin");
-        PLAY_BIN.set("audio-filter", SPECTRUM);
-//        PLAY_BIN.getBus().connect((Bus.ASYNC_DONE) source -> setVolume(VOLUME));
-        PLAY_BIN.getBus().connect((Bus.ERROR) (source, code, message) -> handleError(code, message));
-        PLAY_BIN.getBus().connect((Bus.EOS) source -> handleMediaEnd());
-
-        PLAY_BIN.getBus().connect("element", (bus, message) -> {
+        playBin = new PlayBin("Quartz-Playbin");
+        playBin.set("audio-filter", SPECTRUM);
+        playBin.getBus().connect((Bus.ERROR) (source, code, message) -> handleError(code, message));
+        playBin.getBus().connect((Bus.EOS) source -> handleMediaEnd());
+        playBin.getBus().connect("element", (bus, message) -> {
             if (isVisualizerSamplingEnabled) {
                 // Get the current time
                 long currentTime = System.currentTimeMillis();
@@ -85,6 +70,8 @@ class AudioPlayer implements AudioPlayerModel {
 
 
         MAGNITUDES = new float[SPECTRUM_BANDS];
+
+        setVolume(1);
     }
 
 
@@ -93,7 +80,7 @@ class AudioPlayer implements AudioPlayerModel {
      */
 
     private void setNativeArrayOfMagnitudes(List<Float> magnitudeslist) {
-        if (PLAY_BIN.isPlaying() && !magnitudeslist.isEmpty()) {
+        if (playBin.isPlaying() && !magnitudeslist.isEmpty()) {
             // convert levels for display //
             for (int i = 0; i < magnitudeslist.size(); i++) {
                 MAGNITUDES[i] = magnitudeslist.get(i) - THRESHOLD;
@@ -120,69 +107,71 @@ class AudioPlayer implements AudioPlayerModel {
     @Override
     public void load(AudioData audio) throws FileNotFoundException {
         if (audio != null) {
-            CURRENT_AUDIO = audio;
-            PLAY_BIN.stop();
+            currentAudio = audio;
+            playBin.stop();
             if (audio.getFile().exists())
-                PLAY_BIN.setURI(audio.getFile().toURI());
+                playBin.setURI(audio.getFile().toURI());
             else throw new FileNotFoundException(audio.getFile().getAbsolutePath() + " not found!");
         }
     }
 
     @Override
     public void play() {
-        if (CURRENT_AUDIO != null) {
-            PLAY_BIN.play();
+        if (currentAudio != null) {
+            playBin.play();
         }
     }
 
     @Override
     public synchronized void pause() {
-        PLAY_BIN.pause();
+        playBin.pause();
     }
 
     @Override
     public synchronized void stop() {
-        PLAY_BIN.stop();
+        playBin.stop();
     }
 
     @Override
     public synchronized void seek(long newPosMs) {
         if (getTotalTimeMs() > 0) {
-            PLAY_BIN.seek(newPosMs, TimeUnit.MILLISECONDS);
+            playBin.seek(newPosMs, TimeUnit.MILLISECONDS);
         }
     }
 
     @Override
     public synchronized long getTotalTimeMs() {
-        return PLAY_BIN.queryDuration(TimeUnit.MILLISECONDS); //returns -1 nanos if query failed
+        return playBin.queryDuration(TimeUnit.MILLISECONDS); //returns -1 nanos if query failed
     }
 
     @Override
     public long getCurrentTimeMs() {
-        return PLAY_BIN.queryPosition(TimeUnit.MILLISECONDS);
+        return playBin.queryPosition(TimeUnit.MILLISECONDS);
     }
 
     @Override
     public double getVolume() {
-        return PLAY_BIN.getVolume();
+        return playBin.getVolume();
     }
 
     @Override
     public void setVolume(double newVolume) {
-        if (newVolume != PLAY_BIN.getVolume())
-            PLAY_BIN.setVolume(newVolume);
+        if (newVolume != playBin.getVolume())
+            playBin.setVolume(newVolume);
     }
 
     @Override
     public void dispose() {
-        synchronized (PLAY_BIN) {
+        synchronized (playBin) {
             isDisposed = true;
-            PLAY_BIN.stop();
-            PLAY_BIN.dispose();
+            playBin.stop();
+            playBin.dispose();
             Gst.quit();
             Gst.deinit();
         }
     }
+
+
 
 
     /*

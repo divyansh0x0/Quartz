@@ -17,4 +17,18 @@ public interface AudioPlayerModel {
     void setVolume(double newVolume);
 
     void dispose();
+
+    void addVisualizerDataListener(AudioVisualizerListener instance);
+
+    void addMediaEndedListener(Runnable mediaEnded);
+
+    void setThreshold(int spectrumThreshold);
+
+    void enableVisualizerSampling(boolean b);
+
+    void addExceptionListener(AudioPlayerExceptionListener handleError);
+
+    void setSpectrumBands(int spectrumBandsNum);
+
+    boolean isDisposed();
 }

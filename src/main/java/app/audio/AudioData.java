@@ -72,7 +72,7 @@ public final class AudioData implements Serializable, Comparable<AudioData> {
         } catch (Exception e) {
             //Set everything to defaults if any exception occurs
             applyDefaultTags();
-            Log.error(e);
+            Log.error(e.getMessage());
         }
 
     }
