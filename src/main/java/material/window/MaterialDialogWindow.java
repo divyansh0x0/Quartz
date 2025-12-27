@@ -114,12 +114,13 @@ public class MaterialDialogWindow extends JDialog implements ElevationModel {
      ***************************************************************************/
     public synchronized void close() {
         try {
+            Log.info("Closing loader window");
             SwingUtilities.invokeLater(() -> {
                 this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
                 this.dispose();
             });
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            Log.error("Failed to close loader window");
         }
     }
 

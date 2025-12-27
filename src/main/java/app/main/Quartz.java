@@ -61,8 +61,6 @@ public class Quartz {
 
 
     public void startApplication() {
-//        Quartz.getInstance().show();
-
         EventQueue.invokeLater(() -> {
             QuartzLoaderWindow loaderWindow = new QuartzLoaderWindow(this);
             loaderWindow.setVisible(true);

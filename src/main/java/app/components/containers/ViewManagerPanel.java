@@ -7,12 +7,14 @@ import app.components.containers.views.folders.FoldersContainer;
 import app.components.containers.views.home.ExploreContainer;
 import app.components.enums.NavigationLink;
 import app.components.search.SearchHeader;
+import app.dialogs.DialogFactory;
 import app.settings.StartupSettings;
 import app.settings.constraints.ComponentParameters;
 import material.containers.MaterialPanel;
 import material.theme.enums.Elevation;
 import net.miginfocom.swing.MigLayout;
 
+import java.awt.*;
 import java.awt.event.AdjustmentEvent;
 import java.util.Objects;
 
@@ -134,6 +136,7 @@ public class ViewManagerPanel extends MaterialPanel {
 
     public synchronized void switchToPlaylistView() {
         activeLink = NavigationLink.PLAYLISTS;
+        DialogFactory.showErrorDialog("Playlists do not work");
 //        activePanel = Playl.getInstance();
 //        viewChangeCallback();
     }

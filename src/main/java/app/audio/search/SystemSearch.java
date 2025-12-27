@@ -53,19 +53,19 @@ public class SystemSearch {
 
     private void beginSearch(boolean doBackgroundSearchIfCacheLoaded) {
         isSearching = true;
-//        boolean isCacheLoaded = cacheLoaded();
-//        if (isCacheLoaded) {
-//            Log.info("CACHE LOADED");
-//            searchCompleted();
-//        }
+        boolean isCacheLoaded = cacheLoaded();
+        if (isCacheLoaded) {
+            Log.info("CACHE LOADED");
+            searchCompleted();
+        }
 
-//        if (doBackgroundSearchIfCacheLoaded) {
+        if (doBackgroundSearchIfCacheLoaded) {
         Log.info("Beginning background search");
-//            isBackgroundSearchRunning = true;
+            isBackgroundSearchRunning = true;
         switch (OsInfo.getOsType()) {
             case LINUX, MAC -> rootFSSearch();
             case WINDOWS -> windowsFSSearch();
-//            }
+            }
         }
     }
 
@@ -126,7 +126,7 @@ public class SystemSearch {
     }
 
     private int saveDataAsync(List<File> files) {
-        Log.info("Saving "+files.size()+" file(s) to cache");
+        Log.info("Saving " + files.size() + " file(s) to cache");
         try {
             if (files.isEmpty())
                 return 0;
@@ -139,21 +139,20 @@ public class SystemSearch {
                 int end = Math.min(begin + stackSize, files.size());
                 threads[i] = Thread.ofVirtual().name("Audio data extractor thread " + i).start(() -> {
                     for (int j = begin; j < end; j++) {
-                        File file = files.get(j);
-                        if (file.exists() && AudioData.isValidAudio(file.toPath())) {
-                            try{
+                        try {
+                            File file = files.get(j);
+                            if (file.exists() && AudioData.isValidAudio(file.toPath())) {
                                 AudioData audioData = new AudioData(file);
                                 AudioDataIndexer.getInstance().addAudioFile(audioData);
                                 savedFilesNumber.incrementAndGet();
-                            }
-                            catch (Exception e){
-                                Log.error( "Error occurred while reading file: "+e.getMessage());
-                            }
 
-//                        FileCacheManager.getInstance().cacheFile(file);
-                        } else {
-//                        FileCacheManager.getInstance().deleteCacheFile(file);
-                            Log.error(file + " is not valid or doesn't exist");
+                                FileCacheManager.getInstance().cacheFile(file);
+                            } else {
+                                FileCacheManager.getInstance().deleteCacheFile(file);
+                                Log.error(file + " is not valid or doesn't exist");
+                            }
+                        } catch (Exception e) {
+                            Log.error("Error occurred while reading file: " + e.getMessage());
                         }
                     }
                 });
@@ -167,11 +166,9 @@ public class SystemSearch {
             }
             long t2 = System.nanoTime();
             Log.success("Time taken to hot cache " + savedFilesNumber + " out of " + files.size() + " files: " + ((t2 - t1) / 0.000_0001) + "ms");
-//        FileCacheManager.getInstance().saveCacheToStorage();
             return savedFilesNumber.get();
-        }catch (Exception e){
-            Log.error("error occurred while hot caching searched files: "  + e);
-            e.printStackTrace();
+        } catch (Exception e) {
+            Log.error("error occurred while hot caching searched files: " + e);
             return 0;
         }
     }
@@ -185,6 +182,7 @@ public class SystemSearch {
 
 
     public void onSearchComplete(SearchCompletedListener listener) {
+        Log.success("Search completed");
         if (!searchCompletedListeners.contains(listener))
             searchCompletedListeners.add(listener);
     }

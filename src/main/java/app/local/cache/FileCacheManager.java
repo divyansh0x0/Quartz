@@ -24,11 +24,11 @@ public class FileCacheManager {
     public void cacheFile(File file) {
         if (!cachedFiles.contains(file.toString())) {
             cachedFiles.add(file.toString());
-//            Log.cache("File cached successfully: " + file.getAbsolutePath());
+            Log.cache("File cached successfully: " + file.getAbsolutePath());
         }
-//        else {
-//            Log.cache("File already exists in the cache: " + file.getAbsolutePath());
-//        }
+        else {
+            Log.cache("File already exists in the cache: " + file.getAbsolutePath());
+        }
     }
 
     public List<File> getCachedFiles() {

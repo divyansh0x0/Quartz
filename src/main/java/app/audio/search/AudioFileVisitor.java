@@ -41,10 +41,7 @@ public class AudioFileVisitor implements FileVisitor<Path> {
 //                Log.warn("Skipping " + file);
             return FileVisitResult.SKIP_SUBTREE;
         }
-
-//        if (file.isHidden())
-//            return FileVisitResult.SKIP_SIBLINGS;
-//        Log.info("[ Visiting directory: " + dir.toAbsolutePath() + " ]");
+        Log.info("[ Visiting directory: " + dir.toAbsolutePath() + " ]");
         return FileVisitResult.CONTINUE;
     }
 

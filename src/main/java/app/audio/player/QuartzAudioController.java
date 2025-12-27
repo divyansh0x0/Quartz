@@ -112,7 +112,7 @@ public class QuartzAudioController {
     public void init() {
         try {
 
-            if (!_AudioPlayer.isDisposed()) {
+            if (_AudioPlayer != null && !_AudioPlayer.isDisposed()) {
                 _AudioPlayer.dispose();
 //                _AudioPlayer = null;
             }
